@@ -46,7 +46,7 @@ export const GoalJarsSection: React.FC = () => {
       currentAmount: 0,
       emoji: "🎯",
       category: newCategory,
-      color: "#10B981",
+      color: "#059669",
       deadline: "2027-12-31",
     });
 
@@ -68,7 +68,7 @@ export const GoalJarsSection: React.FC = () => {
       particleCount: 40,
       spread: 60,
       origin: { y: 0.6 },
-      colors: ["#10B981", "#3B82F6", "#F59E0B"],
+      colors: ["#059669", "#0284C7", "#D97706"],
     });
   };
 
@@ -77,17 +77,17 @@ export const GoalJarsSection: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-300">
-            <Vault className="w-4 h-4 text-emerald-400" />
+          <div className="p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700">
+            <Vault className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-white tracking-tight flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-2">
               <span>Capital Reserves &amp; Milestone Vaults</span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300 font-medium">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-700 font-medium">
                 {profile.goals.length} Active Vaults
               </span>
             </h3>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500">
               Segregated capital accounts funded automatically by intercepted impulse spending
             </p>
           </div>
@@ -95,9 +95,9 @@ export const GoalJarsSection: React.FC = () => {
 
         <button
           onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-200 hover:text-white transition-all"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 shadow-sm transition-all"
         >
-          <Plus className="w-3.5 h-3.5 text-emerald-400" />
+          <Plus className="w-3.5 h-3.5 text-emerald-600" />
           <span>New Vault</span>
         </button>
       </div>
@@ -111,24 +111,24 @@ export const GoalJarsSection: React.FC = () => {
           return (
             <div
               key={jar.id}
-              className="fintech-card rounded-2xl p-5 flex flex-col justify-between group hover:border-slate-700 transition-all"
+              className="fintech-card rounded-2xl p-5 flex flex-col justify-between group bg-white border border-slate-200 shadow-sm hover:border-slate-300 transition-all"
             >
               <div>
                 <div className="flex items-start justify-between gap-2 mb-3">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-slate-800/80 border border-slate-700/80 flex items-center justify-center text-emerald-400 shadow-sm">
+                    <div className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-emerald-700 shadow-sm">
                       <VaultIcon className="w-4 h-4" />
                     </div>
                     <div>
-                      <h4 className="text-xs font-bold text-white tracking-tight">{jar.title}</h4>
-                      <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">
+                      <h4 className="text-xs font-bold text-slate-900 tracking-tight">{jar.title}</h4>
+                      <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider font-medium">
                         {jar.category} Reserve
                       </span>
                     </div>
                   </div>
                   <button
                     onClick={() => deleteGoalJar(jar.id)}
-                    className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-500 hover:text-rose-400 rounded transition-opacity"
+                    className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-rose-600 rounded transition-opacity"
                     title="Archive vault"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -136,31 +136,31 @@ export const GoalJarsSection: React.FC = () => {
                 </div>
 
                 <div className="flex items-baseline justify-between mt-3 mb-1.5 font-mono">
-                  <span className="text-lg font-bold text-white">{formatINR(jar.currentAmount)}</span>
-                  <span className="text-xs text-slate-400">Target: {formatINR(jar.targetAmount)}</span>
+                  <span className="text-lg font-bold text-slate-900">{formatINR(jar.currentAmount)}</span>
+                  <span className="text-xs text-slate-500">Target: {formatINR(jar.targetAmount)}</span>
                 </div>
 
-                <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden my-2">
+                <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden my-2">
                   <div
-                    className="h-full rounded-full bg-emerald-400 transition-all duration-300 shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+                    className="h-full rounded-full bg-emerald-500 transition-all duration-300"
                     style={{ width: `${percent}%` }}
                   />
                 </div>
 
-                <div className="flex justify-between items-center text-[11px] font-mono text-slate-400">
-                  <span className="font-semibold text-slate-300">{percent}% funded</span>
+                <div className="flex justify-between items-center text-[11px] font-mono text-slate-500">
+                  <span className="font-semibold text-slate-700">{percent}% funded</span>
                   {jar.totalSavedFromNudges > 0 && (
-                    <span className="text-emerald-400">+{formatINR(jar.totalSavedFromNudges)} from nudges</span>
+                    <span className="text-emerald-700 font-semibold">+{formatINR(jar.totalSavedFromNudges)} from nudges</span>
                   )}
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-slate-800/80">
+              <div className="mt-4 pt-3 border-t border-slate-100">
                 <button
                   onClick={() => setDepositModalGoal(jar)}
-                  className="w-full py-1.5 px-3 rounded-lg text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 hover:border-slate-700 transition-colors flex items-center justify-center gap-1.5"
+                  className="w-full py-1.5 px-3 rounded-lg text-xs font-semibold bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 transition-colors flex items-center justify-center gap-1.5"
                 >
-                  <ArrowUpRight className="w-3.5 h-3.5 text-emerald-400" />
+                  <ArrowUpRight className="w-3.5 h-3.5 text-emerald-600" />
                   <span>Transfer Capital</span>
                 </button>
               </div>
@@ -171,29 +171,29 @@ export const GoalJarsSection: React.FC = () => {
 
       {/* Add Goal Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="fintech-card rounded-2xl w-full max-w-sm p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-sm p-6 shadow-2xl space-y-4">
             <div>
-              <h3 className="text-sm font-bold text-white tracking-tight">Create Capital Reserve</h3>
-              <p className="text-xs text-slate-400 mt-0.5">Segregate discretionary funds into a dedicated milestone vault.</p>
+              <h3 className="text-sm font-bold text-slate-900 tracking-tight">Create Capital Reserve</h3>
+              <p className="text-xs text-slate-500 mt-0.5">Segregate discretionary funds into a dedicated milestone vault.</p>
             </div>
 
             <form onSubmit={handleCreateGoal} className="space-y-3.5">
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Reserve Name</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Reserve Name</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Japan Spring Trip, MacBook M3, Emergency Treasury"
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
-                  className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-emerald-500"
+                  className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">Target Capital (₹)</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Target Capital (₹)</label>
                   <input
                     type="number"
                     required
@@ -201,15 +201,15 @@ export const GoalJarsSection: React.FC = () => {
                     placeholder="150000"
                     value={newTarget}
                     onChange={(e) => setNewTarget(e.target.value)}
-                    className="w-full px-3 py-2 text-xs font-mono bg-slate-950 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-emerald-500"
+                    className="w-full px-3 py-2 text-xs font-mono bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">Category</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Category</label>
                   <select
                     value={newCategory}
                     onChange={(e) => setNewCategory(e.target.value as any)}
-                    className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-emerald-500"
+                    className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors"
                   >
                     <option value="Travel">Travel</option>
                     <option value="Tech">Tech</option>
@@ -220,17 +220,17 @@ export const GoalJarsSection: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-800/80">
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-3 py-1.5 text-xs text-slate-400 hover:text-white"
+                  className="px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500 text-slate-950 hover:bg-emerald-400"
+                  className="px-4 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm"
                 >
                   Create Vault
                 </button>
@@ -242,26 +242,26 @@ export const GoalJarsSection: React.FC = () => {
 
       {/* Deposit Modal */}
       {depositModalGoal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="fintech-card rounded-2xl w-full max-w-sm p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-sm p-6 shadow-2xl space-y-4">
             <div>
-              <h3 className="text-sm font-bold text-white tracking-tight flex items-center gap-2">
-                <Vault className="w-4 h-4 text-emerald-400" />
+              <h3 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                <Vault className="w-4 h-4 text-emerald-600" />
                 <span>Transfer Capital to {depositModalGoal.title}</span>
               </h3>
-              <p className="text-xs text-slate-400 mt-0.5">Divert preserved impulse capital into this reserve vault.</p>
+              <p className="text-xs text-slate-500 mt-0.5">Divert preserved impulse capital into this reserve vault.</p>
             </div>
 
             <form onSubmit={handleQuickDeposit} className="space-y-3.5">
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Transfer Amount (₹)</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Transfer Amount (₹)</label>
                 <input
                   type="number"
                   required
                   min="100"
                   value={depositAmount}
                   onChange={(e) => setDepositAmount(e.target.value)}
-                  className="w-full px-3 py-2 text-sm font-mono bg-slate-950 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-emerald-500"
+                  className="w-full px-3 py-2 text-sm font-mono bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors"
                 />
               </div>
 
@@ -271,24 +271,24 @@ export const GoalJarsSection: React.FC = () => {
                     key={preset}
                     type="button"
                     onClick={() => setDepositAmount(preset)}
-                    className="py-1 text-xs font-mono rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition-colors"
+                    className="py-1 text-xs font-mono font-medium rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition-colors"
                   >
                     +₹{preset}
                   </button>
                 ))}
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-800/80">
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setDepositModalGoal(null)}
-                  className="px-3 py-1.5 text-xs text-slate-400 hover:text-white"
+                  className="px-3 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-900"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500 text-slate-950 hover:bg-emerald-400 flex items-center gap-1.5 shadow-[0_0_12px_rgba(16,185,129,0.25)]"
+                  className="px-4 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 flex items-center gap-1.5 shadow-sm"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>Confirm Transfer</span>

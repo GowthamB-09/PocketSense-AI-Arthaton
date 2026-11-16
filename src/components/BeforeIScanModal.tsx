@@ -12,7 +12,6 @@ import {
   ShieldAlert,
   CheckCircle2,
   CornerDownLeft,
-  ArrowRight,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 
@@ -165,41 +164,41 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
       particleCount: 50,
       spread: 60,
       origin: { y: 0.6 },
-      colors: ["#10B981", "#3B82F6", "#F59E0B"],
+      colors: ["#059669", "#0284C7", "#D97706"],
     });
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-xl fintech-card rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
+      <div className="relative w-full max-w-xl bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800/80 bg-slate-900/40">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50/70">
           <div className="flex items-center gap-2.5">
-            <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400">
-              <Zap className="w-4 h-4" />
+            <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700">
+              <Zap className="w-4 h-4 fill-emerald-700" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white tracking-tight">Pre-Transaction Interceptor</h3>
-              <p className="text-[11px] text-slate-400">Evaluate impulse purchases against your real-time discretionary runway</p>
+              <h3 className="text-sm font-bold text-slate-900 tracking-tight">Pre-Transaction Interceptor</h3>
+              <p className="text-[11px] text-slate-500">Evaluate impulse purchases against your real-time discretionary runway</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+            className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-5 overflow-y-auto space-y-4">
+        <div className="p-6 overflow-y-auto space-y-4">
           {/* Status strip */}
-          <div className="flex items-center justify-between px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs font-mono text-slate-400">
-            <span>Safe Pacing: <strong className="text-emerald-400">{formatINR(analysis.dailySafeToSpend)}/day</strong></span>
+          <div className="flex items-center justify-between px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono text-slate-600">
+            <span>Safe Pacing: <strong className="text-emerald-700">{formatINR(analysis.dailySafeToSpend)}/day</strong></span>
             <span>Runway: {analysis.daysRemaining}d</span>
-            <span>Target Vault: <strong className="text-slate-200">{profile.goals[0]?.title}</strong></span>
+            <span>Target Vault: <strong className="text-slate-900">{profile.goals[0]?.title}</strong></span>
           </div>
 
           {/* Form */}
@@ -216,12 +215,12 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="e.g. Should I spend ₹3,500 on dinner tonight?"
-              className="w-full pl-4 pr-24 py-3 text-xs bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors"
+              className="w-full pl-4 pr-24 py-3 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors"
             />
             <button
               type="submit"
               disabled={isLoading || !prompt.trim()}
-              className="absolute right-1.5 top-1.5 bottom-1.5 px-3 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold disabled:opacity-40 flex items-center gap-1.5 shadow-[0_0_12px_rgba(16,185,129,0.25)] transition-all"
+              className="absolute right-1.5 top-1.5 bottom-1.5 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold disabled:opacity-40 flex items-center gap-1.5 shadow-sm transition-all"
             >
               {isLoading ? (
                 <Sparkles className="w-3.5 h-3.5 animate-spin" />
@@ -244,7 +243,7 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
                   setPrompt(suggestion);
                   handleSubmit(suggestion);
                 }}
-                className="text-[11px] px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white transition-colors"
+                className="text-[11px] px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors font-medium"
               >
                 {suggestion}
               </button>
@@ -256,42 +255,42 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
             <div
               className={`rounded-xl border p-4 space-y-3 ${
                 verdictData.verdict === "DENIED"
-                  ? "bg-rose-950/20 border-rose-500/40 text-rose-300"
+                  ? "bg-rose-50 border-rose-200 text-rose-950"
                   : verdictData.verdict === "CAUTION"
-                  ? "bg-amber-950/20 border-amber-500/40 text-amber-300"
-                  : "bg-emerald-950/20 border-emerald-500/40 text-emerald-300"
+                  ? "bg-amber-50 border-amber-200 text-amber-950"
+                  : "bg-emerald-50 border-emerald-200 text-emerald-950"
               }`}
             >
               <div className="flex items-center justify-between text-xs font-bold">
                 <div className="flex items-center gap-2">
-                  {verdictData.verdict === "DENIED" && <ShieldAlert className="w-4 h-4 text-rose-400" />}
-                  {verdictData.verdict === "CAUTION" && <AlertTriangle className="w-4 h-4 text-amber-400" />}
-                  {verdictData.verdict === "APPROVED" && <ShieldCheck className="w-4 h-4 text-emerald-400" />}
+                  {verdictData.verdict === "DENIED" && <ShieldAlert className="w-4 h-4 text-rose-600" />}
+                  {verdictData.verdict === "CAUTION" && <AlertTriangle className="w-4 h-4 text-amber-600" />}
+                  {verdictData.verdict === "APPROVED" && <ShieldCheck className="w-4 h-4 text-emerald-600" />}
                   <span>VERDICT: {verdictData.verdict}</span>
                 </div>
                 {verdictData.amount > 0 && (
-                  <span className="font-mono text-xs px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-white">
+                  <span className="font-mono text-xs px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-900 shadow-sm">
                     {formatINR(verdictData.amount)}
                   </span>
                 )}
               </div>
 
-              <div className="text-xs text-slate-200 whitespace-pre-line leading-relaxed bg-slate-950/70 p-3.5 rounded-lg border border-slate-800/80">
+              <div className="text-xs text-slate-800 whitespace-pre-line leading-relaxed bg-white p-3.5 rounded-lg border border-slate-200 shadow-sm">
                 {streamedText || "Calculating opportunity cost & behavioral impact..."}
               </div>
 
               {verdictData.amount > 0 && verdictData.verdict !== "APPROVED" && (
-                <div className="pt-2 flex items-center justify-between gap-3 border-t border-slate-800/60">
-                  <span className="text-[11px] text-slate-400">
+                <div className="pt-2 flex items-center justify-between gap-3 border-t border-slate-200/80">
+                  <span className="text-[11px] text-slate-600 font-medium">
                     Reallocate to {profile.goals[0]?.title || "Reserve"}
                   </span>
                   <button
                     disabled={savedSuccess}
                     onClick={handleSkipAndSave}
-                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm ${
                       savedSuccess
-                        ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500"
-                        : "bg-emerald-500 text-slate-950 hover:bg-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.25)]"
+                        ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                        : "bg-emerald-600 text-white hover:bg-emerald-700"
                     }`}
                   >
                     {savedSuccess ? (

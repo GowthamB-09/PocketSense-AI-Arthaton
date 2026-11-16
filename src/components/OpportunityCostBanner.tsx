@@ -9,9 +9,7 @@ import {
   ArrowRight,
   Plane,
   Laptop,
-  ArrowUpRight,
   Coins,
-  ShieldCheck,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 
@@ -66,34 +64,34 @@ export const OpportunityCostBanner: React.FC = () => {
       particleCount: 45,
       spread: 60,
       origin: { y: 0.65 },
-      colors: ["#10B981", "#3B82F6", "#F59E0B"],
+      colors: ["#059669", "#0284C7", "#D97706"],
     });
   };
 
   return (
-    <div className="fintech-card rounded-2xl p-6 space-y-4">
+    <div className="fintech-card rounded-2xl p-6 space-y-4 bg-white border border-slate-200 shadow-sm">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+          <div className="p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700">
             <Coins className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-white tracking-tight flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-2">
               <span>Capital Preservation &amp; Impulse Conversion</span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-medium">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-emerald-800 font-semibold">
                 Active Optimization
               </span>
             </h3>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500">
               Convert momentary lifestyle splurges directly into high-conviction wealth reserves
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 font-mono text-xs">
-          <span className="text-slate-400">Total Capital Preserved:</span>
-          <span className="font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg">
+          <span className="text-slate-500">Total Capital Preserved:</span>
+          <span className="font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg">
             {formatINR(profile.totalSavedToJars)}
           </span>
         </div>
@@ -110,26 +108,26 @@ export const OpportunityCostBanner: React.FC = () => {
               key={opp.id}
               className={`rounded-xl border p-4 flex flex-col justify-between transition-all ${
                 isClaimed
-                  ? "bg-emerald-950/20 border-emerald-500/40"
-                  : "bg-slate-900/60 border-slate-800 hover:border-slate-700 hover:bg-slate-900/80"
+                  ? "bg-emerald-50/70 border-emerald-200"
+                  : "bg-slate-50/80 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
               }`}
             >
               <div>
                 <div className="flex items-center justify-between gap-2 mb-2">
                   <div className="flex items-center gap-2.5">
-                    <div className="p-1.5 rounded-lg bg-slate-800 text-slate-300">
-                      <OppIcon className="w-4 h-4 text-emerald-400" />
+                    <div className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 shadow-sm">
+                      <OppIcon className="w-4 h-4 text-emerald-600" />
                     </div>
                     <div>
-                      <h4 className="text-xs font-semibold text-white">{opp.title}</h4>
-                      <span className="text-[10px] font-mono text-slate-400">Target: {opp.goalTitle}</span>
+                      <h4 className="text-xs font-bold text-slate-900">{opp.title}</h4>
+                      <span className="text-[10px] font-mono text-slate-500">Target: {opp.goalTitle}</span>
                     </div>
                   </div>
-                  <span className="text-xs font-mono font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
+                  <span className="text-xs font-mono font-bold text-emerald-700 bg-emerald-100/60 px-2 py-0.5 rounded">
                     {opp.impact}
                   </span>
                 </div>
-                <p className="text-xs text-slate-400 mb-4 leading-relaxed">
+                <p className="text-xs text-slate-600 mb-4 leading-relaxed">
                   {opp.description}
                 </p>
               </div>
@@ -137,20 +135,20 @@ export const OpportunityCostBanner: React.FC = () => {
               <button
                 disabled={isClaimed}
                 onClick={() => handleClaim(opp)}
-                className={`w-full py-2 px-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-2 ${
+                className={`w-full py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-sm ${
                   isClaimed
-                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 cursor-default"
-                    : "bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-[0_0_14px_rgba(16,185,129,0.2)]"
+                    ? "bg-emerald-100 text-emerald-800 border border-emerald-300 cursor-default"
+                    : "bg-emerald-600 hover:bg-emerald-700 text-white"
                 }`}
               >
                 {isClaimed ? (
                   <>
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-700" />
                     <span>Transferred to Reserve (+1 Streak)</span>
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-3.5 h-3.5 text-slate-950 fill-slate-950" />
+                    <Sparkles className="w-3.5 h-3.5 text-white fill-white" />
                     <span>{opp.buttonLabel}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </>

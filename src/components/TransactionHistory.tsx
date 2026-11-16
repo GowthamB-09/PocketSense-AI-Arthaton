@@ -18,7 +18,6 @@ import {
   Activity,
   TrendingUp,
   Receipt,
-  FileSpreadsheet,
 } from "lucide-react";
 
 export const TransactionHistory: React.FC = () => {
@@ -70,44 +69,44 @@ export const TransactionHistory: React.FC = () => {
     .reduce((sum, t) => sum + t.amount, 0);
 
   return (
-    <div className="fintech-card rounded-2xl p-6 space-y-4">
+    <div className="fintech-card rounded-2xl p-6 space-y-4 bg-white border border-slate-200 shadow-sm">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-300">
-            <Receipt className="w-4 h-4 text-emerald-400" />
+          <div className="p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700">
+            <Receipt className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-white tracking-tight flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-2">
               <span>Payment &amp; Spending Ledger</span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300 font-medium">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-700 font-medium">
                 {transactions.length} Records
               </span>
             </h3>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500">
               Institutional breakdown classified into Essential, Discretionary, and Subscriptions
             </p>
           </div>
         </div>
 
         {/* Micro totals */}
-        <div className="flex items-center gap-3 text-xs font-mono bg-slate-900/60 border border-slate-800 px-3 py-1.5 rounded-xl">
+        <div className="flex items-center gap-3 text-xs font-mono bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
           <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-400" />
-            <span className="text-slate-400">Essential:</span>
-            <span className="text-emerald-400 font-bold">{formatINR(needSpent)}</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span className="text-slate-500">Essential:</span>
+            <span className="text-emerald-700 font-bold">{formatINR(needSpent)}</span>
           </div>
-          <span className="text-slate-700">•</span>
+          <span className="text-slate-300">•</span>
           <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-amber-400" />
-            <span className="text-slate-400">Discretionary:</span>
-            <span className="text-amber-400 font-bold">{formatINR(impulseSpent)}</span>
+            <span className="w-2 h-2 rounded-full bg-amber-500" />
+            <span className="text-slate-500">Discretionary:</span>
+            <span className="text-amber-700 font-bold">{formatINR(impulseSpent)}</span>
           </div>
-          <span className="text-slate-700">•</span>
+          <span className="text-slate-300">•</span>
           <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-rose-400" />
-            <span className="text-slate-400">Subscriptions:</span>
-            <span className="text-rose-400 font-bold">{formatINR(leakSpent)}</span>
+            <span className="w-2 h-2 rounded-full bg-rose-500" />
+            <span className="text-slate-500">Subscriptions:</span>
+            <span className="text-rose-700 font-bold">{formatINR(leakSpent)}</span>
           </div>
         </div>
       </div>
@@ -116,13 +115,13 @@ export const TransactionHistory: React.FC = () => {
       <div className="flex flex-col sm:flex-row gap-3 pt-1">
         {/* Search */}
         <div className="relative flex-1">
-          <Search className="w-4 h-4 absolute left-3 top-3 text-slate-500" />
+          <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Filter by merchant, category, or UPI reference (e.g. Zepto, Blue Tokai, Toit)..."
-            className="w-full pl-9 pr-3 py-2 text-xs bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors"
+            className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors"
           />
         </div>
 
@@ -139,8 +138,8 @@ export const TransactionHistory: React.FC = () => {
               onClick={() => setSelectedFilter(tab.id)}
               className={`px-3 py-1.5 rounded-lg whitespace-nowrap text-xs font-semibold transition-all ${
                 selectedFilter === tab.id
-                  ? "bg-slate-800 text-white border border-slate-700 shadow-sm"
-                  : "text-slate-400 hover:text-slate-200 border border-transparent hover:bg-slate-900"
+                  ? "bg-slate-900 text-white shadow-sm"
+                  : "text-slate-600 hover:text-slate-900 border border-transparent hover:bg-slate-100"
               }`}
             >
               {tab.label}
@@ -152,7 +151,7 @@ export const TransactionHistory: React.FC = () => {
       {/* Transaction Records List */}
       <div className="space-y-2 max-h-[460px] overflow-y-auto pr-1">
         {filteredTransactions.length === 0 ? (
-          <div className="p-8 text-center border border-dashed border-slate-800 rounded-xl text-xs text-slate-400">
+          <div className="p-8 text-center border border-dashed border-slate-200 rounded-xl text-xs text-slate-400">
             No transaction records matching &quot;{searchTerm}&quot;.
           </div>
         ) : (
@@ -162,23 +161,23 @@ export const TransactionHistory: React.FC = () => {
             return (
               <div
                 key={tx.id}
-                className="p-3.5 rounded-xl bg-slate-950/40 border border-slate-800/80 hover:border-slate-700 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
+                className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-200/80 hover:bg-slate-50 hover:border-slate-300 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
               >
                 {/* Left: Merchant & Categorization */}
                 <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center shrink-0 text-slate-300">
-                    <CatIcon className="w-4 h-4 text-emerald-400" />
+                  <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 text-slate-700 shadow-sm">
+                    <CatIcon className="w-4 h-4 text-emerald-600" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h4 className="text-xs font-bold text-white tracking-tight">{tx.merchant}</h4>
+                      <h4 className="text-xs font-bold text-slate-900 tracking-tight">{tx.merchant}</h4>
                       {tx.triggerTag && (
-                        <span className="text-[10px] font-mono px-2 py-0.2 rounded-full bg-slate-900 border border-slate-800 text-slate-300">
+                        <span className="text-[10px] font-mono px-2 py-0.2 rounded-full bg-slate-200/60 text-slate-700 font-medium">
                           #{tx.triggerTag}
                         </span>
                       )}
                     </div>
-                    <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-400 font-mono mt-0.5">
+                    <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-500 font-mono mt-0.5">
                       <span>{formatDate(tx.date)}</span>
                       {tx.time && <span>{tx.time}</span>}
                       <span>•</span>
@@ -186,7 +185,7 @@ export const TransactionHistory: React.FC = () => {
                       {tx.upiRef && (
                         <>
                           <span>•</span>
-                          <span className="text-slate-500">Ref: {tx.upiRef}</span>
+                          <span className="text-slate-400">Ref: {tx.upiRef}</span>
                         </>
                       )}
                     </div>
@@ -196,28 +195,28 @@ export const TransactionHistory: React.FC = () => {
                 {/* Right: Amount & Classification */}
                 <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0">
                   <div className="text-right">
-                    <div className="font-mono text-sm font-black text-white">
+                    <div className="font-mono text-sm font-black text-slate-900">
                       -{formatINR(tx.amount)}
                     </div>
                     <span
                       className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
                         tx.spendingType === "Survival Need"
-                          ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                          ? "bg-emerald-50 border-emerald-200 text-emerald-800"
                           : tx.spendingType === "Silent Subscription Leak"
-                          ? "bg-rose-500/10 border-rose-500/20 text-rose-400"
-                          : "bg-amber-500/10 border-amber-500/20 text-amber-400"
+                          ? "bg-rose-50 border-rose-200 text-rose-800"
+                          : "bg-amber-50 border-amber-200 text-amber-800"
                       }`}
                     >
-                      {tx.spendingType === "Survival Need" && <CheckCircle2 className="w-2.5 h-2.5" />}
-                      {tx.spendingType === "Impulse Want" && <Compass className="w-2.5 h-2.5" />}
-                      {tx.spendingType === "Silent Subscription Leak" && <Clock className="w-2.5 h-2.5" />}
+                      {tx.spendingType === "Survival Need" && <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />}
+                      {tx.spendingType === "Impulse Want" && <Compass className="w-2.5 h-2.5 text-amber-600" />}
+                      {tx.spendingType === "Silent Subscription Leak" && <Clock className="w-2.5 h-2.5 text-rose-600" />}
                       <span>{tx.spendingType}</span>
                     </span>
                   </div>
 
                   <button
                     onClick={() => deleteTransaction(tx.id)}
-                    className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-500 hover:text-rose-400 rounded transition-all"
+                    className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-rose-600 rounded transition-all"
                     title="Remove transaction"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
