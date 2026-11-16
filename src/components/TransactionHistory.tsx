@@ -78,14 +78,11 @@ export const TransactionHistory: React.FC = () => {
           </div>
           <div>
             <h3 className="text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-2">
-              <span>Payment &amp; Spending Ledger</span>
+              <span>Expenses</span>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-700 font-medium">
-                {transactions.length} Records
+                {transactions.length}
               </span>
             </h3>
-            <p className="text-xs text-slate-500">
-              Institutional breakdown classified into Essential, Discretionary, and Subscriptions
-            </p>
           </div>
         </div>
 
@@ -93,13 +90,13 @@ export const TransactionHistory: React.FC = () => {
         <div className="flex items-center gap-3 text-xs font-mono bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span className="text-slate-500">Essential:</span>
+            <span className="text-slate-500">Needs:</span>
             <span className="text-emerald-700 font-bold">{formatINR(needSpent)}</span>
           </div>
           <span className="text-slate-300">•</span>
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-amber-500" />
-            <span className="text-slate-500">Discretionary:</span>
+            <span className="text-slate-500">Wants:</span>
             <span className="text-amber-700 font-bold">{formatINR(impulseSpent)}</span>
           </div>
           <span className="text-slate-300">•</span>
@@ -120,7 +117,7 @@ export const TransactionHistory: React.FC = () => {
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Filter by merchant, category, or UPI reference (e.g. Zepto, Blue Tokai, Toit)..."
+            placeholder="Search expenses..."
             className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors"
           />
         </div>
@@ -128,9 +125,9 @@ export const TransactionHistory: React.FC = () => {
         {/* Filter Pills */}
         <div className="flex gap-1.5 overflow-x-auto pb-1 sm:pb-0 text-xs">
           {[
-            { id: "ALL", label: "All Spends" },
-            { id: "Survival Need", label: "Essential Needs" },
-            { id: "Impulse Want", label: "Discretionary Impulses" },
+            { id: "ALL", label: "All" },
+            { id: "Survival Need", label: "Needs" },
+            { id: "Impulse Want", label: "Wants" },
             { id: "Silent Subscription Leak", label: "Subscriptions" },
           ].map((tab) => (
             <button
@@ -152,7 +149,7 @@ export const TransactionHistory: React.FC = () => {
       <div className="space-y-2 max-h-[460px] overflow-y-auto pr-1">
         {filteredTransactions.length === 0 ? (
           <div className="p-8 text-center border border-dashed border-slate-200 rounded-xl text-xs text-slate-400">
-            No transaction records matching &quot;{searchTerm}&quot;.
+            No expenses found.
           </div>
         ) : (
           filteredTransactions.map((tx) => {
@@ -163,7 +160,7 @@ export const TransactionHistory: React.FC = () => {
                 key={tx.id}
                 className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-200/80 hover:bg-slate-50 hover:border-slate-300 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
               >
-                {/* Left: Merchant & Categorization */}
+                {/* Left */}
                 <div className="flex items-start gap-3">
                   <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 text-slate-700 shadow-sm">
                     <CatIcon className="w-4 h-4 text-emerald-600" />
@@ -179,7 +176,6 @@ export const TransactionHistory: React.FC = () => {
                     </div>
                     <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-500 font-mono mt-0.5">
                       <span>{formatDate(tx.date)}</span>
-                      {tx.time && <span>{tx.time}</span>}
                       <span>•</span>
                       <span>{tx.category}</span>
                       {tx.upiRef && (
@@ -192,7 +188,7 @@ export const TransactionHistory: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Right: Amount & Classification */}
+                {/* Right */}
                 <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0">
                   <div className="text-right">
                     <div className="font-mono text-sm font-black text-slate-900">
@@ -217,7 +213,7 @@ export const TransactionHistory: React.FC = () => {
                   <button
                     onClick={() => deleteTransaction(tx.id)}
                     className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-rose-600 rounded transition-all"
-                    title="Remove transaction"
+                    title="Delete"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>

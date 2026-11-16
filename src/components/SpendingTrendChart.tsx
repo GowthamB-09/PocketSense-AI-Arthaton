@@ -46,14 +46,9 @@ export const SpendingTrendChart: React.FC = () => {
           <div className="p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700">
             <BarChart3 className="w-4 h-4" />
           </div>
-          <div>
-            <h3 className="text-sm font-semibold text-slate-900 tracking-tight">
-              Cashflow Distribution &amp; Velocity
-            </h3>
-            <p className="text-xs text-slate-500">
-              Discretionary capital allocation across categories and days
-            </p>
-          </div>
+          <h3 className="text-sm font-semibold text-slate-900 tracking-tight">
+            Spending Overview
+          </h3>
         </div>
 
         {/* View Switcher */}
@@ -76,7 +71,7 @@ export const SpendingTrendChart: React.FC = () => {
                 : "text-slate-500 hover:text-slate-900"
             }`}
           >
-            14-Day Velocity
+            Daily Pace
           </button>
         </div>
       </div>
@@ -120,9 +115,9 @@ export const SpendingTrendChart: React.FC = () => {
       {viewMode === "days" && (
         <div className="space-y-3 pt-1">
           <div className="flex justify-between items-center text-[11px] text-slate-500 font-mono">
-            <span>Day 1 (Payday)</span>
-            <span className="text-emerald-700 font-semibold">Sustainable Target: {formatINR(analysis.dailySafeToSpend)}/day</span>
-            <span>Day 14 (Mid-Month)</span>
+            <span>Day 1</span>
+            <span className="text-emerald-700 font-semibold">Safe Limit: {formatINR(analysis.dailySafeToSpend)}/day</span>
+            <span>Day 14</span>
           </div>
 
           {/* Bar Chart Grid */}
@@ -161,11 +156,11 @@ export const SpendingTrendChart: React.FC = () => {
           <div className="flex items-center justify-between text-[11px] text-slate-500 font-mono">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-sm bg-rose-500" />
-              <span>Above Safe Pacing</span>
+              <span>Over Limit</span>
               <span className="w-2 h-2 rounded-sm bg-emerald-500 ml-2" />
-              <span>Within Safe Cap</span>
+              <span>Within Limit</span>
             </div>
-            <span className="text-slate-400">Hover daily bars for breakdown</span>
+            <span className="text-slate-400">Hover bars to see amount</span>
           </div>
         </div>
       )}

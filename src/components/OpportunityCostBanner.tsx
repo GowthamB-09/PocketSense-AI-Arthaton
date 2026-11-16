@@ -38,10 +38,10 @@ export const OpportunityCostBanner: React.FC = () => {
       goalTitle: primaryGoal.title,
       icon: Plane,
       amount: 3500,
-      title: "Divert Friday Social & Craft Beer Split",
-      description: `Reallocating tonight's ₹3,500 unbudgeted dining tab directly into your ${primaryGoal.title} reserve.`,
-      impact: `+${((3500 / primaryGoal.targetAmount) * 100).toFixed(1)}% to target`,
-      buttonLabel: "Divert ₹3,500 to Reserve",
+      title: "Skip Friday Night Drinks",
+      description: `Skip tonight's unbudgeted ₹3,500 restaurant/drinks tab and add it straight to ${primaryGoal.title}.`,
+      impact: `+${((3500 / primaryGoal.targetAmount) * 100).toFixed(1)}% to goal`,
+      buttonLabel: "Save ₹3,500 to Goal",
     },
     {
       id: "opp_coffee_habits",
@@ -49,10 +49,10 @@ export const OpportunityCostBanner: React.FC = () => {
       goalTitle: secondaryGoal.title,
       icon: Laptop,
       amount: 1680,
-      title: "Replace 4 Weekday Cafe Pour-Overs",
-      description: `Saving ₹1,680 across 4 weekday visits accelerates your ${secondaryGoal.title} milestone.`,
-      impact: `+${((1680 / secondaryGoal.targetAmount) * 100).toFixed(1)}% to target`,
-      buttonLabel: "Divert ₹1,680 to Reserve",
+      title: "Skip 4 Weekday Cafe Coffees",
+      description: `Saving ₹1,680 on coffee runs this week moves you closer to ${secondaryGoal.title}.`,
+      impact: `+${((1680 / secondaryGoal.targetAmount) * 100).toFixed(1)}% to goal`,
+      buttonLabel: "Save ₹1,680 to Goal",
     },
   ];
 
@@ -72,26 +72,23 @@ export const OpportunityCostBanner: React.FC = () => {
     <div className="fintech-card rounded-2xl p-6 space-y-4 bg-white border border-slate-200 shadow-sm">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700">
             <Coins className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-2">
-              <span>Capital Preservation &amp; Impulse Conversion</span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-emerald-800 font-semibold">
-                Active Optimization
-              </span>
+            <h3 className="text-sm font-semibold text-slate-900 tracking-tight">
+              Smart Savings Ideas
             </h3>
             <p className="text-xs text-slate-500">
-              Convert momentary lifestyle splurges directly into high-conviction wealth reserves
+              Skip an impulse spend and put the money directly towards your goals
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 font-mono text-xs">
-          <span className="text-slate-500">Total Capital Preserved:</span>
-          <span className="font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg">
+        <div className="text-xs font-mono">
+          <span className="text-slate-500">Saved from impulses: </span>
+          <span className="font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
             {formatINR(profile.totalSavedToJars)}
           </span>
         </div>
@@ -120,7 +117,7 @@ export const OpportunityCostBanner: React.FC = () => {
                     </div>
                     <div>
                       <h4 className="text-xs font-bold text-slate-900">{opp.title}</h4>
-                      <span className="text-[10px] font-mono text-slate-500">Target: {opp.goalTitle}</span>
+                      <span className="text-[11px] font-mono text-slate-500">Target: {opp.goalTitle}</span>
                     </div>
                   </div>
                   <span className="text-xs font-mono font-bold text-emerald-700 bg-emerald-100/60 px-2 py-0.5 rounded">
@@ -144,7 +141,7 @@ export const OpportunityCostBanner: React.FC = () => {
                 {isClaimed ? (
                   <>
                     <CheckCircle2 className="w-4 h-4 text-emerald-700" />
-                    <span>Transferred to Reserve (+1 Streak)</span>
+                    <span>Saved to Goal (+1 Streak)</span>
                   </>
                 ) : (
                   <>

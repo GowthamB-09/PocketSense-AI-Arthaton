@@ -22,10 +22,10 @@ export const RunOutDayPredictor: React.FC = () => {
             </div>
             <div>
               <h3 className="text-sm font-semibold text-slate-900 tracking-tight">
-                Burn Velocity vs. Payday Runway
+                Month Runway
               </h3>
               <p className="text-xs text-slate-500">
-                Pacing discretionary capital against next salary credit
+                Pacing against next salary payday
               </p>
             </div>
           </div>
@@ -33,7 +33,7 @@ export const RunOutDayPredictor: React.FC = () => {
           {isSqueezeRisk && (
             <span className="inline-flex items-center gap-1 text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
               <AlertCircle className="w-3 h-3" />
-              <span>Velocity High</span>
+              <span>Spending Fast</span>
             </span>
           )}
         </div>
@@ -42,7 +42,7 @@ export const RunOutDayPredictor: React.FC = () => {
         <div className="grid grid-cols-2 gap-3 my-4 p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono">
           <div>
             <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">
-              Current Daily Burn
+              Current Daily Spend
             </span>
             <span className="text-base font-bold text-rose-700">
               {formatINR(burnRatePerDay)} <span className="text-xs text-slate-500 font-normal">/ day</span>
@@ -51,7 +51,7 @@ export const RunOutDayPredictor: React.FC = () => {
 
           <div>
             <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">
-              Target Sustainable Pacing
+              Target Daily Spend
             </span>
             <span className="text-base font-bold text-emerald-700">
               {formatINR(dailySafeToSpend)} <span className="text-xs text-slate-500 font-normal">/ day</span>
@@ -59,12 +59,12 @@ export const RunOutDayPredictor: React.FC = () => {
           </div>
         </div>
 
-        {/* 30-Day Payday Runway Bar */}
+        {/* Timeline Bar */}
         <div className="my-4 space-y-2">
           <div className="flex justify-between items-center text-[11px] font-mono text-slate-500">
-            <span>Day 1 (Salary In)</span>
-            <span className="text-amber-700 font-semibold">Day 20 Squeeze Marker</span>
-            <span>Day 30 (Next Payday)</span>
+            <span>Day 1 (Payday)</span>
+            <span className="text-amber-700 font-semibold">Day 20 Alert</span>
+            <span>Day 30 (Next Salary)</span>
           </div>
 
           <div className="relative h-3.5 w-full rounded-md bg-slate-100 border border-slate-200 overflow-hidden flex">
@@ -72,7 +72,7 @@ export const RunOutDayPredictor: React.FC = () => {
             <div
               className="h-full bg-slate-400"
               style={{ width: `${(currentDayOfMonth / daysInMonth) * 100}%` }}
-              title={`Days 1-${currentDayOfMonth} elapsed`}
+              title={`Day ${currentDayOfMonth} today`}
             />
 
             {/* Projected runway */}
@@ -89,19 +89,19 @@ export const RunOutDayPredictor: React.FC = () => {
 
             {/* Day 20 Marker */}
             <div
-              className="absolute top-0 bottom-0 w-0.5 bg-amber-500 z-10 shadow-sm"
+              className="absolute top-0 bottom-0 w-0.5 bg-amber-500 z-10"
               style={{ left: `${(20 / daysInMonth) * 100}%` }}
-              title="Day 20 Squeeze Critical Threshold"
+              title="Day 20 Warning Marker"
             />
           </div>
         </div>
       </div>
 
-      {/* Footer Diagnostic */}
+      {/* Footer */}
       <div className="pt-3.5 border-t border-slate-100 flex items-center justify-between text-xs font-mono text-slate-500">
         <span className="flex items-center gap-1.5">
           <Calendar className="w-3.5 h-3.5 text-slate-400" />
-          <span>Projected Discretionary Exhaustion:</span>
+          <span>Money estimated to last until:</span>
         </span>
         <span className={projectedRunOutDay <= 20 ? "text-rose-700 font-bold text-sm" : "text-emerald-700 font-bold text-sm"}>
           Day {projectedRunOutDay} of {daysInMonth}
