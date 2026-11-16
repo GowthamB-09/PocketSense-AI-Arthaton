@@ -6,11 +6,9 @@ import { formatINR } from "@/lib/utils";
 import { Activity, AlertCircle, Calendar, Gauge } from "lucide-react";
 
 export const RunOutDayPredictor: React.FC = () => {
-  const { analysis, profile } = useFinancialMemory();
-  const { burnRatePerDay, dailySafeToSpend, projectedRunOutDay } = analysis;
+  const { analysis } = useFinancialMemory();
+  const { burnRatePerDay, dailySafeToSpend, projectedRunOutDay, currentDayOfMonth, daysInMonth } = analysis;
 
-  const currentDay = profile.currentDayOfMonth;
-  const daysInMonth = profile.daysInMonth;
   const isSqueezeRisk = projectedRunOutDay <= 20;
 
   return (
@@ -73,18 +71,18 @@ export const RunOutDayPredictor: React.FC = () => {
             {/* Elapsed days */}
             <div
               className="h-full bg-slate-600/90"
-              style={{ width: `${(currentDay / daysInMonth) * 100}%` }}
-              title={`Days 1-${currentDay} elapsed`}
+              style={{ width: `${(currentDayOfMonth / daysInMonth) * 100}%` }}
+              title={`Days 1-${currentDayOfMonth} elapsed`}
             />
 
             {/* Projected runway */}
-            {projectedRunOutDay > currentDay ? (
+            {projectedRunOutDay > currentDayOfMonth ? (
               <div
                 className={`h-full ${
                   projectedRunOutDay <= 20 ? "bg-rose-500/60" : "bg-emerald-500/50"
                 }`}
                 style={{
-                  width: `${((projectedRunOutDay - currentDay) / daysInMonth) * 100}%`,
+                  width: `${((projectedRunOutDay - currentDayOfMonth) / daysInMonth) * 100}%`,
                 }}
               />
             ) : null}

@@ -75,7 +75,7 @@ export const DailySafeCard: React.FC<DailySafeCardProps> = ({
               <span>{statusConfig.label}</span>
             </div>
             <span className="text-xs text-slate-400 font-mono">
-              Day {profile.currentDayOfMonth} of 30
+              {analysis.dateLabel || `Day ${analysis.currentDayOfMonth} of ${analysis.daysInMonth}`}
             </span>
           </div>
 

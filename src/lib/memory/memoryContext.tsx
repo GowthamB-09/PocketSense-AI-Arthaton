@@ -30,7 +30,13 @@ interface FinancialMemoryContextType {
   addBatchTransactions: (txs: Transaction[]) => void;
   deleteTransaction: (id: string) => void;
   claimSavings: (goalId: string, amount: number, promptText?: string) => void;
-  updateSalary: (monthlySalary: number, fixedEssentials: number) => void;
+  updateSalary: (
+    monthlySalary: number,
+    fixedEssentials: number,
+    currentDayOfMonth?: number,
+    useRealDate?: boolean,
+    resetLedger?: boolean
+  ) => void;
   addGoalJar: (goal: Omit<GoalJar, "id" | "totalSavedFromNudges">) => void;
   updateGoalJar: (goal: GoalJar) => void;
   deleteGoalJar: (id: string) => void;
@@ -173,12 +179,36 @@ export function FinancialMemoryProvider({ children }: { children: React.ReactNod
     });
   };
 
-  const updateSalary = (monthlySalary: number, fixedEssentials: number) => {
-    setProfile((prev) => ({
-      ...prev,
-      monthlySalary,
-      fixedEssentials,
-    }));
+  const updateSalary = (
+    monthlySalary: number,
+    fixedEssentials: number,
+    currentDayOfMonth?: number,
+    useRealDate?: boolean,
+    resetLedger?: boolean
+  ) => {
+    if (resetLedger) {
+      setTransactions([]);
+      saveTransactions([]);
+    }
+
+    setProfile((prev) => {
+      const now = new Date();
+      const realDay = now.getDate();
+      const realDaysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+
+      const nextUseRealDate = typeof useRealDate === "boolean" ? useRealDate : (prev.useRealCalendarDate ?? false);
+      const nextDay = typeof currentDayOfMonth === "number" ? currentDayOfMonth : (nextUseRealDate ? realDay : prev.currentDayOfMonth);
+      const nextTotalDays = nextUseRealDate ? realDaysInMonth : prev.daysInMonth;
+
+      return {
+        ...prev,
+        monthlySalary,
+        fixedEssentials,
+        currentDayOfMonth: nextDay,
+        daysInMonth: nextTotalDays,
+        useRealCalendarDate: nextUseRealDate,
+      };
+    });
   };
 
   const addGoalJar = (goalData: Omit<GoalJar, "id" | "totalSavedFromNudges">) => {

@@ -79,7 +79,7 @@ function DashboardContent() {
             </div>
             <div className="flex items-baseline justify-between font-mono">
               <span className="text-xl font-bold text-rose-400">{formatINR(analysis.burnRatePerDay)}</span>
-              <span className="text-[11px] text-slate-400 font-medium">Day {profile.currentDayOfMonth}/30</span>
+              <span className="text-[11px] text-slate-400 font-medium">Day {analysis.currentDayOfMonth}/{analysis.daysInMonth}</span>
             </div>
           </div>
 

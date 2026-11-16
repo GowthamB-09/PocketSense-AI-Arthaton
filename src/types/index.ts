@@ -57,6 +57,7 @@ export interface FinancialMemoryProfile {
   fixedEssentials: number; // Rent, SIP, Utilities, Insurance
   daysInMonth: number;
   currentDayOfMonth: number;
+  useRealCalendarDate?: boolean;
   disciplineStreak: number;
   totalSavedToJars: number;
   vulnerabilityZones: string[];
@@ -79,8 +80,12 @@ export interface FinancialMemoryProfile {
 export interface DailyBudgetAnalysis {
   monthlySalary: number;
   fixedEssentials: number;
+  discretionaryPool: number;
+  discretionarySpentSoFar: number;
   totalSpentSoFar: number;
   remainingMonthlyPool: number;
+  currentDayOfMonth: number;
+  daysInMonth: number;
   daysRemaining: number;
   dailySafeToSpend: number;
   spentToday: number;
@@ -90,6 +95,8 @@ export interface DailyBudgetAnalysis {
   statusLevel: "green" | "amber" | "red";
   headline: string;
   comfortMessage: string;
+  dateLabel: string;
+  isRealDate: boolean;
 }
 
 export interface SmsParseResult {
