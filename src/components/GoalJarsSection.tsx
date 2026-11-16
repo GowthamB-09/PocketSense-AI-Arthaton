@@ -8,6 +8,12 @@ import {
   Plus,
   Trash2,
   Sparkles,
+  Plane,
+  Laptop,
+  ShieldCheck,
+  Target,
+  ArrowUpRight,
+  Vault,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 
@@ -15,12 +21,19 @@ export const GoalJarsSection: React.FC = () => {
   const { profile, addGoalJar, deleteGoalJar, claimSavings } = useFinancialMemory();
   const [showAddModal, setShowAddModal] = useState(false);
   const [depositModalGoal, setDepositModalGoal] = useState<GoalJar | null>(null);
-  const [depositAmount, setDepositAmount] = useState<string>("1000");
+  const [depositAmount, setDepositAmount] = useState<string>("2000");
 
   const [newTitle, setNewTitle] = useState("");
   const [newTarget, setNewTarget] = useState("");
-  const [newEmoji, setNewEmoji] = useState("🎯");
   const [newCategory, setNewCategory] = useState<GoalJar["category"]>("Travel");
+
+  const getVaultIcon = (title: string, category: string) => {
+    const t = title.toLowerCase();
+    if (t.includes("trip") || t.includes("japan") || category === "Travel") return Plane;
+    if (t.includes("macbook") || t.includes("tech") || category === "Tech") return Laptop;
+    if (t.includes("emergency") || t.includes("buffer") || category === "Emergency") return ShieldCheck;
+    return Target;
+  };
 
   const handleCreateGoal = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +44,7 @@ export const GoalJarsSection: React.FC = () => {
       title: newTitle.trim(),
       targetAmount: target,
       currentAmount: 0,
-      emoji: newEmoji || "🎯",
+      emoji: "🎯",
       category: newCategory,
       color: "#10B981",
       deadline: "2027-12-31",
@@ -55,85 +68,100 @@ export const GoalJarsSection: React.FC = () => {
       particleCount: 40,
       spread: 60,
       origin: { y: 0.6 },
+      colors: ["#10B981", "#3B82F6", "#F59E0B"],
     });
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between gap-3">
-        <div>
-          <h3 className="text-xs font-semibold text-white tracking-tight flex items-center gap-2">
-            <span>Wealth &amp; Milestone Jars</span>
-            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white/5 border border-white/10 text-zinc-400">
-              {profile.goals.length} Active
-            </span>
-          </h3>
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-300">
+            <Vault className="w-4 h-4 text-emerald-400" />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-white tracking-tight flex items-center gap-2">
+              <span>Capital Reserves &amp; Milestone Vaults</span>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300 font-medium">
+                {profile.goals.length} Active Vaults
+              </span>
+            </h3>
+            <p className="text-xs text-slate-400">
+              Segregated capital accounts funded automatically by intercepted impulse spending
+            </p>
+          </div>
         </div>
 
         <button
           onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-200 hover:text-white transition-all"
         >
           <Plus className="w-3.5 h-3.5 text-emerald-400" />
-          <span>New Jar</span>
+          <span>New Vault</span>
         </button>
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {profile.goals.map((jar) => {
           const percent = Math.min(100, Math.round((jar.currentAmount / jar.targetAmount) * 100));
+          const VaultIcon = getVaultIcon(jar.title, jar.category);
 
           return (
             <div
               key={jar.id}
-              className="rounded-xl bg-[#121215] border border-white/[0.08] p-4 flex flex-col justify-between group hover:border-white/20 transition-all"
+              className="fintech-card rounded-2xl p-5 flex flex-col justify-between group hover:border-slate-700 transition-all"
             >
               <div>
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">{jar.emoji}</span>
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-slate-800/80 border border-slate-700/80 flex items-center justify-center text-emerald-400 shadow-sm">
+                      <VaultIcon className="w-4 h-4" />
+                    </div>
                     <div>
-                      <h4 className="text-xs font-semibold text-white">{jar.title}</h4>
-                      <span className="text-[10px] font-mono text-zinc-500 uppercase">{jar.category}</span>
+                      <h4 className="text-xs font-bold text-white tracking-tight">{jar.title}</h4>
+                      <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider">
+                        {jar.category} Reserve
+                      </span>
                     </div>
                   </div>
                   <button
                     onClick={() => deleteGoalJar(jar.id)}
-                    className="opacity-0 group-hover:opacity-100 p-1 text-zinc-600 hover:text-rose-400 transition-opacity"
-                    title="Delete jar"
+                    className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-500 hover:text-rose-400 rounded transition-opacity"
+                    title="Archive vault"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
 
-                <div className="flex items-baseline justify-between mt-2 mb-1 font-mono">
-                  <span className="text-base font-bold text-white">{formatINR(jar.currentAmount)}</span>
-                  <span className="text-xs text-zinc-500">of {formatINR(jar.targetAmount)}</span>
+                <div className="flex items-baseline justify-between mt-3 mb-1.5 font-mono">
+                  <span className="text-lg font-bold text-white">{formatINR(jar.currentAmount)}</span>
+                  <span className="text-xs text-slate-400">Target: {formatINR(jar.targetAmount)}</span>
                 </div>
 
-                <div className="w-full h-1.5 rounded-full bg-zinc-800 overflow-hidden my-2">
+                <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden my-2">
                   <div
-                    className="h-full rounded-full bg-emerald-400 transition-all duration-300"
+                    className="h-full rounded-full bg-emerald-400 transition-all duration-300 shadow-[0_0_8px_rgba(16,185,129,0.5)]"
                     style={{ width: `${percent}%` }}
                   />
                 </div>
 
-                <div className="flex justify-between items-center text-[10px] font-mono text-zinc-400">
-                  <span>{percent}% funded</span>
+                <div className="flex justify-between items-center text-[11px] font-mono text-slate-400">
+                  <span className="font-semibold text-slate-300">{percent}% funded</span>
                   {jar.totalSavedFromNudges > 0 && (
                     <span className="text-emerald-400">+{formatINR(jar.totalSavedFromNudges)} from nudges</span>
                   )}
                 </div>
               </div>
 
-              <div className="mt-3 pt-2.5 border-t border-white/5">
+              <div className="mt-4 pt-3 border-t border-slate-800/80">
                 <button
                   onClick={() => setDepositModalGoal(jar)}
-                  className="w-full py-1 rounded-md text-xs font-medium bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white transition-colors"
+                  className="w-full py-1.5 px-3 rounded-lg text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 hover:border-slate-700 transition-colors flex items-center justify-center gap-1.5"
                 >
-                  + Deposit Impulse Savings
+                  <ArrowUpRight className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Transfer Capital</span>
                 </button>
               </div>
             </div>
@@ -143,62 +171,68 @@ export const GoalJarsSection: React.FC = () => {
 
       {/* Add Goal Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-[#121215] border border-white/10 rounded-xl w-full max-w-sm p-5 shadow-2xl">
-            <h3 className="text-sm font-bold text-white mb-1">Create Wealth Jar</h3>
-            <p className="text-xs text-zinc-400 mb-3">Define a specific milestone for your savings.</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="fintech-card rounded-2xl w-full max-w-sm p-6 shadow-2xl space-y-4">
+            <div>
+              <h3 className="text-sm font-bold text-white tracking-tight">Create Capital Reserve</h3>
+              <p className="text-xs text-slate-400 mt-0.5">Segregate discretionary funds into a dedicated milestone vault.</p>
+            </div>
 
-            <form onSubmit={handleCreateGoal} className="space-y-3">
+            <form onSubmit={handleCreateGoal} className="space-y-3.5">
               <div>
-                <label className="block text-xs text-zinc-300 mb-1">Jar Title</label>
+                <label className="block text-xs font-medium text-slate-300 mb-1">Reserve Name</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Japan Trip, MacBook Pro, Emergency Buffer"
+                  placeholder="e.g. Japan Spring Trip, MacBook M3, Emergency Treasury"
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
-                  className="w-full px-3 py-1.5 text-xs bg-zinc-900 border border-white/10 rounded-md text-white focus:outline-none focus:border-emerald-500"
+                  className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-emerald-500"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-zinc-300 mb-1">Target (₹)</label>
+                  <label className="block text-xs font-medium text-slate-300 mb-1">Target Capital (₹)</label>
                   <input
                     type="number"
                     required
                     min="1000"
-                    placeholder="100000"
+                    placeholder="150000"
                     value={newTarget}
                     onChange={(e) => setNewTarget(e.target.value)}
-                    className="w-full px-3 py-1.5 text-xs font-mono bg-zinc-900 border border-white/10 rounded-md text-white focus:outline-none focus:border-emerald-500"
+                    className="w-full px-3 py-2 text-xs font-mono bg-slate-950 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-emerald-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-zinc-300 mb-1">Emoji</label>
-                  <input
-                    type="text"
-                    maxLength={2}
-                    value={newEmoji}
-                    onChange={(e) => setNewEmoji(e.target.value)}
-                    className="w-full px-3 py-1.5 text-xs text-center bg-zinc-900 border border-white/10 rounded-md text-white focus:outline-none focus:border-emerald-500"
-                  />
+                  <label className="block text-xs font-medium text-slate-300 mb-1">Category</label>
+                  <select
+                    value={newCategory}
+                    onChange={(e) => setNewCategory(e.target.value as any)}
+                    className="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-emerald-500"
+                  >
+                    <option value="Travel">Travel</option>
+                    <option value="Tech">Tech</option>
+                    <option value="Emergency">Emergency</option>
+                    <option value="Wealth">Wealth</option>
+                    <option value="Lifestyle">Lifestyle</option>
+                  </select>
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-800/80">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-3 py-1 text-xs text-zinc-400 hover:text-white"
+                  className="px-3 py-1.5 text-xs text-slate-400 hover:text-white"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-3 py-1 rounded-md text-xs font-semibold bg-emerald-500 text-black hover:bg-emerald-400"
+                  className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500 text-slate-950 hover:bg-emerald-400"
                 >
-                  Create
+                  Create Vault
                 </button>
               </div>
             </form>
@@ -208,54 +242,56 @@ export const GoalJarsSection: React.FC = () => {
 
       {/* Deposit Modal */}
       {depositModalGoal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-[#121215] border border-white/10 rounded-xl w-full max-w-sm p-5 shadow-2xl">
-            <h3 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
-              <span>{depositModalGoal.emoji}</span>
-              <span>Deposit into {depositModalGoal.title}</span>
-            </h3>
-            <p className="text-xs text-zinc-400 mb-3">Add redirected savings into this jar.</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="fintech-card rounded-2xl w-full max-w-sm p-6 shadow-2xl space-y-4">
+            <div>
+              <h3 className="text-sm font-bold text-white tracking-tight flex items-center gap-2">
+                <Vault className="w-4 h-4 text-emerald-400" />
+                <span>Transfer Capital to {depositModalGoal.title}</span>
+              </h3>
+              <p className="text-xs text-slate-400 mt-0.5">Divert preserved impulse capital into this reserve vault.</p>
+            </div>
 
-            <form onSubmit={handleQuickDeposit} className="space-y-3">
+            <form onSubmit={handleQuickDeposit} className="space-y-3.5">
               <div>
-                <label className="block text-xs text-zinc-300 mb-1">Amount (₹)</label>
+                <label className="block text-xs font-medium text-slate-300 mb-1">Transfer Amount (₹)</label>
                 <input
                   type="number"
                   required
                   min="100"
                   value={depositAmount}
                   onChange={(e) => setDepositAmount(e.target.value)}
-                  className="w-full px-3 py-1.5 text-sm font-mono bg-zinc-900 border border-white/10 rounded-md text-white focus:outline-none focus:border-emerald-500"
+                  className="w-full px-3 py-2 text-sm font-mono bg-slate-950 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-emerald-500"
                 />
               </div>
 
-              <div className="flex gap-2">
-                {["500", "1500", "3000", "5000"].map((preset) => (
+              <div className="grid grid-cols-4 gap-2">
+                {["1000", "2500", "5000", "10000"].map((preset) => (
                   <button
                     key={preset}
                     type="button"
                     onClick={() => setDepositAmount(preset)}
-                    className="flex-1 py-1 text-xs font-mono rounded bg-white/5 hover:bg-white/10 text-zinc-300 border border-white/10"
+                    className="py-1 text-xs font-mono rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition-colors"
                   >
                     +₹{preset}
                   </button>
                 ))}
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-800/80">
                 <button
                   type="button"
                   onClick={() => setDepositModalGoal(null)}
-                  className="px-3 py-1 text-xs text-zinc-400 hover:text-white"
+                  className="px-3 py-1.5 text-xs text-slate-400 hover:text-white"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-3 py-1 rounded-md text-xs font-semibold bg-emerald-500 text-black hover:bg-emerald-400 flex items-center gap-1"
+                  className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500 text-slate-950 hover:bg-emerald-400 flex items-center gap-1.5 shadow-[0_0_12px_rgba(16,185,129,0.25)]"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span>Confirm Deposit</span>
+                  <span>Confirm Transfer</span>
                 </button>
               </div>
             </form>
