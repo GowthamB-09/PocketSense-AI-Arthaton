@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "PocketSense AI • Behavioral Money Coach for Indian College Students",
+  title: "PocketSense PRO • Behavioral Money Coach for Young Professionals (24–30)",
   description:
-    "Zero-login, privacy-first AI behavioral money coach that intercepts frictionless UPI spending before it happens and remembers your student habits, goals, and triggers. Built for Arthaton 2026.",
+    "Zero-login, privacy-first AI behavioral money coach that intercepts frictionless UPI spending and lifestyle creep before it happens. Built for young professionals (24–30).",
 };
 
 export default function RootLayout({

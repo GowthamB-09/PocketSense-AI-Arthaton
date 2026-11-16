@@ -8,9 +8,6 @@ import {
   ShieldCheck,
   AlertTriangle,
   ArrowRight,
-  TrendingDown,
-  Calendar,
-  Wallet,
   Zap,
 } from "lucide-react";
 
@@ -27,48 +24,38 @@ export const DailySafeCard: React.FC<DailySafeCardProps> = ({
 
   const {
     dailySafeToSpend,
-    remainingMonthlyAllowance,
+    remainingMonthlyPool,
     daysRemaining,
     spentToday,
     remainingToday,
     statusLevel,
     comfortMessage,
-    burnRatePerDay,
-    projectedRunOutDay,
   } = analysis;
 
-  // Percentage of today's safe allowance used
   const percentTodaySpent = dailySafeToSpend > 0
     ? Math.min(100, Math.round((spentToday / dailySafeToSpend) * 100))
     : 100;
 
-  // Status colors & icons
   const statusConfig = {
     green: {
-      badgeBg: "bg-emerald-500/10 border-emerald-500/30 text-emerald-400",
-      glow: "shadow-[0_0_35px_rgba(16,185,129,0.12)]",
-      borderColor: "border-emerald-500/30",
+      badge: "bg-emerald-500/10 border-emerald-500/30 text-emerald-400",
       accent: "text-emerald-400",
       progressBar: "bg-emerald-500",
-      label: "Safe-to-Spend Zone",
+      label: "Safe Discretionary Zone",
       icon: ShieldCheck,
     },
     amber: {
-      badgeBg: "bg-amber-500/10 border-amber-500/30 text-amber-400",
-      glow: "shadow-[0_0_35px_rgba(245,158,11,0.12)]",
-      borderColor: "border-amber-500/30",
+      badge: "bg-amber-500/10 border-amber-500/30 text-amber-400",
       accent: "text-amber-400",
       progressBar: "bg-amber-500",
       label: "Runway Tightening",
       icon: AlertTriangle,
     },
     red: {
-      badgeBg: "bg-rose-500/10 border-rose-500/30 text-rose-400",
-      glow: "shadow-[0_0_35px_rgba(239,68,68,0.15)]",
-      borderColor: "border-rose-500/40",
+      badge: "bg-rose-500/10 border-rose-500/30 text-rose-400",
       accent: "text-rose-400",
       progressBar: "bg-rose-500",
-      label: `Day 18 Cliff Alert`,
+      label: "Month-End Squeeze",
       icon: ShieldAlert,
     },
   }[statusLevel];
@@ -76,126 +63,92 @@ export const DailySafeCard: React.FC<DailySafeCardProps> = ({
   const StatusIcon = statusConfig.icon;
 
   return (
-    <div
-      className={`relative overflow-hidden rounded-2xl bg-[#121215] border ${statusConfig.borderColor} ${statusConfig.glow} p-6 sm:p-7 transition-all duration-300`}
-    >
-      {/* Background ambient gradient */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-emerald-500/5 via-transparent to-transparent pointer-events-none rounded-full blur-3xl" />
-
-      {/* Top row: Status & Quick action */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+    <div className="relative overflow-hidden rounded-xl bg-[#121215] border border-white/[0.08] p-5 sm:p-6 transition-all">
+      {/* Top row */}
+      <div className="flex items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-2">
-          <div
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${statusConfig.badgeBg}`}
-          >
+          <div className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusConfig.badge}`}>
             <StatusIcon className="w-3.5 h-3.5" />
             <span>{statusConfig.label}</span>
           </div>
-          <span className="text-xs text-zinc-400 hidden sm:inline">
+          <span className="text-xs text-zinc-500 font-mono">
             Day {profile.currentDayOfMonth} of 30
           </span>
         </div>
 
         <button
           onClick={onOpenBeforeIScan}
-          className="group flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition-all shadow-[0_0_15px_rgba(16,185,129,0.1)]"
+          className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-md bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/10 transition-colors"
         >
           <Zap className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Before-I-Scan Interceptor</span>
-          <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+          <span>Before-I-Scan</span>
+          <ArrowRight className="w-3 h-3 text-zinc-400" />
         </button>
       </div>
 
-      {/* Center Hero: The Big Number */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end">
-        <div className="lg:col-span-7">
-          <div className="text-xs font-medium uppercase tracking-wider text-zinc-400 mb-1 flex items-center gap-2">
-            <span>Daily Safe-to-Spend Limit</span>
-            <span className="text-[10px] lowercase px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-zinc-400">
-              stress-free budget
-            </span>
+      {/* Main Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-12 gap-5 items-end">
+        <div className="sm:col-span-7">
+          <div className="text-[11px] font-mono uppercase tracking-wider text-zinc-400 mb-1">
+            Safe Daily Discretionary Limit
           </div>
 
-          <div className="flex items-baseline gap-3">
-            <span
-              className={`font-mono text-4xl sm:text-6xl font-black tracking-tight ${statusConfig.accent}`}
-            >
+          <div className="flex items-baseline gap-2">
+            <span className={`font-mono text-4xl sm:text-5xl font-black tracking-tight ${statusConfig.accent}`}>
               {formatINR(dailySafeToSpend)}
             </span>
-            <span className="text-base sm:text-lg font-medium text-zinc-400">
-              / day
-            </span>
+            <span className="text-sm font-medium text-zinc-400">/ day</span>
           </div>
 
-          <p className="mt-3 text-xs sm:text-sm text-zinc-300 leading-relaxed max-w-xl">
+          <p className="mt-2 text-xs text-zinc-400 leading-relaxed max-w-md">
             {comfortMessage}
           </p>
         </div>
 
-        {/* Right Gauge / Metrics Bento */}
-        <div className="lg:col-span-5 flex flex-col gap-3.5 bg-black/40 border border-white/5 rounded-xl p-4">
-          {/* Today's Spend Progress */}
+        {/* Right metrics column */}
+        <div className="sm:col-span-5 flex flex-col gap-2.5 bg-black/40 border border-white/5 rounded-lg p-3.5">
           <div>
-            <div className="flex justify-between items-center text-xs mb-1.5">
-              <span className="text-zinc-400 font-medium">Today&apos;s Burn:</span>
-              <span className="font-mono text-zinc-200">
-                {formatINR(spentToday)} / {formatINR(dailySafeToSpend)}
-              </span>
+            <div className="flex justify-between items-center text-xs mb-1 font-mono">
+              <span className="text-zinc-400">Today&apos;s Spend</span>
+              <span className="text-zinc-200">{formatINR(spentToday)} / {formatINR(dailySafeToSpend)}</span>
             </div>
-            <div className="w-full h-2 rounded-full bg-zinc-800 overflow-hidden">
+            <div className="w-full h-1.5 rounded-full bg-zinc-800 overflow-hidden">
               <div
-                className={`h-full transition-all duration-500 rounded-full ${statusConfig.progressBar}`}
+                className={`h-full rounded-full transition-all duration-300 ${statusConfig.progressBar}`}
                 style={{ width: `${percentTodaySpent}%` }}
               />
             </div>
-            <div className="flex justify-between items-center text-[11px] mt-1 text-zinc-400">
-              <span>{percentTodaySpent}% consumed</span>
-              <span>
-                {remainingToday > 0 ? `${formatINR(remainingToday)} left today` : "Limit reached today"}
-              </span>
+            <div className="flex justify-between items-center text-[10px] font-mono mt-1 text-zinc-500">
+              <span>{percentTodaySpent}% spent</span>
+              <span>{remainingToday > 0 ? `${formatINR(remainingToday)} left` : "Limit reached"}</span>
             </div>
           </div>
 
-          {/* Micro Stats Grid */}
-          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/5">
-            <div className="bg-white/[0.02] p-2 rounded-lg">
-              <div className="flex items-center gap-1.5 text-[11px] text-zinc-400 mb-0.5">
-                <Wallet className="w-3 h-3 text-emerald-400" />
-                <span>Runway Pool</span>
-              </div>
-              <div className="font-mono text-sm font-bold text-white">
-                {formatINR(remainingMonthlyAllowance)}
-              </div>
+          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/5 text-xs font-mono">
+            <div>
+              <span className="text-[10px] text-zinc-500 block">Discretionary Pool</span>
+              <span className="font-bold text-white text-sm">{formatINR(remainingMonthlyPool)}</span>
             </div>
-
-            <div className="bg-white/[0.02] p-2 rounded-lg">
-              <div className="flex items-center gap-1.5 text-[11px] text-zinc-400 mb-0.5">
-                <Calendar className="w-3 h-3 text-cyan-400" />
-                <span>Days Remaining</span>
-              </div>
-              <div className="font-mono text-sm font-bold text-white">
-                {daysRemaining} Days
-              </div>
+            <div>
+              <span className="text-[10px] text-zinc-500 block">Runway Days</span>
+              <span className="font-bold text-white text-sm">{daysRemaining} Days</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Subtle bottom footer: Formula transparency */}
-      <div className="mt-5 pt-4 border-t border-white/5 flex flex-wrap items-center justify-between text-[11px] text-zinc-400 gap-2">
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-zinc-400">
-            Formula: ({formatINR(profile.monthlyAllowance)} Allowance - {formatINR(profile.fixedEssentials)} Fixed) ÷ {daysRemaining} days left
-          </span>
-        </div>
+      {/* Clean Footer Link */}
+      <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-zinc-500">
+        <span className="font-mono">
+          Take-Home: {formatINR(profile.monthlySalary)} • Fixed (Rent + SIPs): {formatINR(profile.fixedEssentials)}
+        </span>
         <button
           onClick={onOpenSettings}
-          className="text-emerald-400 hover:text-emerald-300 hover:underline transition-colors font-medium"
+          className="text-zinc-400 hover:text-white transition-colors underline"
         >
-          Edit Budget & Fixed Essentials →
+          Edit Budget →
         </button>
       </div>
     </div>
   );
 };
-

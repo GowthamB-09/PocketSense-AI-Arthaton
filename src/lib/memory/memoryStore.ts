@@ -12,76 +12,78 @@ import {
   SYNTHETIC_TRANSACTIONS,
 } from "../demo/syntheticStudentData";
 
-const STORAGE_KEY_PROFILE = "pocketsense_financial_memory_profile_v1";
-const STORAGE_KEY_TRANSACTIONS = "pocketsense_transactions_v1";
+const STORAGE_KEY_PROFILE = "pocketsense_prof_profile_v2";
+const STORAGE_KEY_TRANSACTIONS = "pocketsense_prof_transactions_v2";
 
 /**
- * Calculates current daily budget analysis based on transactions and profile
+ * Calculates daily discretionary budget analysis for young working professionals
  */
 export function calculateDailyBudgetAnalysis(
   profile: FinancialMemoryProfile,
   transactions: Transaction[]
 ): DailyBudgetAnalysis {
-  const { monthlyAllowance, fixedEssentials, daysInMonth, currentDayOfMonth } = profile;
+  const { monthlySalary, fixedEssentials, daysInMonth, currentDayOfMonth } = profile;
 
-  // Total spent across all transactions so far
+  // Discretionary pool = Salary - Fixed Essentials (Rent, SIPs, Utilities)
+  const discretionaryPool = Math.max(0, monthlySalary - fixedEssentials);
+
+  // Discretionary transactions (exclude rent and SIP investments already accounted for in fixedEssentials)
+  const discretionaryTxs = transactions.filter(
+    (tx) => tx.category !== "Rent & Fixed Utilities" && tx.category !== "Investments & SIPs"
+  );
+
+  const discretionarySpentSoFar = discretionaryTxs.reduce((sum, tx) => sum + tx.amount, 0);
   const totalSpentSoFar = transactions.reduce((sum, tx) => sum + tx.amount, 0);
 
-  // Discretionary pool available
-  const remainingMonthlyAllowance = Math.max(0, monthlyAllowance - totalSpentSoFar);
-
-  // Days remaining in month (including today)
+  const remainingMonthlyPool = Math.max(0, discretionaryPool - discretionarySpentSoFar);
   const daysRemaining = Math.max(1, daysInMonth - currentDayOfMonth + 1);
 
-  // Safe daily spend for the rest of the month
-  // Formula: (Remaining Allowance - any unspent fixed essentials) / daysRemaining
-  // In our model, fixed essentials are paid at beginning or tracked
-  const safeDailySpend = Math.max(0, Math.floor(remainingMonthlyAllowance / daysRemaining));
+  // Safe daily discretionary spending headroom
+  const safeDailySpend = Math.max(0, Math.floor(remainingMonthlyPool / daysRemaining));
 
   // Today's spending
   const todayStr = new Date().toISOString().split("T")[0];
   const spentToday = transactions
-    .filter((tx) => tx.date === todayStr || tx.date === "2026-11-14")
+    .filter((tx) => (tx.date === todayStr || tx.date === "2026-11-14") && tx.category !== "Rent & Fixed Utilities" && tx.category !== "Investments & SIPs")
     .reduce((sum, tx) => sum + tx.amount, 0);
 
   const remainingToday = Math.max(0, safeDailySpend - spentToday);
 
-  // Burn rate per day so far
+  // Velocity calculation
   const daysElapsed = Math.max(1, currentDayOfMonth);
-  const burnRatePerDay = Math.round(totalSpentSoFar / daysElapsed);
+  const burnRatePerDay = Math.round(discretionarySpentSoFar / daysElapsed);
 
-  // Projected run-out day
-  // If burnRatePerDay continues, on what day does money reach 0?
+  // Projected run-out day for discretionary pool
   let projectedRunOutDay = daysInMonth;
   if (burnRatePerDay > 0) {
-    const daysOfRunway = Math.floor(monthlyAllowance / burnRatePerDay);
+    const daysOfRunway = Math.floor(discretionaryPool / burnRatePerDay);
     projectedRunOutDay = Math.min(daysInMonth, daysOfRunway);
   }
 
-  // Status level determination
+  // Clean status levels
   let statusLevel: "green" | "amber" | "red" = "green";
   let headline = "";
   let comfortMessage = "";
 
-  if (projectedRunOutDay <= 18) {
+  if (projectedRunOutDay <= 20) {
     statusLevel = "red";
-    headline = `Day 18 Cliff Ahead: Running dry by Day ${projectedRunOutDay}!`;
-    comfortMessage = `You're burning ₹${burnRatePerDay}/day against a safe rate of ₹${safeDailySpend}/day. The dreaded college 18th-of-the-month dry spell is 4 days away. Intercept impulses now!`;
-  } else if (safeDailySpend < 120 || projectedRunOutDay < 25) {
+    headline = `Month-End Squeeze: Discretionary pool exhausts by Day ${projectedRunOutDay}`;
+    comfortMessage = `Burning ₹${burnRatePerDay}/day against a sustainable limit of ₹${safeDailySpend}/day. Intercept impulse checkouts to maintain your savings rate.`;
+  } else if (safeDailySpend < 400 || projectedRunOutDay < 26) {
     statusLevel = "amber";
     headline = `Caution: Runway tightening to Day ${projectedRunOutDay}`;
-    comfortMessage = `Safe budget is ₹${safeDailySpend}/day. A single late-night Swiggy order could push you into the red zone.`;
+    comfortMessage = `Current safe rate is ₹${safeDailySpend}/day. Large weekend outings could compress your month-end flexibility.`;
   } else {
     statusLevel = "green";
-    headline = `Safe-to-Spend Zone: Runway looks healthy`;
-    comfortMessage = `You have ₹${safeDailySpend} safe spending headroom per day. Keep stacking your discipline streak!`;
+    headline = `Optimal Velocity: Cash flow on track`;
+    comfortMessage = `You have ₹${safeDailySpend}/day in flexible discretionary spending while fully funding your rent and SIP investments.`;
   }
 
   return {
-    monthlyAllowance,
+    monthlySalary,
     fixedEssentials,
     totalSpentSoFar,
-    remainingMonthlyAllowance,
+    remainingMonthlyPool,
     daysRemaining,
     dailySafeToSpend: safeDailySpend,
     spentToday,
@@ -94,65 +96,46 @@ export function calculateDailyBudgetAnalysis(
   };
 }
 
-/**
- * Loads profile from localStorage, falling back to synthetic demo
- */
 export function getStoredProfile(): FinancialMemoryProfile {
   if (typeof window === "undefined") return SYNTHETIC_DEMO_PROFILE;
   try {
     const saved = localStorage.getItem(STORAGE_KEY_PROFILE);
-    if (saved) {
-      return JSON.parse(saved);
-    }
+    if (saved) return JSON.parse(saved);
   } catch (e) {
-    console.error("Failed to load profile from storage", e);
+    console.error("Failed to load profile", e);
   }
   return SYNTHETIC_DEMO_PROFILE;
 }
 
-/**
- * Saves profile to localStorage
- */
 export function saveProfile(profile: FinancialMemoryProfile): void {
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem(STORAGE_KEY_PROFILE, JSON.stringify(profile));
   } catch (e) {
-    console.error("Failed to save profile to storage", e);
+    console.error("Failed to save profile", e);
   }
 }
 
-/**
- * Loads transactions from localStorage, falling back to synthetic transactions
- */
 export function getStoredTransactions(): Transaction[] {
   if (typeof window === "undefined") return SYNTHETIC_TRANSACTIONS;
   try {
     const saved = localStorage.getItem(STORAGE_KEY_TRANSACTIONS);
-    if (saved) {
-      return JSON.parse(saved);
-    }
+    if (saved) return JSON.parse(saved);
   } catch (e) {
-    console.error("Failed to load transactions from storage", e);
+    console.error("Failed to load transactions", e);
   }
   return SYNTHETIC_TRANSACTIONS;
 }
 
-/**
- * Saves transactions to localStorage
- */
 export function saveTransactions(transactions: Transaction[]): void {
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem(STORAGE_KEY_TRANSACTIONS, JSON.stringify(transactions));
   } catch (e) {
-    console.error("Failed to save transactions to storage", e);
+    console.error("Failed to save transactions", e);
   }
 }
 
-/**
- * Resets both profile and transactions to the default synthetic Indian student demo
- */
 export function resetStorageToDemo(): {
   profile: FinancialMemoryProfile;
   transactions: Transaction[];
@@ -166,4 +149,3 @@ export function resetStorageToDemo(): {
     transactions: SYNTHETIC_TRANSACTIONS,
   };
 }
-

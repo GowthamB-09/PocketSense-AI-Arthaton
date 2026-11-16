@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useFinancialMemory } from "@/lib/memory/memoryContext";
 import { formatINR } from "@/lib/utils";
-import { Sparkles, ArrowRight, CheckCircle2, Flame, Gift, Compass } from "lucide-react";
+import { Sparkles, CheckCircle2, ArrowRight } from "lucide-react";
 import confetti from "canvas-confetti";
 
 export const OpportunityCostBanner: React.FC = () => {
@@ -11,43 +11,43 @@ export const OpportunityCostBanner: React.FC = () => {
   const [claimedMap, setClaimedMap] = useState<Record<string, boolean>>({});
 
   const primaryGoal = profile.goals[0] || {
-    id: "goal_goa_trip",
-    title: "Goa Semester-End Trip",
-    targetAmount: 8000,
-    currentAmount: 3200,
-    emoji: "🏝️",
+    id: "goal_japan_trip",
+    title: "Japan Spring Trip",
+    targetAmount: 150000,
+    currentAmount: 68000,
+    emoji: "🇯🇵",
   };
 
   const secondaryGoal = profile.goals[1] || {
-    id: "goal_sneakers",
-    title: "Nike Air Max Sneakers",
-    targetAmount: 3800,
-    currentAmount: 1650,
-    emoji: "👟",
+    id: "goal_macbook",
+    title: "M3 Max MacBook Pro",
+    targetAmount: 120000,
+    currentAmount: 54000,
+    emoji: "💻",
   };
 
   const opportunities = [
     {
-      id: "opp_cold_coffee",
+      id: "opp_weekend_tab",
       goalId: primaryGoal.id,
       goalTitle: primaryGoal.title,
       goalEmoji: primaryGoal.emoji,
-      amount: 450,
-      title: "Skip 3 Cold Coffees / Cafe splits",
-      description: `Skipping 3 cold coffees this week moves ₹450 directly into your '${primaryGoal.title}' Jar.`,
-      impact: `+${Math.round((450 / primaryGoal.targetAmount) * 100)}% to Goa milestone`,
-      buttonLabel: "Claim ₹450 to Goa Trip",
+      amount: 3500,
+      title: "Skip 1 Craft Beer / Bistro Outing",
+      description: `Diverting tonight's ₹3,500 restaurant tab directly into your ${primaryGoal.title} Jar.`,
+      impact: `+${Math.round((3500 / primaryGoal.targetAmount) * 100)}% to Japan milestone`,
+      buttonLabel: "Claim ₹3,500 to Japan Trip",
     },
     {
-      id: "opp_swiggy_midnight",
+      id: "opp_coffee_habits",
       goalId: secondaryGoal.id,
       goalTitle: secondaryGoal.title,
       goalEmoji: secondaryGoal.emoji,
-      amount: 280,
-      title: "Raid Roomie's Maggi instead of Late Swiggy",
-      description: `Dodge 1 late-night Swiggy order (+₹280) and move closer to your '${secondaryGoal.title}'.`,
-      impact: `+${Math.round((280 / secondaryGoal.targetAmount) * 100)}% to Sneakers milestone`,
-      buttonLabel: "Claim ₹280 to Sneakers",
+      amount: 1680,
+      title: "Switch 4 Cafe Pour-Overs to French Press",
+      description: `Saving ₹1,680 across 4 weekday cafe visits advances your ${secondaryGoal.title}.`,
+      impact: `+${Math.round((1680 / secondaryGoal.targetAmount) * 100)}% to MacBook milestone`,
+      buttonLabel: "Claim ₹1,680 to MacBook",
     },
   ];
 
@@ -55,94 +55,83 @@ export const OpportunityCostBanner: React.FC = () => {
     claimSavings(opp.goalId, opp.amount, `Diverted ${opp.title} into ${opp.goalTitle}`);
     setClaimedMap((prev) => ({ ...prev, [opp.id]: true }));
 
-    // Confetti celebration
     confetti({
-      particleCount: 65,
-      spread: 70,
-      origin: { y: 0.7 },
-      colors: ["#10B981", "#8B5CF6", "#06B6D4", "#F59E0B"],
+      particleCount: 50,
+      spread: 60,
+      origin: { y: 0.65 },
+      colors: ["#10B981", "#8B5CF6", "#06B6D4"],
     });
   };
 
   return (
-    <div className="rounded-2xl bg-gradient-to-r from-violet-950/30 via-[#121215] to-emerald-950/20 border border-violet-500/20 p-5 sm:p-6 relative overflow-hidden">
+    <div className="rounded-xl bg-[#121215] border border-white/[0.08] p-5">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <div className="flex items-center gap-2">
-          <div className="p-2 rounded-xl bg-violet-500/10 border border-violet-500/30 text-violet-400">
-            <Compass className="w-4 h-4" />
-          </div>
-          <div>
-            <h3 className="text-sm font-bold text-white tracking-tight flex items-center gap-2">
-              <span>Opportunity Cost &amp; Goal Jar Translator</span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/30">
-                Memory Active
-              </span>
-            </h3>
-            <p className="text-xs text-zinc-400">
-              Transform fleeting student impulses into long-term personal trophies.
-            </p>
-          </div>
+      <div className="flex items-center justify-between gap-3 mb-3.5">
+        <div>
+          <h3 className="text-xs font-semibold text-white tracking-tight flex items-center gap-2">
+            <span>Opportunity Cost Translator</span>
+            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white/5 border border-white/10 text-zinc-400">
+              Impulse → Asset
+            </span>
+          </h3>
+          <p className="text-[11px] text-zinc-500">
+            Convert momentary lifestyle splurges directly into high-conviction goals
+          </p>
         </div>
 
-        <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
-          <Gift className="w-3.5 h-3.5" />
-          <span>Total Diverted: {formatINR(profile.totalSavedToJars)}</span>
+        <div className="text-xs font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md">
+          Total Saved: {formatINR(profile.totalSavedToJars)}
         </div>
       </div>
 
-      {/* Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+      {/* Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {opportunities.map((opp) => {
           const isClaimed = claimedMap[opp.id];
 
           return (
             <div
               key={opp.id}
-              className={`rounded-xl border p-4 transition-all ${
+              className={`rounded-lg border p-3.5 flex flex-col justify-between transition-all ${
                 isClaimed
                   ? "bg-emerald-950/20 border-emerald-500/30"
-                  : "bg-white/[0.02] border-white/10 hover:border-violet-500/30"
+                  : "bg-white/[0.02] border-white/5 hover:border-white/15"
               }`}
             >
-              <div className="flex items-start justify-between gap-2 mb-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-xl">{opp.goalEmoji}</span>
-                  <div>
-                    <h4 className="text-xs font-bold text-white">{opp.title}</h4>
-                    <span className="text-[11px] font-mono text-emerald-400 font-semibold">
-                      {formatINR(opp.amount)} Savings
-                    </span>
+              <div>
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">{opp.goalEmoji}</span>
+                    <h4 className="text-xs font-semibold text-white">{opp.title}</h4>
                   </div>
+                  <span className="text-[10px] font-mono text-zinc-400">
+                    {opp.impact}
+                  </span>
                 </div>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 border border-white/10 text-zinc-300">
-                  {opp.impact}
-                </span>
+                <p className="text-[11px] text-zinc-400 mb-3">
+                  {opp.description}
+                </p>
               </div>
-
-              <p className="text-xs text-zinc-300 mb-3 leading-relaxed">
-                {opp.description}
-              </p>
 
               <button
                 disabled={isClaimed}
                 onClick={() => handleClaim(opp)}
-                className={`w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-all ${
+                className={`w-full py-1.5 px-3 rounded-md text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
                   isClaimed
-                    ? "bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 cursor-default"
-                    : "bg-violet-600 hover:bg-violet-500 text-white shadow-[0_0_15px_rgba(139,92,246,0.25)] hover:shadow-[0_0_20px_rgba(139,92,246,0.4)]"
+                    ? "bg-emerald-500/20 text-emerald-300 cursor-default"
+                    : "bg-white/10 hover:bg-white/20 text-white"
                 }`}
               >
                 {isClaimed ? (
                   <>
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    <span>Transferred to Goal Jar! (+1 Streak)</span>
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Diverted to Goal (+1 Streak)</span>
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-3.5 h-3.5" />
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
                     <span>{opp.buttonLabel}</span>
-                    <ArrowRight className="w-3 h-3" />
+                    <ArrowRight className="w-3 h-3 text-zinc-400" />
                   </>
                 )}
               </button>
@@ -153,4 +142,3 @@ export const OpportunityCostBanner: React.FC = () => {
     </div>
   );
 };
-

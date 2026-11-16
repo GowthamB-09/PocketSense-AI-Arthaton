@@ -13,16 +13,6 @@ import { BeforeIScanModal } from "@/components/BeforeIScanModal";
 import { SmsParserDrawer } from "@/components/SmsParserDrawer";
 import { FinancialMemoryViewer } from "@/components/FinancialMemoryViewer";
 import { SettingsModal } from "@/components/SettingsModal";
-import {
-  Sparkles,
-  ShieldCheck,
-  Brain,
-  Zap,
-  Flame,
-  ArrowRight,
-  ExternalLink,
-  Code2,
-} from "lucide-react";
 
 export default function Home() {
   const [isBeforeIScanOpen, setIsBeforeIScanOpen] = useState(false);
@@ -43,30 +33,7 @@ export default function Home() {
 
         {/* Main Content Area */}
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-          {/* Founder Insight Mini Banner */}
-          <div className="rounded-xl bg-white/[0.02] border border-white/5 p-3 sm:p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs">
-            <div className="flex items-center gap-2.5">
-              <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              <div className="text-zinc-300">
-                <strong className="text-white">Arthaton 2026 Core Insight: </strong>
-                Existing finance apps fail Indian students by showing depressing pie charts{" "}
-                <em>after</em> the money is gone. PocketSense AI intercepts impulse UPI scans{" "}
-                <em>before</em> they happen with persistent Supermemory.
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                onClick={() => setIsBeforeIScanOpen(true)}
-                className="text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1 transition-colors"
-              >
-                <span>Try Before-I-Scan (Cmd+K)</span>
-                <ArrowRight className="w-3 h-3" />
-              </button>
-            </div>
-          </div>
-
-          {/* Hero Row: Daily Safe-to-Spend & Day 18 Cliff Predictor */}
+          {/* Hero Row: Daily Safe-to-Spend & Day 20 Squeeze Predictor */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-7">
               <DailySafeCard
@@ -82,7 +49,7 @@ export default function Home() {
           {/* Opportunity Cost & Goal Jar Translator */}
           <OpportunityCostBanner />
 
-          {/* Student Goal Jars Section */}
+          {/* Wealth & Milestone Jars Section */}
           <GoalJarsSection />
 
           {/* Bento Grid: Spending Trends & Ledger */}
@@ -102,7 +69,7 @@ export default function Home() {
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <span className="font-bold text-white tracking-tight">
-                  PocketSense <span className="text-emerald-400">AI</span>
+                  PocketSense <span className="text-emerald-400">PRO</span>
                 </span>
                 <span className="text-[10px] px-2 py-0.5 rounded border border-white/10 bg-white/5 text-zinc-400 font-mono">
                   Arthaton 2026 Submission
@@ -125,8 +92,8 @@ export default function Home() {
 
             {/* Compliance & Privacy Disclaimer */}
             <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 text-[11px] text-zinc-400 leading-relaxed">
-              <strong className="text-zinc-300">Privacy &amp; Hackathon Compliance: </strong>
-              PocketSense AI operates strictly on synthetic Indian college student UPI data. No real bank accounts, PAN cards, OTPs, or live brokerage credentials are accessed or stored. 100% of financial memory resides in client-side storage for zero-login, non-custodial privacy.
+              <strong className="text-zinc-300">Privacy &amp; Compliance: </strong>
+              PocketSense AI operates strictly on synthetic UPI &amp; discretionary spending data for young working professionals (24–30). Zero real bank credentials, PAN cards, OTPs, or brokerage access. 100% of financial memory resides in client-side storage for non-custodial privacy.
             </div>
           </div>
         </footer>

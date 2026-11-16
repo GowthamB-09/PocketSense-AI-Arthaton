@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { geminiModel, isGeminiConfigured } from "@/lib/ai/gemini";
-import { generateHeuristicSeniorAdvice } from "@/lib/ai/heuristics";
+import { generateHeuristicCoachAdvice } from "@/lib/ai/heuristics";
 import { getPrecomputedCoachResponse } from "@/lib/demo/precomputedCoachResponses";
 import { SYNTHETIC_DEMO_PROFILE } from "@/lib/demo/syntheticStudentData";
 import { FinancialMemoryProfile } from "@/types";
@@ -15,63 +15,59 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
     }
 
-    // Extract amount and merchant from prompt if possible
+    // Extract amount and merchant
     let extractedAmount = 0;
-    const amountMatch = prompt.match(/(?:(?:Rs\.?|INR|₹)\s*([\d,]+(?:\.\d{1,2})?))|(?:\b(\d{2,5})\s*(?:rs|rupees|bucks|inr)?\b)/i);
+    const amountMatch = prompt.match(/(?:(?:Rs\.?|INR|₹)\s*([\d,]+(?:\.\d{1,2})?))|(?:\b(\d{2,6})\s*(?:rs|rupees|bucks|inr)?\b)/i);
     if (amountMatch) {
       const raw = (amountMatch[1] || amountMatch[2]).replace(/,/g, "");
       extractedAmount = parseFloat(raw);
     }
 
     let merchant = "This purchase";
-    if (/swiggy/i.test(prompt)) merchant = "Swiggy";
-    else if (/zomato/i.test(prompt)) merchant = "Zomato";
-    else if (/dinner|food/i.test(prompt)) merchant = "Dinner with friends";
-    else if (/sneakers|shoes/i.test(prompt)) merchant = "New Sneakers";
-    else if (/keyboard/i.test(prompt)) merchant = "Mechanical Keyboard";
-    else if (/chai|tea/i.test(prompt)) merchant = "Chai Tapri";
-    else if (/drinks|beer|party/i.test(prompt)) merchant = "Weekend Party Split";
-    else if (/uber|cab|auto/i.test(prompt)) merchant = "Cab ride";
+    if (/dinner|drinks|brewery|beer|pub|bar/i.test(prompt)) merchant = "Weekend Dinner & Drinks";
+    else if (/coffee|tokai|starbucks/i.test(prompt)) merchant = "Specialty Coffee";
+    else if (/headphones|watch|gadget|macbook/i.test(prompt)) merchant = "Electronics / Tech Gear";
+    else if (/zara|h&m|shirt|jacket/i.test(prompt)) merchant = "Apparel & Shopping";
+    else if (/staycation|resort|hotel/i.test(prompt)) merchant = "Weekend Staycation";
+    else if (/zepto|blinkit|swiggy|zomato/i.test(prompt)) merchant = "Quick Food & Commerce";
 
     const profile: FinancialMemoryProfile = memoryProfile || SYNTHETIC_DEMO_PROFILE;
     if (!profile.goals || profile.goals.length === 0) {
       profile.goals = SYNTHETIC_DEMO_PROFILE.goals;
     }
-    const safeAmount = dailySafe || 165;
+    const safeAmount = dailySafe || 550;
     const remainingDays = daysLeft || 16;
 
-    // Get precomputed response for Demo Mode or fallback
     const precomputedVerdict = getPrecomputedCoachResponse(prompt, profile, safeAmount, remainingDays);
     if (extractedAmount === 0 && precomputedVerdict.opportunityCostGoal) {
-      extractedAmount = precomputedVerdict.dailySafeReduction > 0 ? precomputedVerdict.dailySafeReduction * remainingDays : 250;
+      extractedAmount = precomputedVerdict.dailySafeReduction > 0 ? precomputedVerdict.dailySafeReduction * remainingDays : 1500;
     }
 
-    // If Demo Mode is NOT forced and Gemini is configured, attempt live streaming
+    // If Gemini is configured and Demo Mode is disabled
     if (!demoMode && isGeminiConfigured) {
       try {
-        const primaryGoal = profile?.goals?.[0] || { title: "Goa Trip", targetAmount: 8000, currentAmount: 3200 };
-        const systemPrompt = `You are "Senior Bhai/Didi", a witty, street-smart, caring final-year Indian college senior acting as the AI Behavioral Money Coach for "PocketSense AI".
-You are intercepting an impulse UPI spend before the student scans the QR code.
+        const primaryGoal = profile?.goals?.[0] || { title: "Japan Spring Trip", targetAmount: 150000, currentAmount: 68000 };
+        const systemPrompt = `You are an elite, sharp, empathetic Behavioral Money Coach for PocketSense AI, assisting a young working professional (age 24–30).
+You are intercepting an impulse purchase before they swipe their card or scan a QR code.
 
-Student Context & Financial Memory:
-- Name: ${profile?.studentName || "Aarav"} (${profile?.collegeYear || "2nd Year B.Tech"})
-- Remaining Allowance: ₹${Math.round(safeAmount * remainingDays)} for ${remainingDays} days left in the month.
-- Current Safe-to-Spend limit: ₹${safeAmount} / day.
-- Crucial Target Goal Jar: ${primaryGoal.title} (Target: ₹${primaryGoal.targetAmount}, Saved: ₹${primaryGoal.currentAmount}).
-- Recurring Student Traps: Late-night Swiggy/Zomato, ₹40 chai tapri micropayments, Friday peer splits.
+User Financial Context:
+- Professional: ${profile?.userName || "Rohan"} (${profile?.role || "Product Designer, 26"})
+- Remaining Discretionary Runway: ₹${Math.round(safeAmount * remainingDays)} across ${remainingDays} days.
+- Daily Safe-to-Spend limit: ₹${safeAmount} / day.
+- Crucial Target Wealth Jar: ${primaryGoal.title} (Target: ₹${primaryGoal.targetAmount}, Saved: ₹${primaryGoal.currentAmount}).
+- Common Patterns: Craft beer & weekend dining tabs, daily specialty coffee, quick-commerce carts.
 
-Instructions for your response:
-1. Speak in authentic, witty, supportive Indian college senior tone ("Bhai sun...", "Listen junior...", "Real talk:"). Natural mix of English and familiar college terms (tapri, mess food, roomie, FOMO, thali, semester).
-2. Clearly give your VERDICT: [APPROVED / CAUTION / DENIED].
-3. Calculate the brutal trade-off: Show how many days of their daily safe budget (₹${safeAmount}/day) this single purchase burns, or how many days it sets back their "${primaryGoal.title}".
-4. Offer a practical "Senior Bhai Hack" (e.g., eat before going out, negotiate share, wait 20 minutes, or buy the cheaper alternative).
-5. If the verdict is CAUTION or DENIED, encourage them to click the "Skip & Save" button to divert this money straight into their "${primaryGoal.title}" Goal Jar!
-Keep response under 160 words—punchy, memorable, and empathetic.`;
+Response Guidelines:
+1. Deliver a crisp, executive, actionable response (under 120 words).
+2. Clearly state your VERDICT: [APPROVED / CAUTION / DENIED].
+3. State the exact numeric trade-off: Show how many days of their daily safe headroom (₹${safeAmount}/day) this purchase burns, or how it delays their "${primaryGoal.title}".
+4. Provide a direct financial hack (e.g., cap spend, enforce 48-hr cooling period, offset by home dining).
+5. If CAUTION or DENIED, encourage clicking 'Skip & Save' to transfer this amount into their "${primaryGoal.title}" Goal Jar.`;
 
         const result = streamText({
           model: geminiModel,
           system: systemPrompt,
-          prompt: `The student asks: "${prompt}". Extracted amount: ₹${extractedAmount}, Merchant/Item: ${merchant}. Intercept this spend!`,
+          prompt: `User query: "${prompt}". Extracted amount: ₹${extractedAmount}, Item/Merchant: ${merchant}. Intercept this spend!`,
         });
 
         return result.toDataStreamResponse({
@@ -83,12 +79,11 @@ Keep response under 160 words—punchy, memorable, and empathetic.`;
           },
         });
       } catch (geminiError) {
-        console.warn("Gemini stream failed or rate-limited; switching to Demo Mode pre-computed response:", geminiError);
+        console.warn("Gemini stream error, falling back to pre-computed response:", geminiError);
       }
     }
 
-    // Demo Mode & Fallback Engine:
-    // If client requested JSON
+    // Demo Mode & Fallback
     if (!stream) {
       return NextResponse.json({
         success: true,
@@ -99,8 +94,7 @@ Keep response under 160 words—punchy, memorable, and empathetic.`;
       });
     }
 
-    // Fast simulated streaming of pre-computed text
-    const textToStream = `${precomputedVerdict.headline}\n\n${precomputedVerdict.seniorBhaiResponse}\n\n💡 Senior Bhai Hack:\n${precomputedVerdict.smartSeniorHacks.map((h) => `• ${h}`).join("\n")}`;
+    const textToStream = `${precomputedVerdict.headline}\n\n${precomputedVerdict.coachResponse}\n\n💡 Smart Action:\n${precomputedVerdict.smartHacks.map((h) => `• ${h}`).join("\n")}`;
 
     const encoder = new TextEncoder();
     const customStream = new ReadableStream({
@@ -109,8 +103,7 @@ Keep response under 160 words—punchy, memorable, and empathetic.`;
         for (let i = 0; i < words.length; i++) {
           const chunk = (i === 0 ? "" : " ") + words[i];
           controller.enqueue(encoder.encode(`0:${JSON.stringify(chunk)}\n`));
-          // Micro delay to simulate smooth natural streaming
-          await new Promise((r) => setTimeout(r, 14));
+          await new Promise((r) => setTimeout(r, 12));
         }
         controller.close();
       },
@@ -118,7 +111,7 @@ Keep response under 160 words—punchy, memorable, and empathetic.`;
 
     const finalAmount = precomputedVerdict.budgetImpactDays
       ? Math.round(precomputedVerdict.budgetImpactDays * safeAmount)
-      : extractedAmount || 250;
+      : extractedAmount || 1500;
 
     return new Response(customStream, {
       headers: {

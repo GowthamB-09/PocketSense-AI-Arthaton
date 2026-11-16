@@ -1,14 +1,14 @@
 export type SpendingType = "Survival Need" | "Impulse Want" | "Silent Subscription Leak";
 
 export type TransactionCategory =
-  | "Food & Dining"
-  | "Groceries & Essentials"
-  | "Transit & Commute"
-  | "Entertainment & Subscriptions"
+  | "Dining & Social"
+  | "Quick Commerce & Groceries"
+  | "Commute & Rides"
+  | "Subscriptions & Cloud"
   | "Shopping & Gear"
-  | "Academic & Utilities"
-  | "Personal Care & Health"
-  | "Peer Transfers & Splits";
+  | "Rent & Fixed Utilities"
+  | "Health & Wellness"
+  | "Investments & SIPs";
 
 export interface Transaction {
   id: string;
@@ -22,7 +22,7 @@ export interface Transaction {
   upiRef?: string;
   bank?: string;
   notes?: string;
-  triggerTag?: string; // e.g. "late-night", "chai-tapri", "weekend-fomo", "auto-debit"
+  triggerTag?: string; // e.g. "specialty-coffee", "weekend-hangout", "quick-commerce", "lifestyle-creep"
   opportunityCostEquivalent?: string;
 }
 
@@ -33,7 +33,7 @@ export interface GoalJar {
   currentAmount: number;
   deadline?: string;
   emoji: string;
-  category: "Travel" | "Tech" | "Lifestyle" | "Emergency" | "Course";
+  category: "Travel" | "Tech" | "Wealth" | "Emergency" | "Lifestyle";
   color: string;
   totalSavedFromNudges: number;
   lastUpdated?: string;
@@ -47,14 +47,14 @@ export interface SpendingTrap {
   estimatedMonthlyBurn: number;
   emoji: string;
   severity: "high" | "medium" | "low";
-  seniorAdvice: string;
+  coachAdvice: string;
 }
 
 export interface FinancialMemoryProfile {
-  studentName: string;
-  collegeYear: string;
-  monthlyAllowance: number;
-  fixedEssentials: number;
+  userName: string;
+  role: string;
+  monthlySalary: number;
+  fixedEssentials: number; // Rent, SIP, Utilities, Insurance
   daysInMonth: number;
   currentDayOfMonth: number;
   disciplineStreak: number;
@@ -77,16 +77,16 @@ export interface FinancialMemoryProfile {
 }
 
 export interface DailyBudgetAnalysis {
-  monthlyAllowance: number;
+  monthlySalary: number;
   fixedEssentials: number;
   totalSpentSoFar: number;
-  remainingMonthlyAllowance: number;
+  remainingMonthlyPool: number;
   daysRemaining: number;
   dailySafeToSpend: number;
   spentToday: number;
   remainingToday: number;
   burnRatePerDay: number;
-  projectedRunOutDay: number; // Day of month when student hits ₹0
+  projectedRunOutDay: number;
   statusLevel: "green" | "amber" | "red";
   headline: string;
   comfortMessage: string;
@@ -116,7 +116,7 @@ export interface ImpulseCheckRequest {
 export interface ImpulseVerdict {
   verdict: "APPROVED" | "CAUTION" | "DENIED";
   headline: string;
-  seniorBhaiResponse: string;
+  coachResponse: string;
   budgetImpactDays: number;
   dailySafeReduction: number;
   opportunityCostGoal?: {
@@ -125,7 +125,6 @@ export interface ImpulseVerdict {
     delayDays: number;
     equivalentMilestone: string;
   };
-  smartSeniorHacks: string[];
+  smartHacks: string[];
   recalledMemories: string[];
 }
-

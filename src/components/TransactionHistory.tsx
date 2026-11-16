@@ -83,7 +83,7 @@ export const TransactionHistory: React.FC = () => {
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search merchants (e.g. Swiggy, Chai, Ramesh, Metro)..."
+            placeholder="Search merchants (e.g. Zepto, Blue Tokai, Toit, Uber, Cult.fit)..."
             className="w-full pl-9 pr-3 py-2 text-xs bg-zinc-900 border border-white/10 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500"
           />
         </div>

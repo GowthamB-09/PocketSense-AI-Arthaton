@@ -25,7 +25,7 @@ export function formatINR(amount: number, showDecimals: boolean = false): string
 }
 
 /**
- * Formats date into Indian student-friendly readable format
+ * Formats date into readable format
  */
 export function formatDate(dateStr: string): string {
   try {

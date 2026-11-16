@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useFinancialMemory } from "@/lib/memory/memoryContext";
 import { formatINR } from "@/lib/utils";
-import { Sliders, X, Sparkles, Check, RotateCcw } from "lucide-react";
+import { Sliders, X, Check, RotateCcw } from "lucide-react";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -14,25 +14,25 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { profile, updateAllowance, loadSyntheticDemo, clearAllData } = useFinancialMemory();
+  const { profile, updateSalary, loadSyntheticDemo } = useFinancialMemory();
 
-  const [allowance, setAllowance] = useState(String(profile.monthlyAllowance));
-  const [fixed, setFixed] = useState(String(profile.fixedEssentials));
+  const [salary, setSalary] = useState(String(profile.monthlySalary || 75000));
+  const [fixed, setFixed] = useState(String(profile.fixedEssentials || 32000));
   const [savedAlert, setSavedAlert] = useState(false);
 
   if (!isOpen) return null;
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    const a = parseFloat(allowance);
+    const s = parseFloat(salary);
     const f = parseFloat(fixed);
-    if (!isNaN(a) && !isNaN(f) && a > 0) {
-      updateAllowance(a, f);
+    if (!isNaN(s) && !isNaN(f) && s > 0) {
+      updateSalary(s, f);
       setSavedAlert(true);
       setTimeout(() => {
         setSavedAlert(false);
         onClose();
-      }, 1000);
+      }, 800);
     }
   };
 
@@ -47,10 +47,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
             <div>
               <h3 className="text-sm font-bold text-white tracking-tight">
-                Student Allowance &amp; Fixed Budget
+                Income &amp; Fixed Commitments
               </h3>
               <p className="text-xs text-zinc-400">
-                Calibrate your monthly parameters for exact Safe-to-Spend calculations.
+                Calibrate your parameters for accurate safe discretionary limits.
               </p>
             </div>
           </div>
@@ -66,24 +66,24 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <form onSubmit={handleSave} className="p-5 space-y-4">
           <div>
             <label className="block text-xs font-medium text-zinc-300 mb-1">
-              Monthly Pocket Money / Allowance (₹)
+              Monthly Take-Home Salary (₹)
             </label>
             <input
               type="number"
-              min="500"
+              min="5000"
               required
-              value={allowance}
-              onChange={(e) => setAllowance(e.target.value)}
+              value={salary}
+              onChange={(e) => setSalary(e.target.value)}
               className="w-full px-3 py-2 text-sm font-mono bg-zinc-900 border border-white/10 rounded-lg text-white focus:outline-none focus:border-emerald-500"
             />
             <p className="text-[11px] text-zinc-400 mt-1">
-              Usually credited on the 1st of the month by parents.
+              Net salary credited to your bank account after TDS and deductions.
             </p>
           </div>
 
           <div>
             <label className="block text-xs font-medium text-zinc-300 mb-1">
-              Fixed Essentials &amp; Canteen Pass (₹)
+              Fixed Commitments (Rent, SIPs, Utilities) (₹)
             </label>
             <input
               type="number"
@@ -94,14 +94,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               className="w-full px-3 py-2 text-sm font-mono bg-zinc-900 border border-white/10 rounded-lg text-white focus:outline-none focus:border-emerald-500"
             />
             <p className="text-[11px] text-zinc-400 mt-1">
-              Mandatory expenses (Hostel mess card, monthly metro pass, Wi-Fi share).
+              Non-negotiable monthly expenses (Rent, SIP mutual funds, electricity, cook/maid).
             </p>
           </div>
 
           <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 text-xs text-zinc-400">
-            <div className="text-zinc-300 font-semibold mb-1">Discretionary Spending Pool:</div>
+            <div className="text-zinc-300 font-semibold mb-1">Monthly Discretionary Pool:</div>
             <div className="font-mono text-sm font-bold text-emerald-400">
-              {formatINR(Math.max(0, parseFloat(allowance || "0") - parseFloat(fixed || "0")))}
+              {formatINR(Math.max(0, parseFloat(salary || "0") - parseFloat(fixed || "0")))}
             </div>
           </div>
 
@@ -116,7 +116,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               className="text-xs text-zinc-400 hover:text-white flex items-center gap-1.5"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>Reset to ₹6,000 Demo</span>
+              <span>Reset to ₹75,000 Demo</span>
             </button>
 
             <div className="flex gap-2">
@@ -137,7 +137,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     <span>Saved!</span>
                   </>
                 ) : (
-                  <span>Update Budget</span>
+                  <span>Save Budget</span>
                 )}
               </button>
             </div>

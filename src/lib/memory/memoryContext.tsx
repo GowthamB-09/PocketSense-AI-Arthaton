@@ -30,7 +30,7 @@ interface FinancialMemoryContextType {
   addBatchTransactions: (txs: Transaction[]) => void;
   deleteTransaction: (id: string) => void;
   claimSavings: (goalId: string, amount: number, promptText?: string) => void;
-  updateAllowance: (monthlyAllowance: number, fixedEssentials: number) => void;
+  updateSalary: (monthlySalary: number, fixedEssentials: number) => void;
   addGoalJar: (goal: Omit<GoalJar, "id" | "totalSavedFromNudges">) => void;
   updateGoalJar: (goal: GoalJar) => void;
   deleteGoalJar: (id: string) => void;
@@ -42,10 +42,9 @@ const FinancialMemoryContext = createContext<FinancialMemoryContextType | undefi
 export function FinancialMemoryProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<FinancialMemoryProfile>(SYNTHETIC_DEMO_PROFILE);
   const [transactions, setTransactions] = useState<Transaction[]>(SYNTHETIC_TRANSACTIONS);
-  const [demoMode, setDemoMode] = useState<boolean>(true); // Default to True for hackathon rate-limit safety!
+  const [demoMode, setDemoMode] = useState<boolean>(true);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load from localStorage on mount
   useEffect(() => {
     const storedProf = getStoredProfile();
     const storedTxs = getStoredTransactions();
@@ -58,20 +57,8 @@ export function FinancialMemoryProvider({ children }: { children: React.ReactNod
     setIsLoaded(true);
   }, []);
 
-  const toggleDemoMode = (val?: boolean) => {
-    setDemoMode((prev) => {
-      const nextVal = typeof val === "boolean" ? val : !prev;
-      if (typeof window !== "undefined") {
-        localStorage.setItem("pocketsense_demo_mode", String(nextVal));
-      }
-      return nextVal;
-    });
-  };
-
-  // Compute live analysis
   const analysis = calculateDailyBudgetAnalysis(profile, transactions);
 
-  // Save changes to localStorage
   useEffect(() => {
     if (!isLoaded) return;
     saveProfile(profile);
@@ -82,19 +69,27 @@ export function FinancialMemoryProvider({ children }: { children: React.ReactNod
     saveTransactions(transactions);
   }, [transactions, isLoaded]);
 
-  // Load synthetic student dataset
+  const toggleDemoMode = (val?: boolean) => {
+    setDemoMode((prev) => {
+      const nextVal = typeof val === "boolean" ? val : !prev;
+      if (typeof window !== "undefined") {
+        localStorage.setItem("pocketsense_demo_mode", String(nextVal));
+      }
+      return nextVal;
+    });
+  };
+
   const loadSyntheticDemo = () => {
     const demo = resetStorageToDemo();
     setProfile({ ...demo.profile });
     setTransactions([...demo.transactions]);
   };
 
-  // Clear all data
   const clearAllData = () => {
     const emptyProfile: FinancialMemoryProfile = {
       ...SYNTHETIC_DEMO_PROFILE,
-      monthlyAllowance: 6000,
-      fixedEssentials: 1400,
+      monthlySalary: 75000,
+      fixedEssentials: 32000,
       disciplineStreak: 0,
       totalSavedToJars: 0,
       pastImpulseDecisions: [],
@@ -110,20 +105,17 @@ export function FinancialMemoryProvider({ children }: { children: React.ReactNod
     saveTransactions([]);
   };
 
-  // Add a single transaction
   const addTransaction = (tx: Transaction) => {
     setTransactions((prev) => [tx, ...prev]);
 
-    // Update known merchants and memory
     setProfile((prev) => {
       const updatedKnown = {
         ...prev.knownMerchants,
         [tx.merchant]: { category: tx.category, type: tx.spendingType },
       };
 
-      // If impulse want, decrease streak or track trap
       let streak = prev.disciplineStreak;
-      if (tx.spendingType === "Impulse Want" && tx.amount > 200) {
+      if (tx.spendingType === "Impulse Want" && tx.amount > 1000) {
         streak = Math.max(0, streak - 1);
       }
 
@@ -135,17 +127,14 @@ export function FinancialMemoryProvider({ children }: { children: React.ReactNod
     });
   };
 
-  // Add multiple transactions (e.g. from SMS batch parse or CSV)
   const addBatchTransactions = (newTxs: Transaction[]) => {
     setTransactions((prev) => [...newTxs, ...prev]);
   };
 
-  // Delete a transaction
   const deleteTransaction = (id: string) => {
     setTransactions((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // Intercept & Claim Savings into Goal Jar
   const claimSavings = (goalId: string, amount: number, promptText?: string) => {
     if (amount <= 0) return;
 
@@ -184,16 +173,14 @@ export function FinancialMemoryProvider({ children }: { children: React.ReactNod
     });
   };
 
-  // Update budget parameters
-  const updateAllowance = (monthlyAllowance: number, fixedEssentials: number) => {
+  const updateSalary = (monthlySalary: number, fixedEssentials: number) => {
     setProfile((prev) => ({
       ...prev,
-      monthlyAllowance,
+      monthlySalary,
       fixedEssentials,
     }));
   };
 
-  // Goal jar management
   const addGoalJar = (goalData: Omit<GoalJar, "id" | "totalSavedFromNudges">) => {
     const newJar: GoalJar = {
       ...goalData,
@@ -221,9 +208,8 @@ export function FinancialMemoryProvider({ children }: { children: React.ReactNod
     }));
   };
 
-  // Format memory context for AI
   const getAiPromptContext = (): string => {
-    const { dailySafeToSpend, remainingMonthlyAllowance, daysRemaining, projectedRunOutDay, statusLevel } = analysis;
+    const { dailySafeToSpend, remainingMonthlyPool, daysRemaining, projectedRunOutDay, statusLevel } = analysis;
     const goalsSummary = profile.goals
       .map(
         (g) =>
@@ -236,22 +222,22 @@ export function FinancialMemoryProvider({ children }: { children: React.ReactNod
       .join("\n");
 
     return `
-=== STUDENT FINANCIAL MEMORY PROFILE ===
-Student: ${profile.studentName} (${profile.collegeYear})
-Monthly Allowance: ₹${profile.monthlyAllowance} (credited on 1st)
-Fixed Essentials: ₹${profile.fixedEssentials} (Mess + Transit)
-Current Day of Month: Day ${profile.currentDayOfMonth} / 30
-Remaining Allowance: ₹${remainingMonthlyAllowance}
+=== USER FINANCIAL MEMORY PROFILE ===
+Professional: ${profile.userName} (${profile.role})
+Monthly Take-Home: ₹${profile.monthlySalary}
+Fixed Commitments: ₹${profile.fixedEssentials} (Rent, SIPs, Utilities)
+Day of Month: Day ${profile.currentDayOfMonth} / 30
+Remaining Discretionary Pool: ₹${remainingMonthlyPool}
 Days Left: ${daysRemaining} days
-Current Safe-to-Spend: ₹${dailySafeToSpend} / day
-Projected Run-Out Day: Day ${projectedRunOutDay} (Status: ${statusLevel.toUpperCase()})
+Current Safe Discretionary Limit: ₹${dailySafeToSpend} / day
+Projected Runway Exhaustion: Day ${projectedRunOutDay} (Status: ${statusLevel.toUpperCase()})
 Discipline Streak: ${profile.disciplineStreak} days
-Total Diverted to Goal Jars: ₹${profile.totalSavedToJars}
+Total Diverted to Wealth Jars: ₹${profile.totalSavedToJars}
 
 ACTIVE GOAL JARS:
 ${goalsSummary}
 
-DOCUMENTED SPENDING TRAPS & TRIGGERS:
+SPENDING PATTERNS & HABITS:
 ${trapsSummary}
 
 VULNERABILITY ZONES:
@@ -274,7 +260,7 @@ ${profile.vulnerabilityZones.map((z) => `- ${z}`).join("\n")}
         addBatchTransactions,
         deleteTransaction,
         claimSavings,
-        updateAllowance,
+        updateSalary,
         addGoalJar,
         updateGoalJar,
         deleteGoalJar,
@@ -293,4 +279,3 @@ export function useFinancialMemory() {
   }
   return context;
 }
-

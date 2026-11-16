@@ -8,11 +8,10 @@ import {
   FileText,
   Brain,
   Sliders,
-  RotateCcw,
   ShieldCheck,
   Flame,
   Check,
-  TrendingDown,
+  Zap,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 
@@ -36,135 +35,119 @@ export const Navbar: React.FC<NavbarProps> = ({
     loadSyntheticDemo();
     setLoadedAlert(true);
     confetti({
-      particleCount: 50,
+      particleCount: 40,
       spread: 60,
-      origin: { y: 0.2 },
+      origin: { y: 0.15 },
     });
-    setTimeout(() => setLoadedAlert(false), 2400);
+    setTimeout(() => setLoadedAlert(false), 2000);
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-[#09090B]/90 backdrop-blur-md">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-        {/* Left: Brand & Hackathon Tag */}
-        <div className="flex items-center gap-3">
-          <div className="relative flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 border border-emerald-500/30 text-emerald-400 font-bold shadow-[0_0_15px_rgba(16,185,129,0.15)]">
-            <span className="font-mono text-lg font-black tracking-tight">₹</span>
-            <div className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+    <header className="sticky top-0 z-40 w-full border-b border-white/[0.08] bg-[#09090B]/90 backdrop-blur-md">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-3">
+        {/* Brand */}
+        <div className="flex items-center gap-2.5">
+          <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold">
+            <span className="font-mono text-sm font-black">₹</span>
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-base tracking-tight text-white">
-                PocketSense <span className="text-emerald-400">AI</span>
-              </span>
-              <span className="text-[10px] font-medium tracking-wide uppercase px-1.5 py-0.5 rounded border border-white/10 bg-white/5 text-zinc-400">
-                Arthaton &apos;26
-              </span>
-            </div>
-            <p className="text-[11px] text-zinc-400 hidden sm:block">
-              Behavioral Money Coach for Indian Students
-            </p>
+          <div className="flex items-center gap-1.5">
+            <span className="font-semibold text-sm tracking-tight text-white">
+              PocketSense
+            </span>
+            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white/5 border border-white/10 text-zinc-400">
+              PRO
+            </span>
           </div>
         </div>
 
-        {/* Center: Quick Student Demo Dataset & Rate-Limit Fallback CTA */}
+        {/* Center: Demo Data & Rate-Limit Toggle */}
         <div className="flex items-center gap-2">
-          {/* Demo Fallback Rate-Limit Switch */}
           <button
             onClick={() => toggleDemoMode()}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border transition-all ${
               demoMode
-                ? "bg-amber-500/15 border-amber-500/40 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.15)]"
-                : "bg-white/5 hover:bg-white/10 border-white/10 text-zinc-400 hover:text-white"
+                ? "bg-amber-500/10 border-amber-500/30 text-amber-300"
+                : "bg-white/5 hover:bg-white/10 border-white/10 text-zinc-400"
             }`}
-            title={
-              demoMode
-                ? "Demo Mode Active: Pre-computed responses ensure judges never get blocked if free API quota rate limits. Click to toggle Live Gemini AI."
-                : "Live Gemini AI Active: Click to switch to Demo Mode if you hit free API rate limits."
-            }
+            title="Toggle between instant pre-computed demo mode and live Gemini AI"
           >
             <ShieldCheck className={`w-3.5 h-3.5 ${demoMode ? "text-amber-400" : "text-zinc-500"}`} />
-            <span className="hidden sm:inline">Demo Mode:</span>
-            <span className={`font-mono text-[11px] ${demoMode ? "text-amber-300 font-bold" : "text-zinc-400"}`}>
+            <span className="hidden sm:inline">Mode:</span>
+            <span className="font-mono text-[11px]">
               {demoMode ? "Pre-Computed" : "Live AI"}
             </span>
-            <span className={`w-2 h-2 rounded-full ${demoMode ? "bg-amber-400 animate-pulse" : "bg-emerald-400"}`} />
+            <span className={`w-1.5 h-1.5 rounded-full ${demoMode ? "bg-amber-400" : "bg-emerald-400"}`} />
           </button>
 
-          {/* Load Dataset Button */}
           <button
             onClick={handleLoadDemo}
-            className={`relative flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 border ${
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-all border ${
               loadedAlert
                 ? "bg-emerald-500/20 border-emerald-500 text-emerald-300"
-                : "bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30 hover:border-emerald-500/50 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.15)]"
+                : "bg-white/5 hover:bg-white/10 border-white/10 text-zinc-300 hover:text-white"
             }`}
-            title="Load 30 days of realistic Indian student UPI SMS records and ₹6,000 allowance"
+            title="Load 30 days of realistic ₹75,000 professional salary data"
           >
             {loadedAlert ? (
               <>
                 <Check className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Demo Loaded!</span>
+                <span>Loaded</span>
               </>
             ) : (
               <>
-                <Sparkles className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-                <span className="hidden md:inline">Load Student Dataset</span>
-                <span className="md:hidden">Load Data</span>
+                <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Load Demo Data</span>
               </>
             )}
           </button>
         </div>
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-2">
-          {/* Streak indicator */}
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* Streak */}
           <button
             onClick={onOpenMemoryViewer}
-            className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono font-medium bg-amber-500/10 border border-amber-500/20 text-amber-400 hover:bg-amber-500/20 transition-colors"
-            title="Current Discipline Streak"
+            className="hidden md:flex items-center gap-1 px-2 py-1 rounded-md text-xs font-mono text-amber-400 bg-amber-500/10 border border-amber-500/20"
           >
-            <Flame className="w-3.5 h-3.5 fill-amber-400 text-amber-400 animate-bounce" />
-            <span>{profile.disciplineStreak}d Streak</span>
+            <Flame className="w-3 h-3 fill-amber-400 text-amber-400" />
+            <span>{profile.disciplineStreak}d</span>
           </button>
 
-          {/* Before I Scan (Command Bar) */}
+          {/* Before I Scan */}
           <button
             onClick={onOpenBeforeIScan}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/5 hover:bg-white/10 border border-white/10 text-white transition-all hover:border-white/20"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-500 hover:bg-emerald-400 text-black transition-all shadow-[0_0_12px_rgba(16,185,129,0.2)]"
           >
-            <span className="w-2 h-2 rounded-full bg-emerald-400" />
-            <span className="hidden sm:inline">Before I Scan</span>
-            <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/10 text-zinc-300 border border-white/10">
-              <Command className="w-2.5 h-2.5 inline" /> K
+            <Zap className="w-3.5 h-3.5" />
+            <span>Before I Scan</span>
+            <kbd className="hidden lg:inline-flex items-center px-1 rounded text-[10px] font-mono bg-black/20 text-black">
+              ⌘K
             </kbd>
           </button>
 
-          {/* Paste SMS */}
+          {/* Parse SMS */}
           <button
             onClick={onOpenSmsParser}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white transition-colors"
-            title="Paste UPI SMS alerts or upload statement"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 hover:text-white transition-colors"
           >
             <FileText className="w-3.5 h-3.5 text-zinc-400" />
             <span className="hidden sm:inline">Parse SMS</span>
           </button>
 
-          {/* Financial Memory Drawer Toggle */}
+          {/* Memory */}
           <button
             onClick={onOpenMemoryViewer}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/30 text-violet-300 transition-colors"
-            title="View Supermemory Financial Context"
+            className="p-1.5 rounded-md text-zinc-400 hover:text-white hover:bg-white/5 transition-colors"
+            title="Financial Memory"
           >
-            <Brain className="w-3.5 h-3.5 text-violet-400" />
-            <span className="hidden sm:inline">Memory</span>
+            <Brain className="w-4 h-4 text-violet-400" />
           </button>
 
-          {/* Settings / Budget Modal */}
+          {/* Settings */}
           <button
             onClick={onOpenSettings}
-            className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10 transition-colors"
-            title="Adjust Monthly Allowance & Fixed Expenses"
+            className="p-1.5 rounded-md text-zinc-400 hover:text-white hover:bg-white/5 transition-colors"
+            title="Adjust Salary & Fixed Expenses"
           >
             <Sliders className="w-4 h-4" />
           </button>
@@ -173,4 +156,3 @@ export const Navbar: React.FC<NavbarProps> = ({
     </header>
   );
 };
-

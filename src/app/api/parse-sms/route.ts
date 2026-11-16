@@ -8,29 +8,29 @@ import { z } from "zod";
 const smsSchema = z.object({
   transactions: z.array(
     z.object({
-      merchant: z.string().describe("Clean merchant name, e.g. 'Ramesh Chai', 'Swiggy', 'Spotify'"),
+      merchant: z.string().describe("Clean merchant or payee name, e.g. 'Blue Tokai', 'Toit Brewery', 'Zerodha', 'Apartment Rent'"),
       amount: z.number().describe("Amount in Indian Rupees (INR)"),
       date: z.string().describe("ISO format YYYY-MM-DD"),
       category: z.enum([
-        "Food & Dining",
-        "Groceries & Essentials",
-        "Transit & Commute",
-        "Entertainment & Subscriptions",
+        "Dining & Social",
+        "Quick Commerce & Groceries",
+        "Commute & Rides",
+        "Subscriptions & Cloud",
         "Shopping & Gear",
-        "Academic & Utilities",
-        "Personal Care & Health",
-        "Peer Transfers & Splits",
+        "Rent & Fixed Utilities",
+        "Health & Wellness",
+        "Investments & SIPs",
       ]),
       spendingType: z.enum([
         "Survival Need",
         "Impulse Want",
         "Silent Subscription Leak",
-      ]).describe("Classification for student budget management"),
+      ]).describe("Classification for cash-flow runway management"),
       upiRef: z.string().describe("UPI Reference number or transaction ID if present"),
-      bank: z.string().describe("Bank or UPI app name, e.g. HDFC, SBI, PhonePe"),
-      triggerTag: z.string().optional().describe("e.g. 'late-night', 'chai-tapri', 'weekend-fomo', 'auto-debit'"),
+      bank: z.string().describe("Bank, card, or UPI app name"),
+      triggerTag: z.string().optional().describe("e.g. 'specialty-coffee', 'weekend-hangout', 'quick-commerce', 'lifestyle-creep'"),
       confidenceScore: z.number().min(0).max(1),
-      explanation: z.string().describe("One sentence explaining why this is Need vs Want vs Leak"),
+      explanation: z.string().describe("One concise sentence explaining classification"),
     })
   ),
 });
@@ -50,12 +50,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No SMS text provided" }, { status: 400 });
     }
 
-    // If Demo Mode is NOT forced and Gemini is configured, attempt structured AI parsing
     if (!demoMode && isGeminiConfigured) {
       try {
-        const prompt = `You are the PocketSense AI Indian UPI SMS Parser. Parse the following Indian bank SMS notifications into structured transaction records.
+        const prompt = `You are the PocketSense AI Financial Parser for young working professionals (24-30 age group).
+Parse the following Indian bank SMS notifications into structured transaction records.
 Rules:
-1. Indian College Student context: ₹40 tea/chai or snacks is 'Impulse Want' (chai-tapri). Canteen thali, metro card, printouts/xerox, hostel mess, medicine are 'Survival Need'. Swiggy/Zomato/Blinkit after 11 PM are 'Impulse Want' with trigger 'late-night'. Recurring Spotify, Netflix, YouTube Premium auto-debits are 'Silent Subscription Leak'.
+1. Context: Rent, Mutual Fund SIPs, Cook/Maid, Gym, Groceries are 'Survival Need'. Speciality coffee, weekend brewery/dining splits, apparel sales, gourmet quick commerce are 'Impulse Want'. Recurring streaming/SaaS auto-debits (Apple, Netflix, Spotify) are 'Silent Subscription Leak'.
 2. Return amounts strictly in INR (numeric).
 3. Do not invent bank account numbers or sensitive data.
 
@@ -80,12 +80,10 @@ ${rawList.map((t, idx) => `[SMS #${idx + 1}]: ${t}`).join("\n")}
           results,
         });
       } catch (geminiError) {
-        console.warn("Gemini parsing failed or rate-limited; falling back to heuristic parser:", geminiError);
-        // Fall through to heuristic parser below
+        console.warn("Gemini parsing failed; falling back to heuristic parser:", geminiError);
       }
     }
 
-    // Heuristic Fallback Engine
     const results: SmsParseResult[] = rawList.map((text) => parseSmsHeuristically(text));
 
     return NextResponse.json({
@@ -101,4 +99,3 @@ ${rawList.map((t, idx) => `[SMS #${idx + 1}]: ${t}`).join("\n")}
     );
   }
 }
-
