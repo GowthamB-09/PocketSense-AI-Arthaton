@@ -10,7 +10,6 @@ import {
   RotateCcw,
   Calendar,
   AlertTriangle,
-  Clock,
   Sparkles,
 } from "lucide-react";
 
@@ -192,14 +191,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 />
                 <span className="text-slate-500">of each month</span>
               </div>
-            </div>
-
-            {/* Zero Effort Reassurance Note */}
-            <div className="p-2.5 rounded-lg bg-emerald-50/80 border border-emerald-200/60 text-[11px] text-emerald-900 flex items-start gap-2">
-              <Clock className="w-3.5 h-3.5 text-emerald-700 shrink-0 mt-0.5" />
-              <p className="leading-relaxed">
-                <strong>Less work for you:</strong> Let&apos;s be real—people are too lazy to track and enter data every single day. Set your payday once, and PocketSense handles your cycle and daily safe limits completely on autopilot.
-              </p>
             </div>
           </div>
 
