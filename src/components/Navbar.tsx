@@ -13,6 +13,7 @@ import {
 import confetti from "canvas-confetti";
 
 interface NavbarProps {
+  onOpenDailySafe?: () => void;
   onOpenBeforeIScan: () => void;
   onOpenSmsParser: () => void;
   onOpenMemoryViewer: () => void;
@@ -20,6 +21,7 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
+  onOpenDailySafe,
   onOpenBeforeIScan,
   onOpenSmsParser,
   onOpenSettings,
@@ -42,14 +44,17 @@ export const Navbar: React.FC<NavbarProps> = ({
     <header className="sticky top-0 z-40 w-full border-b border-slate-200 bg-white/95 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {/* Brand */}
-        <div className="flex items-center gap-2.5">
+        <button
+          onClick={onOpenDailySafe}
+          className="flex items-center gap-2.5 hover:opacity-80 transition-opacity text-left"
+        >
           <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-600 text-white font-bold shadow-sm">
             <span className="font-mono text-sm font-black">₹</span>
           </div>
           <span className="font-bold text-base tracking-tight text-slate-900">
             PocketSense
           </span>
-        </div>
+        </button>
 
         {/* Right Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
