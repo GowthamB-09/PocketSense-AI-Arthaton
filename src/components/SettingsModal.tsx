@@ -77,7 +77,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 Budget &amp; Salary Settings
               </h3>
               <p className="text-xs text-slate-500">
-                Set your salary cycle once — tracked automatically every day
+                Set your salary cycle once — runs on autopilot with zero daily effort
               </p>
             </div>
           </div>
@@ -134,7 +134,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <span>When Does Your Salary Arrive?</span>
               </span>
               <span className="text-[11px] font-mono text-emerald-700 font-semibold">
-                Auto-Tracked Daily
+                Autopilot Pacing
               </span>
             </div>
 
@@ -194,11 +194,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </div>
             </div>
 
-            {/* Automated Reassurance Note */}
+            {/* Zero Effort Reassurance Note */}
             <div className="p-2.5 rounded-lg bg-emerald-50/80 border border-emerald-200/60 text-[11px] text-emerald-900 flex items-start gap-2">
               <Clock className="w-3.5 h-3.5 text-emerald-700 shrink-0 mt-0.5" />
               <p className="leading-relaxed">
-                <strong>No daily manual entries needed:</strong> PocketSense syncs with your device calendar clock every midnight. As each day passes, your remaining days and daily safe limit update automatically.
+                <strong>Less work for you:</strong> Let&apos;s be real—people are too lazy to track and enter data every single day. Set your payday once, and PocketSense handles your cycle and daily safe limits completely on autopilot.
               </p>
             </div>
           </div>
