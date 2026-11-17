@@ -2,7 +2,7 @@
 
 🌐 **Live Public Deployment (Works 24/7):** [https://pocketsense-ai-one.vercel.app](https://pocketsense-ai-one.vercel.app)
 
-> **Zero-Login, Privacy-First Behavioral Money Coach for Young Professionals (Ages 24–30)**  
+> **Zero-Login, Privacy-First Behavioral Money Coach for Young Professionals** 
 > *Built for Arthaton 2026 ("AI for Finance") Hackathon*
 
 ---
