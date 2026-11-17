@@ -96,7 +96,7 @@ export const DailySafeCard: React.FC<DailySafeCardProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
           <div className="md:col-span-7 space-y-1">
             <span className="text-xs font-semibold text-slate-500 block uppercase tracking-wide">
-              Safe to Spend Daily
+              Safe to Spend Today
             </span>
 
             <div className="flex items-baseline gap-2">
@@ -138,7 +138,7 @@ export const DailySafeCard: React.FC<DailySafeCardProps> = ({
 
             <div className="grid grid-cols-2 gap-2 pt-2.5 border-t border-slate-200 text-xs font-mono">
               <div>
-                <span className="text-[10px] text-slate-500 block uppercase font-medium">Pool Left</span>
+                <span className="text-[10px] text-slate-500 block uppercase font-medium">Left to Spend</span>
                 <span className="font-bold text-slate-900 text-sm">{formatINR(remainingMonthlyPool)}</span>
               </div>
               <div>

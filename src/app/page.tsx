@@ -17,9 +17,9 @@ import { formatINR } from "@/lib/utils";
 import {
   TrendingUp,
   Wallet,
-  Activity,
-  Flame,
-  Vault,
+  ShieldCheck,
+  CreditCard,
+  Calendar,
 } from "lucide-react";
 
 function DashboardContent() {
@@ -41,64 +41,61 @@ function DashboardContent() {
 
       {/* Main Dashboard */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* Simple 4-Card Summary */}
+        {/* Transparent 4-Card Monthly Balance Sheet */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-          {/* Daily Limit */}
+          {/* Card 1: Monthly Salary */}
           <div className="fintech-card rounded-2xl p-4.5 bg-white border border-slate-200 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between text-slate-500 mb-2">
-              <span className="text-xs font-semibold text-slate-500">Daily Limit</span>
+              <span className="text-xs font-semibold text-slate-500">Take-Home Salary</span>
               <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700">
                 <Wallet className="w-3.5 h-3.5" />
               </div>
             </div>
             <div className="flex items-baseline justify-between font-mono">
-              <span className="text-xl font-bold text-slate-900">{formatINR(analysis.dailySafeToSpend)}</span>
-              <span className="text-xs text-emerald-700 font-semibold">Safe Cap</span>
+              <span className="text-xl font-bold text-slate-900">{formatINR(profile.monthlySalary)}</span>
+              <span className="text-xs text-slate-500 font-normal">Income</span>
             </div>
           </div>
 
-          {/* Left This Month */}
+          {/* Card 2: Fixed Essentials */}
           <div className="fintech-card rounded-2xl p-4.5 bg-white border border-slate-200 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between text-slate-500 mb-2">
-              <span className="text-xs font-semibold text-slate-500">Left This Month</span>
+              <span className="text-xs font-semibold text-slate-500">Fixed Bills &amp; SIPs</span>
               <div className="p-1.5 rounded-lg bg-blue-50 text-blue-700">
+                <ShieldCheck className="w-3.5 h-3.5" />
+              </div>
+            </div>
+            <div className="flex items-baseline justify-between font-mono">
+              <span className="text-xl font-bold text-slate-900">{formatINR(profile.fixedEssentials)}</span>
+              <span className="text-xs text-slate-500 font-normal">Committed</span>
+            </div>
+          </div>
+
+          {/* Card 3: Spent This Month */}
+          <div className="fintech-card rounded-2xl p-4.5 bg-white border border-slate-200 shadow-sm flex flex-col justify-between">
+            <div className="flex items-center justify-between text-slate-500 mb-2">
+              <span className="text-xs font-semibold text-slate-500">Spent This Month</span>
+              <div className="p-1.5 rounded-lg bg-slate-50 text-slate-700 border border-slate-200">
+                <CreditCard className="w-3.5 h-3.5" />
+              </div>
+            </div>
+            <div className="flex items-baseline justify-between font-mono">
+              <span className="text-xl font-bold text-slate-900">{formatINR(analysis.discretionarySpentSoFar)}</span>
+              <span className="text-xs text-slate-500 font-normal">Discretionary</span>
+            </div>
+          </div>
+
+          {/* Card 4: Remaining to Spend */}
+          <div className="fintech-card rounded-2xl p-4.5 bg-white border border-slate-200 shadow-sm flex flex-col justify-between">
+            <div className="flex items-center justify-between text-slate-500 mb-2">
+              <span className="text-xs font-semibold text-slate-500">Remaining to Spend</span>
+              <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
                 <TrendingUp className="w-3.5 h-3.5" />
               </div>
             </div>
             <div className="flex items-baseline justify-between font-mono">
-              <span className="text-xl font-bold text-slate-900">{formatINR(analysis.remainingMonthlyPool)}</span>
-              <span className="text-xs text-slate-500">{analysis.daysRemaining} days left</span>
-            </div>
-          </div>
-
-          {/* Daily Average */}
-          <div className="fintech-card rounded-2xl p-4.5 bg-white border border-slate-200 shadow-sm flex flex-col justify-between">
-            <div className="flex items-center justify-between text-slate-500 mb-2">
-              <span className="text-xs font-semibold text-slate-500">Daily Average</span>
-              <div className="p-1.5 rounded-lg bg-rose-50 text-rose-700">
-                <Activity className="w-3.5 h-3.5" />
-              </div>
-            </div>
-            <div className="flex items-baseline justify-between font-mono">
-              <span className="text-xl font-bold text-rose-700">{formatINR(analysis.burnRatePerDay)}</span>
-              <span className="text-xs text-slate-500">Day {analysis.currentDayOfMonth}/{analysis.daysInMonth}</span>
-            </div>
-          </div>
-
-          {/* Total Saved */}
-          <div className="fintech-card rounded-2xl p-4.5 bg-white border border-slate-200 shadow-sm flex flex-col justify-between">
-            <div className="flex items-center justify-between text-slate-500 mb-2">
-              <span className="text-xs font-semibold text-slate-500">Total Saved</span>
-              <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700">
-                <Vault className="w-3.5 h-3.5" />
-              </div>
-            </div>
-            <div className="flex items-baseline justify-between font-mono">
-              <span className="text-xl font-bold text-emerald-700">{formatINR(profile.totalSavedToJars)}</span>
-              <span className="text-xs text-amber-800 font-semibold flex items-center gap-1 bg-amber-50 px-1.5 py-0.5 rounded">
-                <Flame className="w-3 h-3 fill-amber-500 text-amber-500" />
-                {profile.disciplineStreak}d
-              </span>
+              <span className="text-xl font-bold text-emerald-700">{formatINR(analysis.remainingMonthlyPool)}</span>
+              <span className="text-xs text-slate-500 font-normal">{analysis.daysRemaining}d to salary</span>
             </div>
           </div>
         </div>

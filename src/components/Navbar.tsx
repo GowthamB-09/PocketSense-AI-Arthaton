@@ -6,7 +6,7 @@ import {
   Sparkles,
   FileText,
   Sliders,
-  Flame,
+  Calendar,
   Check,
   Zap,
 } from "lucide-react";
@@ -24,7 +24,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenSmsParser,
   onOpenSettings,
 }) => {
-  const { profile, loadSyntheticDemo } = useFinancialMemory();
+  const { profile, analysis, loadSyntheticDemo } = useFinancialMemory();
   const [loadedAlert, setLoadedAlert] = useState(false);
 
   const handleLoadDemo = () => {
@@ -53,10 +53,10 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Right Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Streak */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-mono text-amber-800 bg-amber-50 border border-amber-200 shadow-sm">
-            <Flame className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-            <span className="font-bold">{profile.disciplineStreak}d streak</span>
+          {/* Salary Cycle Indicator */}
+          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-mono text-slate-700 bg-slate-50 border border-slate-200 shadow-sm">
+            <Calendar className="w-3.5 h-3.5 text-emerald-600" />
+            <span className="font-semibold">{analysis?.dateLabel || `Day ${analysis?.currentDayOfMonth || 1} of ${analysis?.daysInMonth || 30}`}</span>
           </div>
 
           {/* Reset Demo Data */}

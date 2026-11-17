@@ -59,15 +59,15 @@ export const FinancialMemoryViewer: React.FC<FinancialMemoryViewerProps> = ({
             </div>
 
             <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-              <span className="text-[10px] text-slate-500 block uppercase font-semibold">Discipline Streak</span>
-              <span className="font-bold text-amber-700 text-sm flex items-center gap-1.5 mt-0.5">
-                <Flame className="w-4 h-4 fill-amber-500 text-amber-500" />
-                {profile.disciplineStreak} Days
+              <span className="text-[10px] text-slate-500 block uppercase font-semibold">Runway Status</span>
+              <span className="font-bold text-emerald-700 text-sm flex items-center gap-1.5 mt-0.5">
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                {analysis.projectedRunOutDay >= analysis.daysInMonth ? "Full Month Safe" : `Pacing Day ${analysis.projectedRunOutDay}`}
               </span>
             </div>
 
             <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-              <span className="text-[10px] text-slate-500 block uppercase font-semibold">Diverted to Vaults</span>
+              <span className="text-[10px] text-slate-500 block uppercase font-semibold">Saved in Goal Jars</span>
               <span className="font-bold text-emerald-700 text-sm mt-0.5 block">
                 {formatINR(profile.totalSavedToJars)}
               </span>

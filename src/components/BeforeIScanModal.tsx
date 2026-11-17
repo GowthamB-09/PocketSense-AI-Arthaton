@@ -296,7 +296,7 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
                     {savedSuccess ? (
                       <span className="flex items-center gap-1.5">
                         <CheckCircle2 className="w-3.5 h-3.5" />
-                        Transferred to Reserve (+1 Streak)
+                        Transferred to Savings Goal
                       </span>
                     ) : (
                       <span>Divert &amp; Save {formatINR(verdictData.amount)}</span>

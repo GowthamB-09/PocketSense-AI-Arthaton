@@ -141,7 +141,7 @@ export const OpportunityCostBanner: React.FC = () => {
                 {isClaimed ? (
                   <>
                     <CheckCircle2 className="w-4 h-4 text-emerald-700" />
-                    <span>Saved to Goal (+1 Streak)</span>
+                    <span>Saved to Goal</span>
                   </>
                 ) : (
                   <>
