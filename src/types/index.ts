@@ -114,6 +114,8 @@ export interface SmsParseResult {
   confidenceScore: number;
   explanation: string;
   rawText: string;
+  isSalaryCredit?: boolean;
+  isFixedCommitment?: boolean;
 }
 
 export interface ImpulseCheckRequest {

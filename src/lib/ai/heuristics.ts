@@ -84,8 +84,16 @@ export function parseSmsHeuristically(smsText: string): SmsParseResult {
 
   const lower = clean.toLowerCase();
 
+  const isSalaryCredit = /(?:salary|credited.*salary|salary.*credited)/i.test(clean) ||
+    (/(?:credited|deposited)/i.test(clean) && !/(?:debited|paid|withdrawn)/i.test(clean) && amount >= 25000);
+
+  if (isSalaryCredit) {
+    category = "Investments & SIPs";
+    spendingType = "Survival Need";
+    merchant = "Monthly Take-Home Salary";
+  }
   // Rent & Fixed Utilities
-  if (
+  else if (
     lower.includes("rent") ||
     lower.includes("landlord") ||
     lower.includes("maintenance") ||
@@ -212,6 +220,8 @@ export function parseSmsHeuristically(smsText: string): SmsParseResult {
     date = `${year}-${resolvedMonth}-${day}`;
   }
 
+  const isFixedCommitment = !isSalaryCredit && (category === "Rent & Fixed Utilities" || category === "Investments & SIPs");
+
   return {
     merchant,
     amount,
@@ -222,8 +232,12 @@ export function parseSmsHeuristically(smsText: string): SmsParseResult {
     bank,
     triggerTag,
     confidenceScore: 0.95,
-    explanation: `Classified as ${spendingType} (${category}) based on professional spending pattern.`,
+    explanation: isSalaryCredit
+      ? "Identified monthly salary credit — ready to set budget income."
+      : `Classified as ${spendingType} (${category}) based on professional spending pattern.`,
     rawText: smsText,
+    isSalaryCredit: !!isSalaryCredit,
+    isFixedCommitment: !!isFixedCommitment,
   };
 }
 

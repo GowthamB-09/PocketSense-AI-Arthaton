@@ -322,10 +322,14 @@ export const SYNTHETIC_DEMO_PROFILE: FinancialMemoryProfile = {
 };
 
 export const RAW_SMS_SNIPPETS_DEMO = [
-  `Paid Rs. 3,450.00 to TOIT BREWERY on 14-Nov-2026 via Cred UPI. Ref: 6316223401`,
-  `Paid Rs. 420.00 to BLUE TOKAI via GPay on 14-Nov-2026. Ref: 6312458921. Pour-over.`,
-  `Paid Rs. 680.00 to ZEPTO QUICK via PhonePe on 14-Nov-2026. Ref: 6313498112`,
-  `Auto-debit of INR 499.00 from HDFC A/C **4412 for APPLE.COM/BILL on 10-Nov-2026. Ref: 6320556190`,
+  `Salary of INR 75,000.00 credited to HDFC Bank A/C **4412 on 01-Nov-2026 by TECH CORP PVT LTD. Ref: 9921440123.`,
   `Debited Rs. 20000.00 from HDFC Bank A/C **4412 to RAJESH (RENT) on 01-Nov-2026. Ref: 6311029381`,
+  `Auto-debit of INR 8000.00 from HDFC Bank A/C **4412 for ZERODHA MUTUAL FUND SIP on 01-Nov-2026. Ref: 6311440192`,
+  `Sent Rs. 4000.00 to REKHA (COOK) via GPay on 07-Nov-2026. Ref: 6317109283.`,
+  `Paid Rs. 3,450.00 to TOIT BREWERY on 06-Nov-2026 via Cred UPI. Ref: 6316223401`,
+  `Paid Rs. 420.00 to BLUE TOKAI via GPay on 02-Nov-2026. Ref: 6312458921. Pour-over.`,
+  `Paid Rs. 680.00 to ZEPTO QUICK via PhonePe on 03-Nov-2026. Ref: 6313498112`,
+  `Auto-debit of INR 499.00 from HDFC A/C **4412 for APPLE.COM/BILL on 10-Nov-2026. Ref: 6320556190`,
   `Txn of INR 2990.00 on ICICI CC ending 8810 at ZARA INDIA on 08-Nov-2026. Ref: 6318334912`,
+  `Paid Rs. 850.00 to SWIGGY via PhonePe on 11-Nov-2026. Ref: 6321667281`,
 ];

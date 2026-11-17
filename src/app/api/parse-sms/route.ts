@@ -29,6 +29,8 @@ const smsSchema = z.object({
       upiRef: z.string().describe("UPI Reference number or transaction ID if present"),
       bank: z.string().describe("Bank, card, or UPI app name"),
       triggerTag: z.string().optional().describe("e.g. 'specialty-coffee', 'weekend-hangout', 'quick-commerce', 'lifestyle-creep'"),
+      isSalaryCredit: z.boolean().optional().describe("True if SMS is an incoming salary or income deposit"),
+      isFixedCommitment: z.boolean().optional().describe("True if SMS is fixed rent, loan EMI, mutual fund SIP, or utilities"),
       confidenceScore: z.number().min(0).max(1),
       explanation: z.string().describe("One concise sentence explaining classification"),
     })
