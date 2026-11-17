@@ -272,6 +272,7 @@ export const SYNTHETIC_DEMO_PROFILE: FinancialMemoryProfile = {
   role: "Senior Product Designer (Age 26)",
   monthlySalary: 75000,
   fixedEssentials: 32000, // Rent 20k + SIP 8k + Cook/Maid 4k
+  salaryCreditDay: 1,
   daysInMonth: 30,
   currentDayOfMonth: 14,
   disciplineStreak: 5,

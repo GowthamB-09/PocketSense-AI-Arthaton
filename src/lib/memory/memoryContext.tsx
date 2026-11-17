@@ -33,7 +33,7 @@ interface FinancialMemoryContextType {
   updateSalary: (
     monthlySalary: number,
     fixedEssentials: number,
-    currentDayOfMonth?: number,
+    salaryCreditDay?: number,
     useRealDate?: boolean,
     resetLedger?: boolean
   ) => void;
@@ -182,7 +182,7 @@ export function FinancialMemoryProvider({ children }: { children: React.ReactNod
   const updateSalary = (
     monthlySalary: number,
     fixedEssentials: number,
-    currentDayOfMonth?: number,
+    salaryCreditDay?: number,
     useRealDate?: boolean,
     resetLedger?: boolean
   ) => {
@@ -192,20 +192,14 @@ export function FinancialMemoryProvider({ children }: { children: React.ReactNod
     }
 
     setProfile((prev) => {
-      const now = new Date();
-      const realDay = now.getDate();
-      const realDaysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-
-      const nextUseRealDate = typeof useRealDate === "boolean" ? useRealDate : (prev.useRealCalendarDate ?? false);
-      const nextDay = typeof currentDayOfMonth === "number" ? currentDayOfMonth : (nextUseRealDate ? realDay : prev.currentDayOfMonth);
-      const nextTotalDays = nextUseRealDate ? realDaysInMonth : prev.daysInMonth;
+      const nextUseRealDate = typeof useRealDate === "boolean" ? useRealDate : true;
+      const nextSalaryCreditDay = typeof salaryCreditDay === "number" ? salaryCreditDay : (prev.salaryCreditDay || 1);
 
       return {
         ...prev,
         monthlySalary,
         fixedEssentials,
-        currentDayOfMonth: nextDay,
-        daysInMonth: nextTotalDays,
+        salaryCreditDay: nextSalaryCreditDay,
         useRealCalendarDate: nextUseRealDate,
       };
     });

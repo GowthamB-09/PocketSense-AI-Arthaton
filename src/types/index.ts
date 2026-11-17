@@ -55,6 +55,7 @@ export interface FinancialMemoryProfile {
   role: string;
   monthlySalary: number;
   fixedEssentials: number; // Rent, SIP, Utilities, Insurance
+  salaryCreditDay: number; // Day of month when salary is credited (default 1)
   daysInMonth: number;
   currentDayOfMonth: number;
   useRealCalendarDate?: boolean;
@@ -96,7 +97,9 @@ export interface DailyBudgetAnalysis {
   headline: string;
   comfortMessage: string;
   dateLabel: string;
+  salaryCreditDay: number;
   isRealDate: boolean;
+  nextPaydayLabel: string;
 }
 
 export interface SmsParseResult {

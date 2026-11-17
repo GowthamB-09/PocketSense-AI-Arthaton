@@ -12,29 +12,106 @@ import {
   SYNTHETIC_TRANSACTIONS,
 } from "../demo/syntheticStudentData";
 
-const STORAGE_KEY_PROFILE = "pocketsense_prof_profile_v3";
-const STORAGE_KEY_TRANSACTIONS = "pocketsense_prof_transactions_v3";
+const STORAGE_KEY_PROFILE = "pocketsense_prof_profile_v4";
+const STORAGE_KEY_TRANSACTIONS = "pocketsense_prof_transactions_v4";
 
 /**
- * Calculates daily discretionary budget analysis for young working professionals
- * Dynamically factors in real calendar dates or simulated cycle day
+ * Calculates automated salary cycle details based on salary credit day and real clock
+ * NO DAILY MANUAL INPUT REQUIRED:
+ * - If salaryDay is 1st of month: tracks automatically from 1st of month to 1st of next month.
+ * - If salaryDay is 25th: tracks automatically from 25th of month to 25th of next month.
+ * - Automatically rolls over on payday!
+ */
+export function getSalaryCycleDetails(
+  salaryCreditDay: number = 1,
+  useRealDate: boolean = true,
+  fallbackCycleDay: number = 14
+) {
+  const now = new Date();
+
+  // If in demo simulation mode:
+  if (!useRealDate) {
+    const simulatedDay = fallbackCycleDay || 14;
+    const totalDays = 30;
+    const daysRemaining = Math.max(1, totalDays - simulatedDay + 1);
+    return {
+      cycleDay: simulatedDay,
+      totalDaysInCycle: totalDays,
+      daysRemaining,
+      dateLabel: `Day ${simulatedDay} of ${totalDays}`,
+      nextPaydayLabel: `${daysRemaining} days left until next salary`,
+      isPayday: simulatedDay === 1,
+    };
+  }
+
+  // Automated Real Calendar Clock:
+  const todayDate = now.getDate();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+
+  let cycleStart: Date;
+  let nextSalaryDate: Date;
+
+  if (salaryCreditDay === 1) {
+    cycleStart = new Date(currentYear, currentMonth, 1);
+    nextSalaryDate = new Date(currentYear, currentMonth + 1, 1);
+  } else {
+    if (todayDate >= salaryCreditDay) {
+      cycleStart = new Date(currentYear, currentMonth, salaryCreditDay);
+      nextSalaryDate = new Date(currentYear, currentMonth + 1, salaryCreditDay);
+    } else {
+      cycleStart = new Date(currentYear, currentMonth - 1, salaryCreditDay);
+      nextSalaryDate = new Date(currentYear, currentMonth, salaryCreditDay);
+    }
+  }
+
+  const oneDayMs = 1000 * 60 * 60 * 24;
+  const totalDaysInCycle = Math.max(28, Math.round((nextSalaryDate.getTime() - cycleStart.getTime()) / oneDayMs));
+
+  // Which day of the salary cycle is today (1-indexed, day 1 is payday)
+  const diffFromStart = Math.floor((now.getTime() - cycleStart.getTime()) / oneDayMs);
+  const cycleDay = Math.min(totalDaysInCycle, Math.max(1, diffFromStart + 1));
+
+  // Days remaining in cycle until next salary arrives (inclusive of today)
+  const diffUntilNext = Math.ceil((nextSalaryDate.getTime() - now.getTime()) / oneDayMs);
+  const daysRemaining = Math.max(1, diffUntilNext);
+
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const formattedToday = `${monthNames[now.getMonth()]} ${now.getDate()}`;
+  const formattedNextSalary = `${monthNames[nextSalaryDate.getMonth()]} ${nextSalaryDate.getDate()}`;
+
+  const isPayday = cycleDay === 1;
+  const dateLabel = isPayday
+    ? `${formattedToday} (Day 1 — Payday! 🎉)`
+    : `${formattedToday} (Day ${cycleDay} of ${totalDaysInCycle})`;
+  const nextPaydayLabel = `Next salary on ${formattedNextSalary} (${daysRemaining} days left)`;
+
+  return {
+    cycleDay,
+    totalDaysInCycle,
+    daysRemaining,
+    dateLabel,
+    nextPaydayLabel,
+    isPayday,
+  };
+}
+
+/**
+ * Calculates daily budget analysis for young working professionals
+ * Automatically tracks calendar pacing without requiring any daily manual input
  */
 export function calculateDailyBudgetAnalysis(
   profile: FinancialMemoryProfile,
   transactions: Transaction[]
 ): DailyBudgetAnalysis {
-  const now = new Date();
-  const realDay = now.getDate();
-  const realDaysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-
-  // If useRealCalendarDate is enabled, use real calendar day; otherwise use profile setting (default 14 in demo)
   const isRealDate = profile.useRealCalendarDate ?? false;
-  const currentDayOfMonth = isRealDate ? realDay : (profile.currentDayOfMonth || 14);
-  const daysInMonth = isRealDate ? realDaysInMonth : (profile.daysInMonth || 30);
+  const salaryDay = profile.salaryCreditDay || 1;
 
-  // Remaining days in month until next payday (inclusive of today)
-  // e.g. Day 16 of 30 => (30 - 16 + 1) = 15 days remaining
-  const daysRemaining = Math.max(1, daysInMonth - currentDayOfMonth + 1);
+  const cycle = getSalaryCycleDetails(salaryDay, isRealDate, profile.currentDayOfMonth);
+
+  const currentDayOfMonth = cycle.cycleDay;
+  const daysInMonth = cycle.totalDaysInCycle;
+  const daysRemaining = cycle.daysRemaining;
 
   // Discretionary pool = Salary - Fixed Essentials (Rent, SIPs, Utilities)
   const discretionaryPool = Math.max(0, profile.monthlySalary - profile.fixedEssentials);
@@ -54,6 +131,7 @@ export function calculateDailyBudgetAnalysis(
   const safeDailySpend = Math.max(0, Math.floor(remainingMonthlyPool / daysRemaining));
 
   // Today's spending:
+  const now = new Date();
   const todayISO = now.toISOString().split("T")[0];
   const simulatedDayStr = `2026-11-${String(currentDayOfMonth).padStart(2, "0")}`;
 
@@ -74,11 +152,6 @@ export function calculateDailyBudgetAnalysis(
     projectedRunOutDay = Math.min(daysInMonth, daysOfRunway);
   }
 
-  // Date label formatted nicely
-  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  const currentMonthName = isRealDate ? monthNames[now.getMonth()] : "Nov";
-  const dateLabel = `${currentMonthName} ${currentDayOfMonth} (Day ${currentDayOfMonth} of ${daysInMonth})`;
-
   // Clean status levels
   let statusLevel: "green" | "amber" | "red" = "green";
   let headline = "";
@@ -86,20 +159,20 @@ export function calculateDailyBudgetAnalysis(
 
   if (remainingMonthlyPool <= 0 && discretionarySpentSoFar > 0) {
     statusLevel = "red";
-    headline = "Discretionary Capital Exhausted";
-    comfortMessage = `Discretionary spend (₹${discretionarySpentSoFar.toLocaleString("en-IN")}) has consumed the full ₹${discretionaryPool.toLocaleString("en-IN")} pool. Clear transactions or increase salary allocation in Settings.`;
+    headline = "Discretionary Budget Exhausted";
+    comfortMessage = `Discretionary spend (₹${discretionarySpentSoFar.toLocaleString("en-IN")}) has consumed the full ₹${discretionaryPool.toLocaleString("en-IN")} pool. Reduce extra spending until next salary.`;
   } else if (projectedRunOutDay <= 20) {
     statusLevel = "red";
-    headline = `Month-End Squeeze: Discretionary pool exhausts by Day ${projectedRunOutDay}`;
-    comfortMessage = `Burning ₹${burnRatePerDay}/day against a sustainable limit of ₹${safeDailySpend}/day. Intercept impulse checkouts to maintain your savings rate.`;
+    headline = `Pacing Fast: Budget runs out by Day ${projectedRunOutDay}`;
+    comfortMessage = `Spending ₹${burnRatePerDay}/day against a safe pace of ₹${safeDailySpend}/day. Cut back non-essentials to reach next payday comfortably.`;
   } else if (safeDailySpend < 400 || projectedRunOutDay < 26) {
     statusLevel = "amber";
-    headline = `Caution: Runway tightening to Day ${projectedRunOutDay}`;
-    comfortMessage = `Current safe rate is ₹${safeDailySpend}/day with ${daysRemaining} days left. Large weekend outings could compress your month-end flexibility.`;
+    headline = `Caution: Runway tightening`;
+    comfortMessage = `Current safe rate is ₹${safeDailySpend}/day with ${daysRemaining} days left. Keep daily expenses low.`;
   } else {
     statusLevel = "green";
-    headline = `Optimal Velocity: Cash flow on track`;
-    comfortMessage = `You have ₹${safeDailySpend}/day across the remaining ${daysRemaining} days in the cycle while fully protecting rent and SIP investments.`;
+    headline = `On Track: Budget healthy`;
+    comfortMessage = `You have ₹${safeDailySpend}/day safe to spend across the remaining ${daysRemaining} days until your next salary.`;
   }
 
   return {
@@ -120,8 +193,10 @@ export function calculateDailyBudgetAnalysis(
     statusLevel,
     headline,
     comfortMessage,
-    dateLabel,
+    dateLabel: cycle.dateLabel,
+    salaryCreditDay: salaryDay,
     isRealDate,
+    nextPaydayLabel: cycle.nextPaydayLabel,
   };
 }
 
