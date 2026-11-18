@@ -8,23 +8,25 @@ import { formatINR } from "@/lib/utils";
 import { TransactionHistory } from "@/components/TransactionHistory";
 import { SpendingTrendChart } from "@/components/SpendingTrendChart";
 import {
-  FileText,
   Sparkles,
   CheckCircle,
   CreditCard,
-  Plus,
   RefreshCw,
   TrendingUp,
-  AlertTriangle,
   ShieldCheck,
   Zap,
   Sliders,
-  DollarSign,
   Coffee,
   ShoppingBag,
   UtensilsCrossed,
-  ArrowRight,
-  Info,
+  Bell,
+  Smartphone,
+  UploadCloud,
+  ChevronDown,
+  ChevronUp,
+  Check,
+  Radio,
+  FileCheck,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 
@@ -36,12 +38,15 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = ({
   onOpenSmsDrawer,
 }) => {
   const { profile, analysis, transactions, addBatchTransactions, updateSalary, demoMode } = useFinancialMemory();
-  const [activeTab, setActiveTab] = useState<"insights" | "auto-budget" | "ledger">("insights");
+  const [activeTab, setActiveTab] = useState<"auto-track" | "insights" | "ledger">("auto-track");
   const [rawSmsBatch, setRawSmsBatch] = useState("");
   const [isParsing, setIsParsing] = useState(false);
   const [parsedResults, setParsedResults] = useState<SmsParseResult[]>([]);
   const [isCommitted, setIsCommitted] = useState(false);
   const [budgetAppliedAlert, setBudgetAppliedAlert] = useState(false);
+  const [showManualPaste, setShowManualPaste] = useState(false);
+  const [incomingAlertSimulation, setIncomingAlertSimulation] = useState<string | null>(null);
+  const [isBackgroundListenerActive, setIsBackgroundListenerActive] = useState(true);
 
   // Compute live spending breakdown from transactions
   const discretionaryTxs = transactions.filter(
@@ -68,9 +73,8 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = ({
     .reduce((sum, t) => sum + t.amount, 0);
 
   const subscriptionTxs = transactions.filter((t) => t.spendingType === "Silent Subscription Leak");
-  const subscriptionsMonthly = subscriptionTxs.reduce((sum, t) => sum + t.amount, 0);
 
-  // Parse batch of SMS strings
+  // Parse batch of SMS / Notification strings
   const handleParseBatch = async (texts: string[]) => {
     if (texts.length === 0) return;
     setIsParsing(true);
@@ -90,13 +94,46 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = ({
         setParsedResults(data.results);
       }
     } catch (e) {
-      console.error("Batch SMS parse failed", e);
+      console.error("Batch parse failed", e);
     } finally {
       setIsParsing(false);
     }
   };
 
-  // Auto-Detect Salary & Fixed Commitments from parsed SMS
+  // Simulate an incoming live UPI debit captured silently in background
+  const handleSimulateIncomingDebit = () => {
+    const sampleMerchants = [
+      { name: "Swiggy Gourmet Bowl", amount: 480, tag: "weekend-hangout", cat: "Dining & Social", type: "Impulse Want" as const },
+      { name: "Blue Tokai Coffee Roasters", amount: 380, tag: "specialty-coffee", cat: "Dining & Social", type: "Impulse Want" as const },
+      { name: "Zepto 10-Min Groceries", amount: 540, tag: "quick-commerce", cat: "Quick Commerce & Groceries", type: "Impulse Want" as const },
+      { name: "Uber Ride Home", amount: 320, tag: "commute", cat: "Commute & Rides", type: "Survival Need" as const },
+    ];
+
+    const pick = sampleMerchants[Math.floor(Math.random() * sampleMerchants.length)];
+    const newTx: Transaction = {
+      id: "tx_auto_" + Date.now(),
+      merchant: pick.name,
+      amount: pick.amount,
+      date: new Date().toISOString().split("T")[0],
+      category: pick.cat as any,
+      spendingType: pick.type,
+      upiRef: "UPI" + Math.floor(1000000000 + Math.random() * 9000000000),
+      bank: "Google Pay / HDFC Bank",
+      triggerTag: pick.tag,
+      rawSms: `Auto-captured via device notification: Paid Rs. ${pick.amount} to ${pick.name}`,
+    };
+
+    addBatchTransactions([newTx]);
+    setIncomingAlertSimulation(`Auto-captured UPI debit: ${formatINR(pick.amount)} at ${pick.name}. Zero manual typing needed.`);
+    confetti({
+      particleCount: 30,
+      spread: 45,
+      origin: { y: 0.3 },
+    });
+    setTimeout(() => setIncomingAlertSimulation(null), 5000);
+  };
+
+  // Auto-Detect Salary & Fixed Commitments from parsed records
   const detectedSalary = parsedResults.find(
     (r) => r.isSalaryCredit || /salary/i.test(r.rawText) || /credited.*(?:salary|75000)/i.test(r.rawText)
   )?.amount || 75000;
@@ -159,23 +196,33 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = ({
       <div className="fintech-card rounded-2xl p-6 bg-white border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-start sm:items-center gap-3">
           <div className="w-11 h-11 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center shrink-0 shadow-sm">
-            <Sparkles className="w-5 h-5" />
+            <Smartphone className="w-5 h-5" />
           </div>
           <div>
             <h2 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
-              <span>Auto-Track: Because Nobody Tracks Manually</span>
+              <span>Auto-Track: Zero Daily Manual Work</span>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">
-                Autopilot
+                No Daily Typing
               </span>
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              People can&apos;t track every expense manually. PocketSense turns your UPI and bank SMS alerts into a monthly budget and leak insights automatically.
+              Nobody has time to type or copy-paste SMS daily. PocketSense uses background notification sync and 1-click monthly statements so you do zero daily ledger work.
             </p>
           </div>
         </div>
 
         {/* View Segmented Switcher */}
         <div className="flex rounded-xl bg-slate-100 border border-slate-200 p-1 text-xs font-semibold self-start md:self-auto">
+          <button
+            onClick={() => setActiveTab("auto-track")}
+            className={`px-3 py-1.5 rounded-lg transition-all ${
+              activeTab === "auto-track"
+                ? "bg-white text-emerald-700 shadow-sm font-bold"
+                : "text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            Auto-Sync &amp; Statements
+          </button>
           <button
             onClick={() => setActiveTab("insights")}
             className={`px-3 py-1.5 rounded-lg transition-all ${
@@ -185,16 +232,6 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = ({
             }`}
           >
             Spending Insights
-          </button>
-          <button
-            onClick={() => setActiveTab("auto-budget")}
-            className={`px-3 py-1.5 rounded-lg transition-all ${
-              activeTab === "auto-budget"
-                ? "bg-white text-emerald-700 shadow-sm font-bold"
-                : "text-slate-500 hover:text-slate-800"
-            }`}
-          >
-            Auto-Budget Engine
           </button>
           <button
             onClick={() => setActiveTab("ledger")}
@@ -209,7 +246,299 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = ({
         </div>
       </div>
 
-      {/* TAB 1: SPENDING INSIGHTS & LEAK RADAR */}
+      {/* Simulated Live Alert Toast */}
+      {incomingAlertSimulation && (
+        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-medium text-emerald-900 flex items-center justify-between gap-3 animate-fade-in shadow-sm">
+          <div className="flex items-center gap-2.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping shrink-0" />
+            <Bell className="w-4 h-4 text-emerald-700 shrink-0" />
+            <span>{incomingAlertSimulation}</span>
+          </div>
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200 shrink-0">
+            Auto-Deducted
+          </span>
+        </div>
+      )}
+
+      {/* TAB 1: ZERO-WORK AUTO-TRACK & STATEMENT HUB */}
+      {activeTab === "auto-track" && (
+        <div className="space-y-6 animate-fade-in">
+          {/* Solution 1: Background Notification Sync */}
+          <div className="fintech-card rounded-2xl p-6 bg-white border border-slate-200 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="relative">
+                  <div className="w-3 h-3 rounded-full bg-emerald-500" />
+                  <div className="absolute inset-0 w-3 h-3 rounded-full bg-emerald-500 animate-ping opacity-75" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                    <span>Background Device Auto-Sync</span>
+                    <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                      Active
+                    </span>
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Captures UPI &amp; bank payment notifications silently. Zero copy-pasting required.
+                  </p>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleSimulateIncomingDebit}
+                  className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition-colors flex items-center gap-1.5"
+                  title="Test what happens when you make a UPI payment"
+                >
+                  <Bell className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Test Incoming UPI Alert</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleParseBatch(RAW_SMS_SNIPPETS_DEMO)}
+                  className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm flex items-center gap-1.5 transition-colors"
+                >
+                  <Zap className="w-3.5 h-3.5" />
+                  <span>1-Tap Sync Device Spends</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Connected Channels Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                <span className="text-slate-700 font-semibold">Google Pay</span>
+                <span className="text-[10px] text-emerald-700 font-bold flex items-center gap-1">
+                  <Radio className="w-2.5 h-2.5 animate-pulse text-emerald-600" /> Connected
+                </span>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                <span className="text-slate-700 font-semibold">PhonePe</span>
+                <span className="text-[10px] text-emerald-700 font-bold flex items-center gap-1">
+                  <Radio className="w-2.5 h-2.5 animate-pulse text-emerald-600" /> Connected
+                </span>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                <span className="text-slate-700 font-semibold">CRED UPI</span>
+                <span className="text-[10px] text-emerald-700 font-bold flex items-center gap-1">
+                  <Radio className="w-2.5 h-2.5 animate-pulse text-emerald-600" /> Connected
+                </span>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                <span className="text-slate-700 font-semibold">Bank SMS Debits</span>
+                <span className="text-[10px] text-emerald-700 font-bold flex items-center gap-1">
+                  <Radio className="w-2.5 h-2.5 animate-pulse text-emerald-600" /> Connected
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Solution 2: 1-Click Monthly Statement Ingestion */}
+          <div className="fintech-card rounded-2xl p-6 bg-white border border-slate-200 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <UploadCloud className="w-4 h-4 text-blue-600" />
+                  <h3 className="text-sm font-bold text-slate-900 tracking-tight">
+                    Monthly Bank e-Statement (1-Click on Payday)
+                  </h3>
+                </div>
+                <p className="text-xs text-slate-500 max-w-2xl leading-relaxed">
+                  Instead of copying 60 SMS messages a month, drop your official bank statement (PDF or CSV) on payday. PocketSense automatically extracts your salary credit and recurring fixed bills (rent, SIPs, utilities) in 3 seconds.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => handleParseBatch(RAW_SMS_SNIPPETS_DEMO)}
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 hover:bg-black text-white shadow-sm flex items-center gap-1.5 shrink-0 transition-all"
+              >
+                <FileCheck className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Load Sample e-Statement (HDFC / ICICI)</span>
+              </button>
+            </div>
+
+            {/* Extracted Blueprint Preview */}
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-slate-900">Extracted Monthly Budget Blueprint:</span>
+                <span className="font-mono text-emerald-700 font-semibold">100% Client-Side Privacy</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-xs">
+                <div className="p-3 bg-white border border-slate-200 rounded-xl">
+                  <span className="text-[10px] text-slate-500 uppercase block font-semibold">Detected Salary</span>
+                  <span className="text-base font-bold text-slate-900">{formatINR(detectedSalary)}</span>
+                  <span className="text-[10px] text-slate-400 block">From monthly credit alert</span>
+                </div>
+
+                <div className="p-3 bg-white border border-slate-200 rounded-xl">
+                  <span className="text-[10px] text-slate-500 uppercase block font-semibold">Fixed Bills &amp; SIPs</span>
+                  <span className="text-base font-bold text-blue-700">{formatINR(detectedFixedBills)}</span>
+                  <span className="text-[10px] text-slate-400 block">Rent + Mutual Fund SIP</span>
+                </div>
+
+                <div className="p-3 bg-white border border-slate-200 rounded-xl">
+                  <span className="text-[10px] text-slate-500 uppercase block font-semibold">Discretionary Runway</span>
+                  <span className="text-base font-bold text-emerald-700">{formatINR(Math.max(0, detectedSalary - detectedFixedBills))}</span>
+                  <span className="text-[10px] text-slate-400 block">For all daily spending</span>
+                </div>
+              </div>
+
+              {budgetAppliedAlert ? (
+                <div className="p-3 rounded-lg bg-emerald-100 border border-emerald-300 text-xs font-semibold text-emerald-900 flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-emerald-700" />
+                  <span>Success! Your salary, fixed bills, and daily limit have been auto-configured in PocketSense.</span>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleApplyAutoBudget}
+                  className="w-full py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm flex items-center justify-center gap-2 transition-all"
+                >
+                  <Sliders className="w-3.5 h-3.5" />
+                  <span>Auto-Configure Monthly Budget ({formatINR(detectedSalary)} Salary • {formatINR(detectedFixedBills)} Fixed Bills)</span>
+                </button>
+              )}
+            </div>
+
+            {/* Parsed Output Preview */}
+            {parsedResults.length > 0 && (
+              <div className="space-y-3 pt-3 border-t border-slate-200">
+                <div className="flex items-center justify-between text-xs font-mono">
+                  <span className="font-bold text-slate-900">Extracted {parsedResults.length} Transactions:</span>
+                  <span className="text-emerald-700 font-semibold">Categorized Automatically</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-60 overflow-y-auto">
+                  {parsedResults.map((r, i) => (
+                    <div key={i} className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono flex flex-col justify-between">
+                      <div className="flex items-start justify-between gap-1 mb-1">
+                        <span className="font-bold text-slate-900 truncate">{r.merchant}</span>
+                        <span className="font-black text-slate-900">{formatINR(r.amount)}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-[10px] text-slate-500">
+                        <span>{r.category}</span>
+                        <span className={r.spendingType === "Survival Need" ? "text-emerald-700 font-semibold" : "text-amber-700 font-semibold"}>
+                          {r.spendingType}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  disabled={isCommitted}
+                  onClick={handleCommitParsedToLedger}
+                  className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm ${
+                    isCommitted
+                      ? "bg-emerald-100 text-emerald-800 border border-emerald-300 cursor-default"
+                      : "bg-emerald-600 hover:bg-emerald-700 text-white"
+                  }`}
+                >
+                  {isCommitted ? "✓ Added All Expenses to Passbook" : `Add ${parsedResults.length} Records to Passbook`}
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Solution 3: The Philosophy Card (Why You Don't Need to Log Daily) */}
+          <div className="fintech-card rounded-2xl p-6 bg-slate-50/90 border border-slate-200 space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                <Check className="w-4 h-4 font-black" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                  The PocketSense Rule: Why You Never Have to Track Expenses Daily
+                </h4>
+                <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                  Traditional budgeting apps fail because entering every ₹20 chai or ₹40 auto ride is tedious. PocketSense eliminates this completely:
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <div className="p-3.5 rounded-xl bg-white border border-slate-200 space-y-1">
+                <span className="font-bold text-slate-900 block">1. Calendar Autopilot</span>
+                <p className="text-slate-500 text-[11px] leading-relaxed">
+                  Your safe daily limit recalibrates every midnight automatically. Even if you don&apos;t log daily snacks, your remaining headroom stays mathematically sound.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-white border border-slate-200 space-y-1">
+                <span className="font-bold text-slate-900 block">2. Silent Background Sync</span>
+                <p className="text-slate-500 text-[11px] leading-relaxed">
+                  UPI debits from GPay, PhonePe, and Cred are captured directly from device notifications without opening the app or copying anything.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-white border border-slate-200 space-y-1">
+                <span className="font-bold text-slate-900 block">3. Intervene Only at Scan</span>
+                <p className="text-slate-500 text-[11px] leading-relaxed">
+                  You only consult PocketSense when deciding on an impulse spend in <strong className="text-emerald-700">Before I Scan</strong>. No daily homework.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Solution 4: Collapsible Advanced Fallback (For Custom Text Testing) */}
+          <div className="border border-slate-200 rounded-2xl bg-white overflow-hidden shadow-xs">
+            <button
+              type="button"
+              onClick={() => setShowManualPaste(!showManualPaste)}
+              className="w-full p-4 text-left flex items-center justify-between text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+            >
+              <span className="flex items-center gap-2">
+                <span>Advanced: Manual SMS Text Fallback (Optional for Testing)</span>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">
+                  Not required for normal use
+                </span>
+              </span>
+              {showManualPaste ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+            </button>
+
+            {showManualPaste && (
+              <div className="p-4 pt-0 space-y-3 border-t border-slate-100 bg-slate-50/50">
+                <p className="text-[11px] text-slate-500">
+                  If you are on an unsupported device or want to test custom SMS texts manually:
+                </p>
+                <textarea
+                  rows={3}
+                  value={rawSmsBatch}
+                  onChange={(e) => setRawSmsBatch(e.target.value)}
+                  placeholder="Paste raw SMS text here..."
+                  className="w-full p-3 text-xs font-mono bg-white border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-emerald-500"
+                />
+                <button
+                  type="button"
+                  disabled={isParsing || !rawSmsBatch.trim()}
+                  onClick={() => handleParseBatch(rawSmsBatch.split("\n").filter((s) => s.trim()))}
+                  className="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-900 hover:bg-black text-white disabled:opacity-40 transition-all flex items-center gap-1.5"
+                >
+                  {isParsing ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Parsing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Parse Text</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* TAB 2: SPENDING INSIGHTS & LEAK RADAR */}
       {activeTab === "insights" && (
         <div className="space-y-6 animate-fade-in">
           {/* Key Insights Overview Grid */}
@@ -322,7 +651,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = ({
           <div className="fintech-card rounded-2xl p-6 bg-slate-50/80 border border-slate-200 space-y-3">
             <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
               <Zap className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Smart Behavioral Spending Hacks (Derived from SMS Analysis)</span>
+              <span>Smart Behavioral Spending Hacks (Derived Automatically)</span>
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
@@ -357,151 +686,6 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = ({
             <div className="lg:col-span-5">
               <SpendingTrendChart />
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* TAB 2: AUTO-BUDGET FROM SMS ENGINE */}
-      {activeTab === "auto-budget" && (
-        <div className="space-y-6 animate-fade-in">
-          {/* How It Works Banner */}
-          <div className="fintech-card rounded-2xl p-6 bg-white border border-slate-200 shadow-sm space-y-4">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h3 className="text-sm font-bold text-slate-900 tracking-tight">
-                  Auto-Extract Your Monthly Budget from Bank SMS
-                </h3>
-                <p className="text-xs text-slate-500 mt-1">
-                  Paste your bank SMS alerts or load the realistic Indian bank pack. PocketSense isolates your salary credit and fixed commitments to build your budget in one click.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => handleParseBatch(RAW_SMS_SNIPPETS_DEMO)}
-                className="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm flex items-center gap-1.5 shrink-0 transition-colors"
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Load 10-SMS Bank Pack</span>
-              </button>
-            </div>
-
-            {/* Detected Budget Summary Card */}
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-slate-900">Detected Budget Blueprint:</span>
-                <span className="font-mono text-emerald-700 font-semibold">100% Client-Side Privacy</span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-xs">
-                <div className="p-3 bg-white border border-slate-200 rounded-xl">
-                  <span className="text-[10px] text-slate-500 uppercase block font-semibold">Detected Salary</span>
-                  <span className="text-base font-bold text-slate-900">{formatINR(detectedSalary)}</span>
-                  <span className="text-[10px] text-slate-400 block">From monthly credit SMS</span>
-                </div>
-
-                <div className="p-3 bg-white border border-slate-200 rounded-xl">
-                  <span className="text-[10px] text-slate-500 uppercase block font-semibold">Fixed Bills &amp; SIPs</span>
-                  <span className="text-base font-bold text-blue-700">{formatINR(detectedFixedBills)}</span>
-                  <span className="text-[10px] text-slate-400 block">Rent + Mutual Fund SIP</span>
-                </div>
-
-                <div className="p-3 bg-white border border-slate-200 rounded-xl">
-                  <span className="text-[10px] text-slate-500 uppercase block font-semibold">Discretionary Runway</span>
-                  <span className="text-base font-bold text-emerald-700">{formatINR(Math.max(0, detectedSalary - detectedFixedBills))}</span>
-                  <span className="text-[10px] text-slate-400 block">For all daily spending</span>
-                </div>
-              </div>
-
-              {budgetAppliedAlert ? (
-                <div className="p-3 rounded-lg bg-emerald-100 border border-emerald-300 text-xs font-semibold text-emerald-900 flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-700" />
-                  <span>Success! Your salary, fixed bills, and daily limit have been auto-configured in PocketSense.</span>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleApplyAutoBudget}
-                  className="w-full py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm flex items-center justify-center gap-2 transition-all"
-                >
-                  <Sliders className="w-3.5 h-3.5" />
-                  <span>Auto-Configure My Monthly Budget ({formatINR(detectedSalary)} Salary • {formatINR(detectedFixedBills)} Fixed)</span>
-                </button>
-              )}
-            </div>
-
-            {/* Custom Multi-SMS Textarea */}
-            <div className="space-y-2 pt-2">
-              <label className="block text-xs font-semibold text-slate-700">
-                Or Paste Multiple Bank / UPI SMS Messages Below:
-              </label>
-              <textarea
-                rows={4}
-                value={rawSmsBatch}
-                onChange={(e) => setRawSmsBatch(e.target.value)}
-                placeholder="Paste multiple SMS alerts separated by lines (HDFC, ICICI, SBI, Cred, PhonePe, GPay)..."
-                className="w-full p-3.5 text-xs font-mono bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-500"
-              />
-
-              <button
-                type="button"
-                disabled={isParsing || !rawSmsBatch.trim()}
-                onClick={() => handleParseBatch(rawSmsBatch.split("\n").filter((s) => s.trim()))}
-                className="px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 hover:bg-black text-white disabled:opacity-40 transition-all flex items-center gap-1.5"
-              >
-                {isParsing ? (
-                  <>
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                    <span>Extracting Budget &amp; Expenses...</span>
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>Parse Custom SMS Batch</span>
-                  </>
-                )}
-              </button>
-            </div>
-
-            {/* Parsed Output Preview */}
-            {parsedResults.length > 0 && (
-              <div className="space-y-3 pt-4 border-t border-slate-200">
-                <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="font-bold text-slate-900">Extracted {parsedResults.length} Financial Records:</span>
-                  <span className="text-emerald-700 font-semibold">Structured &amp; Categorized</span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-72 overflow-y-auto">
-                  {parsedResults.map((r, i) => (
-                    <div key={i} className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono flex flex-col justify-between">
-                      <div className="flex items-start justify-between gap-1 mb-1">
-                        <span className="font-bold text-slate-900 truncate">{r.merchant}</span>
-                        <span className="font-black text-slate-900">{formatINR(r.amount)}</span>
-                      </div>
-                      <div className="flex items-center justify-between text-[10px] text-slate-500">
-                        <span>{r.category}</span>
-                        <span className={r.spendingType === "Survival Need" ? "text-emerald-700 font-semibold" : "text-amber-700 font-semibold"}>
-                          {r.spendingType}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <button
-                  type="button"
-                  disabled={isCommitted}
-                  onClick={handleCommitParsedToLedger}
-                  className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm ${
-                    isCommitted
-                      ? "bg-emerald-100 text-emerald-800 border border-emerald-300 cursor-default"
-                      : "bg-emerald-600 hover:bg-emerald-700 text-white"
-                  }`}
-                >
-                  {isCommitted ? "✓ Added All Expenses to Passbook" : `Commit ${parsedResults.length} Records to Ledger`}
-                </button>
-              </div>
-            )}
           </div>
         </div>
       )}
