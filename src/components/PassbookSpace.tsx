@@ -163,13 +163,13 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = ({
           </div>
           <div>
             <h2 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
-              <span>Smart Budgeting from UPI &amp; Bank Alerts</span>
+              <span>Auto-Track: Because Nobody Tracks Manually</span>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">
-                AI Intelligence
+                Autopilot
               </span>
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              Turn passive transaction notifications into an automated monthly budget and spending leak insights
+              People can&apos;t track every expense manually. PocketSense turns your UPI and bank SMS alerts into a monthly budget and leak insights automatically.
             </p>
           </div>
         </div>

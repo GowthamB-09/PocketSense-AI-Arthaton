@@ -88,7 +88,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 transition-colors"
           >
             <FileText className="w-3.5 h-3.5 text-slate-500" />
-            <span className="hidden sm:inline">Add SMS</span>
+            <span className="hidden sm:inline">Auto-Track</span>
           </button>
 
           {/* Settings */}

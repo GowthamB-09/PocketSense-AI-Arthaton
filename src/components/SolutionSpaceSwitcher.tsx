@@ -45,10 +45,10 @@ export const SolutionSpaceSwitcher: React.FC<SolutionSpaceSwitcherProps> = ({
     },
     {
       id: "passbook" as SolutionSpace,
-      label: "SMS & Insights",
-      subtitle: "Smart Budgeting",
+      label: "Auto-Track Spends",
+      subtitle: "No manual tracking",
       icon: Receipt,
-      badge: "AI Budget",
+      badge: "Autopilot",
     },
   ];
 
@@ -133,7 +133,7 @@ export const SolutionSpaceSwitcher: React.FC<SolutionSpaceSwitcherProps> = ({
                 <Icon className="w-4 h-4" />
               </div>
               <span className="tracking-tight leading-none">
-                {space.id === "passbook" ? "Insights" : space.label.split(" ")[0]}
+                {space.id === "passbook" ? "Auto-Track" : space.label.split(" ")[0]}
               </span>
             </button>
           );
