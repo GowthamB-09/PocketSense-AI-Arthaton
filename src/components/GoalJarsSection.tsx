@@ -10,6 +10,8 @@ import {
   Sparkles,
   Plane,
   Laptop,
+  Smartphone,
+  Coins,
   ShieldCheck,
   Target,
   ArrowUpRight,
@@ -26,6 +28,7 @@ import {
   Landmark,
   ChevronRight,
   HelpCircle,
+  TrendingDown,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 
@@ -45,7 +48,7 @@ export const GoalJarsSection: React.FC = () => {
   const [sweepFeedback, setSweepFeedback] = useState<{
     total: number;
     sipAmount: number;
-    fdAmount: number;
+    goldAmount: number;
     timestamp: string;
     refNo: string;
   } | null>(null);
@@ -60,11 +63,52 @@ export const GoalJarsSection: React.FC = () => {
     answer: string;
   } | null>(null);
 
+  // AI Goal Strategy & Price Trend Advisor Insights
+  const getGoalAiAdvisorInsight = (title: string, category: string) => {
+    const t = title.toLowerCase();
+    if (t.includes("iphone") || t.includes("apple") || t.includes("phone")) {
+      return {
+        badge: "Tech Inflation: ~7% Annually",
+        badgeColor: "bg-blue-50 text-blue-700 border-blue-200",
+        insight:
+          "Price Trend: Flagship phone prices rise ~7% annually. Parking cash in a 3% bank account loses value. Recommended: Auto-sweep into a High-Yield FD / Arbitrage Fund (~7%) + target October festive sale discounts.",
+        recommendation: "Target October Festive Sale (~₹12k discount)",
+      };
+    }
+    if (t.includes("gold") || t.includes("wealth") || category === "Wealth") {
+      return {
+        badge: "Inflation Hedge: ~11–12% Long-Term",
+        badgeColor: "bg-amber-50 text-amber-700 border-amber-200",
+        insight:
+          "Price Trend: Gold & Indian equities beat inflation long-term (~11–12%). Recommended: Split Friday UPI AutoPay sweeps 70% into a Nifty 50 Index Fund SIP and 30% into Sovereign/Digital Gold.",
+        recommendation: "Split Friday AutoPay: 70% Index SIP / 30% Gold",
+      };
+    }
+    if (t.includes("emergency") || t.includes("shield") || category === "Emergency") {
+      return {
+        badge: "Safety Rule: 0% Equity Volatility",
+        badgeColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        insight:
+          "Safety Rule: Never put emergency cash in volatile stocks. Recommended: Keep 100% in an instant-withdrawal Bank FD (~6.5%).",
+        recommendation: "100% Instant-Withdrawal Bank FD (~6.5%)",
+      };
+    }
+    return {
+      badge: "Goal Pacing: On Track",
+      badgeColor: "bg-slate-50 text-slate-700 border-slate-200",
+      insight:
+        "AutoPay sweeps and intercepted impulse round-ups will compound towards this milestone every Friday without manual intervention.",
+      recommendation: "Continue Friday UPI AutoPay Sweeps",
+    };
+  };
+
   const getVaultIcon = (title: string, category: string) => {
     const t = title.toLowerCase();
+    if (t.includes("iphone") || t.includes("phone")) return Smartphone;
+    if (t.includes("gold") || t.includes("coin")) return Coins;
     if (t.includes("trip") || t.includes("japan") || category === "Travel") return Plane;
     if (t.includes("macbook") || t.includes("tech") || category === "Tech") return Laptop;
-    if (t.includes("emergency") || t.includes("fd") || category === "Emergency") return ShieldCheck;
+    if (t.includes("emergency") || t.includes("shield") || category === "Emergency") return ShieldCheck;
     if (t.includes("nifty") || t.includes("wealth") || category === "Wealth") return TrendingUp;
     return Target;
   };
@@ -78,28 +122,30 @@ export const GoalJarsSection: React.FC = () => {
     }
 
     setIsSweeping(true);
-    const simulatedBuffer = 2400; // unspent weekly daily safe buffer
+    const simulatedBuffer = 2400; // unspent weekly buffer
     const simulatedRoundUps = 600; // round-up spare change
     const totalSweep = simulatedBuffer + simulatedRoundUps; // ₹3,000
-    const sipAmount = Math.round(totalSweep * 0.75); // ₹2,250 (75%)
-    const fdAmount = totalSweep - sipAmount; // ₹750 (25%)
 
-    // Find or target Nifty 50 and FD goal jars
-    const niftyGoal = profile.goals.find((g) => g.title.toLowerCase().includes("nifty") || g.category === "Wealth") || profile.goals[0];
-    const fdGoal = profile.goals.find((g) => g.title.toLowerCase().includes("fd") || g.category === "Emergency") || profile.goals[1];
+    // 70% into Wealth / Gold Goal + 30% into Emergency Shield
+    const sipAmount = Math.round(totalSweep * 0.70); // ₹2,100 (70%)
+    const goldAmount = totalSweep - sipAmount; // ₹900 (30%)
 
-    if (niftyGoal) {
-      claimSavings(niftyGoal.id, sipAmount, `Friday AutoPay Sweep (75% Nifty 50 Index Fund)`);
+    // Find target goals
+    const wealthGoal = profile.goals.find((g) => g.title.toLowerCase().includes("gold") || g.category === "Wealth") || profile.goals[1];
+    const emergencyGoal = profile.goals.find((g) => g.title.toLowerCase().includes("emergency") || g.category === "Emergency") || profile.goals[2];
+
+    if (wealthGoal) {
+      claimSavings(wealthGoal.id, sipAmount, `Friday AutoPay Sweep (70% Nifty 50 + Gold)`);
     }
-    if (fdGoal) {
-      claimSavings(fdGoal.id, fdAmount, `Friday AutoPay Sweep (25% Emergency FD Shield)`);
+    if (emergencyGoal) {
+      claimSavings(emergencyGoal.id, goldAmount, `Friday AutoPay Sweep (30% Emergency Shield FD)`);
     }
 
-    const refNo = "NPCI-SWEEP-" + Math.floor(10000000 + Math.random() * 90000000);
+    const refNo = "NPCI-AUTOPAY-" + Math.floor(10000000 + Math.random() * 90000000);
     setSweepFeedback({
       total: totalSweep,
       sipAmount,
-      fdAmount,
+      goldAmount,
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       refNo,
     });
@@ -176,7 +222,7 @@ export const GoalJarsSection: React.FC = () => {
                 </span>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">
-                Zero-click monthly investing. Sweeps your weekly unspent daily buffer + UPI round-up change every Friday without asking for a UPI PIN.
+                Zero-click monthly investing. Automatically sweeps weekly unspent buffers + UPI spare change every Friday without asking for a UPI PIN.
               </p>
             </div>
           </div>
@@ -204,7 +250,7 @@ export const GoalJarsSection: React.FC = () => {
           </div>
         </div>
 
-        {/* 75% / 25% Split Visualizer & Schedule */}
+        {/* 70% / 30% Split Visualizer & Schedule */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
           <div className="md:col-span-8 space-y-3">
             <div className="flex items-center justify-between text-xs font-mono">
@@ -213,7 +259,7 @@ export const GoalJarsSection: React.FC = () => {
                 Schedule: <strong>Every Friday @ 6:00 PM</strong>
               </span>
               <span className="text-slate-500">
-                Auto-Sweep Rule: <strong>75% Index Fund / 25% Emergency FD</strong>
+                Rule: <strong>70% Nifty 50 &amp; Gold / 30% Emergency Shield</strong>
               </span>
             </div>
 
@@ -221,24 +267,24 @@ export const GoalJarsSection: React.FC = () => {
             <div className="space-y-1.5">
               <div className="w-full h-3 rounded-full bg-slate-100 overflow-hidden flex">
                 <div
-                  className="h-full bg-emerald-500 transition-all"
-                  style={{ width: "75%" }}
-                  title="75% Nifty 50 Index Fund SIP"
+                  className="h-full bg-amber-500 transition-all"
+                  style={{ width: "70%" }}
+                  title="70% Nifty 50 Index Fund & 24K Gold (~11-12% p.a.)"
                 />
                 <div
-                  className="h-full bg-blue-500 transition-all"
-                  style={{ width: "25%" }}
-                  title="25% Emergency FD"
+                  className="h-full bg-emerald-500 transition-all"
+                  style={{ width: "30%" }}
+                  title="30% Emergency Shield FD (~6.5% guaranteed)"
                 />
               </div>
               <div className="flex items-center justify-between text-[11px] font-mono">
+                <span className="text-amber-800 font-bold flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-amber-500" />
+                  70% Nifty 50 &amp; 24K Gold (~11–12% p.a.)
+                </span>
                 <span className="text-emerald-700 font-bold flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  75% Nifty 50 SIP (~12% p.a.)
-                </span>
-                <span className="text-blue-700 font-bold flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-blue-500" />
-                  25% Emergency FD (~6.5% p.a.)
+                  30% Emergency Shield (~6.5% p.a.)
                 </span>
               </div>
             </div>
@@ -285,7 +331,7 @@ export const GoalJarsSection: React.FC = () => {
               </span>
             </button>
             <span className="text-[10px] text-center text-slate-500 font-mono">
-              Demo button: Sweeps ₹3,000 (₹2,250 SIP + ₹750 FD)
+              Demo button: Sweeps ₹3,000 (₹2,100 Wealth + ₹900 Shield)
             </span>
           </div>
         </div>
@@ -302,8 +348,8 @@ export const GoalJarsSection: React.FC = () => {
                   </h4>
                   <p className="text-xs text-slate-600 mt-0.5">
                     Swept <strong>{formatINR(sweepFeedback.total)}</strong> without asking for a UPI PIN:{" "}
-                    <strong className="text-emerald-700">{formatINR(sweepFeedback.sipAmount)}</strong> into Nifty 50 SIP +{" "}
-                    <strong className="text-blue-700">{formatINR(sweepFeedback.fdAmount)}</strong> into Emergency FD.
+                    <strong className="text-amber-700">{formatINR(sweepFeedback.sipAmount)}</strong> into 24K Gold &amp; Wealth +{" "}
+                    <strong className="text-emerald-700">{formatINR(sweepFeedback.goldAmount)}</strong> into Emergency Shield.
                   </p>
                 </div>
               </div>
@@ -315,125 +361,109 @@ export const GoalJarsSection: React.FC = () => {
         )}
       </div>
 
-      {/* FEATURE 2: SILENT PORTFOLIO RISK GUARD */}
-      <div className="fintech-card rounded-2xl p-6 bg-white border border-slate-200 shadow-sm space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center shrink-0">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                <span>Silent Portfolio Risk Guard</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 font-semibold">
-                  Zero User Input Needed
-                </span>
-              </h3>
-              <p className="text-xs text-slate-500">
-                Monitors cross-bank credit card traps and inflation drag silently across your parsed statements.
-              </p>
-            </div>
+      {/* FEATURE 2: AI GOAL STRATEGY & PRICE TREND ADVISOR */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between text-xs">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-emerald-600" />
+            <h3 className="font-bold text-slate-900 uppercase tracking-wide">
+              AI Goal Strategy &amp; Price Trend Advisor
+            </h3>
           </div>
-
-          {/* Test Scenario Selector */}
-          <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl text-xs font-mono self-start sm:self-auto">
-            <button
-              type="button"
-              onClick={() => setRiskScenario("card-trap")}
-              className={`px-2.5 py-1.5 rounded-lg transition-all ${
-                riskScenario === "card-trap"
-                  ? "bg-white text-rose-700 shadow-xs font-bold"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              Card Bill Trap (65%)
-            </button>
-            <button
-              type="button"
-              onClick={() => setRiskScenario("fd-drag")}
-              className={`px-2.5 py-1.5 rounded-lg transition-all ${
-                riskScenario === "fd-drag"
-                  ? "bg-white text-amber-700 shadow-xs font-bold"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              Low-Return FD Drag (80%)
-            </button>
-            <button
-              type="button"
-              onClick={() => setRiskScenario("safe")}
-              className={`px-2.5 py-1.5 rounded-lg transition-all ${
-                riskScenario === "safe"
-                  ? "bg-white text-emerald-700 shadow-xs font-bold"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              Safe Autopilot
-            </button>
-          </div>
+          <span className="text-slate-400 font-mono text-[11px]">Real-World Inflation &amp; Product Trends</span>
         </div>
 
-        {/* Dynamic Risk Guard Insight Card */}
-        {riskScenario === "card-trap" && (
-          <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-950 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
-              <div>
-                <span className="font-bold block text-rose-900">
-                  Cross-Card Bill Alert: ICICI + HDFC Card Bills Hit ₹18,500 (65% of Salary)
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Card 1: New iPhone (₹80,000) */}
+          <div className="fintech-card rounded-2xl p-5 bg-white border border-slate-200 shadow-sm space-y-3 flex flex-col justify-between hover:border-slate-300 transition-all">
+            <div className="space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 flex items-center justify-center shadow-xs">
+                    <Smartphone className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-900">New iPhone</h4>
+                    <span className="text-[10px] font-mono text-slate-500">Target: ₹80,000</span>
+                  </div>
+                </div>
+                <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 font-bold">
+                  Tech Inflation ~7%
                 </span>
-                <p className="text-rose-800 text-xs mt-0.5 leading-relaxed">
-                  Your upcoming card bills total <strong>₹18,500</strong>. PocketSense has <strong>automatically paused this Friday&apos;s UPI AutoPay sweep</strong> so your checking balance doesn&apos;t run into a negative trap before payday.
-                </p>
               </div>
-            </div>
-            <div className="shrink-0 flex items-center gap-2">
-              <span className="text-[10px] font-mono px-2 py-1 rounded bg-rose-100 text-rose-800 border border-rose-300 font-bold">
-                Auto-Sweep Paused
-              </span>
-            </div>
-          </div>
-        )}
 
-        {riskScenario === "fd-drag" && (
-          <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-950 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in">
-            <div className="flex items-start gap-3">
-              <Info className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-              <div>
-                <span className="font-bold block text-amber-900">
-                  Inflation Drag Alert: 80% of Savings Locked in 6.5% FDs
-                </span>
-                <p className="text-amber-800 text-xs mt-0.5 leading-relaxed">
-                  You have ₹65,000 sitting in low-yield fixed deposits losing purchasing power to inflation. AutoPay has automatically re-routed <strong>75% of future weekly spare change into the Nifty 50 Index Fund (~12% p.a.)</strong>.
-                </p>
+              <div className="p-3 rounded-xl bg-blue-50/50 border border-blue-100 text-xs text-slate-700 leading-relaxed font-sans">
+                <strong className="text-blue-900 block font-semibold mb-1">AI Price Trend Insight:</strong>
+                Price Trend: Flagship phone prices rise ~7% annually. Parking cash in a 3% bank account loses value. Recommended: Auto-sweep into a High-Yield FD / Arbitrage Fund (~7%) + target October festive sale discounts.
               </div>
             </div>
-            <div className="shrink-0">
-              <span className="text-[10px] font-mono px-2 py-1 rounded bg-amber-100 text-amber-800 border border-amber-300 font-bold">
-                Re-Routing to Equity SIP
-              </span>
-            </div>
-          </div>
-        )}
 
-        {riskScenario === "safe" && (
-          <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-950 flex items-center justify-between gap-3 animate-fade-in">
-            <div className="flex items-center gap-3">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-              <div>
-                <span className="font-bold block text-emerald-900">
-                  All Systems Clear: Runway &amp; Allocation Healthy
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono text-slate-500">
+              <span>Saved: ₹36,000 (45%)</span>
+              <span className="text-blue-700 font-semibold">Festive Sale Target</span>
+            </div>
+          </div>
+
+          {/* Card 2: 24K Digital Gold & Wealth (₹1,50,000) */}
+          <div className="fintech-card rounded-2xl p-5 bg-white border border-slate-200 shadow-sm space-y-3 flex flex-col justify-between hover:border-slate-300 transition-all">
+            <div className="space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center shadow-xs">
+                    <Coins className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-900">24K Digital Gold &amp; Wealth</h4>
+                    <span className="text-[10px] font-mono text-slate-500">Target: ₹1,50,000</span>
+                  </div>
+                </div>
+                <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 font-bold">
+                  Inflation Hedge ~12%
                 </span>
-                <p className="text-emerald-800 text-xs mt-0.5">
-                  Credit card dues are under 25% of monthly salary. Next scheduled auto-sweep: <strong>Friday @ 6:00 PM (₹3,000)</strong>.
-                </p>
+              </div>
+
+              <div className="p-3 rounded-xl bg-amber-50/50 border border-amber-100 text-xs text-slate-700 leading-relaxed font-sans">
+                <strong className="text-amber-900 block font-semibold mb-1">AI Price Trend Insight:</strong>
+                Price Trend: Gold &amp; Indian equities beat inflation long-term (~11–12%). Recommended: Split Friday UPI AutoPay sweeps 70% into a Nifty 50 Index Fund SIP and 30% into Sovereign/Digital Gold.
               </div>
             </div>
-            <span className="text-[10px] font-mono px-2 py-1 rounded bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold shrink-0">
-              Autopilot Ready
-            </span>
+
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono text-slate-500">
+              <span>Saved: ₹68,000 (45%)</span>
+              <span className="text-amber-700 font-semibold">70/30 AutoPay Split</span>
+            </div>
           </div>
-        )}
+
+          {/* Card 3: 3-Month Emergency Shield (₹90,000) */}
+          <div className="fintech-card rounded-2xl p-5 bg-white border border-slate-200 shadow-sm space-y-3 flex flex-col justify-between hover:border-slate-300 transition-all">
+            <div className="space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center shadow-xs">
+                    <ShieldCheck className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-900">3-Month Emergency Shield</h4>
+                    <span className="text-[10px] font-mono text-slate-500">Target: ₹90,000</span>
+                  </div>
+                </div>
+                <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold">
+                  Zero Stock Volatility
+                </span>
+              </div>
+
+              <div className="p-3 rounded-xl bg-emerald-50/50 border border-emerald-100 text-xs text-slate-700 leading-relaxed font-sans">
+                <strong className="text-emerald-900 block font-semibold mb-1">AI Safety Rule Insight:</strong>
+                Safety Rule: Never put emergency cash in volatile stocks. Recommended: Keep 100% in an instant-withdrawal Bank FD (~6.5%).
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono text-slate-500">
+              <span>Saved: ₹55,000 (61%)</span>
+              <span className="text-emerald-700 font-semibold">Instant Bank FD</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* FEATURE 3: 3 ULTRA-SHORT PLAIN-ENGLISH INVESTING CARDS */}
@@ -460,7 +490,7 @@ export const GoalJarsSection: React.FC = () => {
               </span>
             </div>
             <p className="text-xs text-slate-600 leading-relaxed">
-              Your financial helmet. Keeps 3 months of survival money safe in RBI-backed bank deposits so you never have to break stock investments during an emergency.
+              Your financial helmet. Keeps 3 months of emergency survival money in RBI-insured bank deposits so you never sell investments in a panic.
             </p>
           </div>
 
@@ -501,26 +531,26 @@ export const GoalJarsSection: React.FC = () => {
           </div>
         </div>
 
-        {/* 1-Tap Plain-English AI Advisor Bar */}
+        {/* 1-Tap "Ask AI About My Goals" Bar with Preset Questions */}
         <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
           <div className="flex items-center gap-2 text-xs font-semibold text-slate-700">
             <HelpCircle className="w-4 h-4 text-emerald-600" />
-            <span>1-Tap AI Advisor (Preset Questions):</span>
+            <span>1-Tap &quot;Ask AI About My Goals&quot; (Preset Questions):</span>
           </div>
 
           <div className="flex flex-wrap gap-2 text-xs">
             {[
               {
-                q: "Why 75% in Nifty 50 and 25% in FD?",
-                a: "The 75/25 barbell gives you the highest long-term growth (~12% p.a.) while keeping an unbreakable liquid cash cushion (25%) so you never have to panic-sell when markets dip.",
+                q: "Why shouldn't I keep iPhone savings in a normal bank account?",
+                a: "Normal savings accounts pay ~2.5–3%, which lags 7% annual tech price inflation. High-yield liquid FDs or arbitrage funds earn ~7% without stock market risk, preserving your purchasing power.",
               },
               {
-                q: "Can I stop or pause AutoPay anytime?",
-                a: "Yes, instantly with zero penalties. You can toggle the mandate off with 1 tap right here or modify your weekly cap.",
+                q: "How does 70% Nifty 50 + 30% Gold beat inflation?",
+                a: "Indian equities (Nifty 50) have historically delivered ~12% long-term CAGR, while 24K Gold hedges against currency devaluation (~10–11%). Combined, they easily beat India's ~5–6% CPI inflation.",
               },
               {
-                q: "Does AutoPay trigger if my bank balance is low?",
-                a: "No! The Silent Risk Guard checks your live safe runway. If your balance drops below ₹5,000 or card bills exceed 50% of salary, the sweep is auto-paused.",
+                q: "Why must Emergency cash be in a 6.5% FD instead of mutual funds?",
+                a: "Emergencies don't wait for market crashes to recover. Bank FDs backed by DICGC insurance offer instant 24/7 liquidity with 0% capital volatility, so you never sell equity at a bottom.",
               },
             ].map((item, idx) => (
               <button
@@ -585,11 +615,12 @@ export const GoalJarsSection: React.FC = () => {
           {profile.goals.map((jar) => {
             const percent = Math.min(100, Math.round((jar.currentAmount / jar.targetAmount) * 100));
             const VaultIcon = getVaultIcon(jar.title, jar.category);
+            const aiInsight = getGoalAiAdvisorInsight(jar.title, jar.category);
 
             return (
               <div
                 key={jar.id}
-                className="fintech-card rounded-2xl p-5 flex flex-col justify-between group bg-white border border-slate-200 shadow-sm hover:border-slate-300 transition-all"
+                className="fintech-card rounded-2xl p-5 flex flex-col justify-between group bg-white border border-slate-200 shadow-sm hover:border-slate-300 transition-all space-y-3"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-3">
@@ -633,9 +664,16 @@ export const GoalJarsSection: React.FC = () => {
                       <span className="text-emerald-700 font-semibold">+{formatINR(jar.totalSavedFromNudges)} swept</span>
                     )}
                   </div>
+
+                  {/* AI Strategy Mini-Tag */}
+                  <div className="mt-2.5 pt-2 border-t border-slate-100">
+                    <span className={`text-[9px] font-mono px-2 py-0.5 rounded border block truncate font-medium ${aiInsight.badgeColor}`}>
+                      {aiInsight.recommendation}
+                    </span>
+                  </div>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-slate-100">
+                <div className="pt-2 border-t border-slate-100">
                   <button
                     onClick={() => setDepositModalGoal(jar)}
                     className="w-full py-1.5 px-3 rounded-lg text-xs font-semibold bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 transition-colors flex items-center justify-center gap-1.5"
@@ -666,7 +704,7 @@ export const GoalJarsSection: React.FC = () => {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Nifty Index Fund, Japan Trip, MacBook"
+                  placeholder="e.g. New iPhone, 24K Gold, Emergency Shield"
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                   className="w-full px-3 py-2 text-base sm:text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors min-h-[44px]"
@@ -680,7 +718,7 @@ export const GoalJarsSection: React.FC = () => {
                     type="number"
                     required
                     min="1000"
-                    placeholder="50000"
+                    placeholder="80000"
                     value={newTarget}
                     onChange={(e) => setNewTarget(e.target.value)}
                     className="w-full px-3 py-2 text-base sm:text-xs font-mono bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors min-h-[44px]"
@@ -693,10 +731,10 @@ export const GoalJarsSection: React.FC = () => {
                     onChange={(e) => setNewCategory(e.target.value as any)}
                     className="w-full px-3 py-2 text-base sm:text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors min-h-[44px]"
                   >
-                    <option value="Wealth">Wealth (Index Fund/SIP)</option>
+                    <option value="Tech">Tech (iPhone/Laptop)</option>
+                    <option value="Wealth">Wealth (24K Gold/SIP)</option>
                     <option value="Emergency">Emergency (FD Shield)</option>
                     <option value="Travel">Travel</option>
-                    <option value="Tech">Tech</option>
                     <option value="Lifestyle">Lifestyle</option>
                   </select>
                 </div>

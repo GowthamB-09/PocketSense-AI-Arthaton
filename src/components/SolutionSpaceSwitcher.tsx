@@ -24,11 +24,11 @@ export const SolutionSpaceSwitcher: React.FC<SolutionSpaceSwitcherProps> = ({
   const spaces = [
     {
       id: "daily-safe" as SolutionSpace,
-      label: "Daily Safe Core",
-      mobileLabel: "Daily Safe",
-      subtitle: "Limit & Runway",
+      label: "Safe Pool Core",
+      mobileLabel: "Safe Pool",
+      subtitle: "Flexible Pool & Runway",
       icon: Wallet,
-      badge: "Core",
+      badge: "Pool",
     },
     {
       id: "before-i-scan" as SolutionSpace,

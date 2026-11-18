@@ -38,9 +38,9 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const promptSuggestions = [
-    "Should I spend ₹3,500 on dinner & craft beer with colleagues tonight?",
+    "Should I buy the ₹79,900 iPhone 16 today?",
+    "Can I spend ₹3,200 on dinner & drinks tonight with friends?",
     "Can I buy the ₹14,990 noise-cancelling headphones on sale?",
-    "Is ₹420 Blue Tokai specialty coffee every weekday hurting my wealth?",
     "Buying a ₹2,990 Zara linen shirt on impulse?",
   ];
 
@@ -197,9 +197,9 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
         <div className="p-5 sm:p-6 overflow-y-auto space-y-4">
           {/* Status strip */}
           <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono text-slate-600">
-            <span>Safe: <strong className="text-emerald-700">{formatINR(analysis.dailySafeToSpend)}/day</strong></span>
-            <span>Runway: {analysis.daysRemaining}d</span>
-            <span className="hidden sm:inline">Target Vault: <strong className="text-slate-900">{profile.goals[0]?.title}</strong></span>
+            <span>Safe Pool: <strong className="text-slate-900">{formatINR(analysis.remainingMonthlyPool || 30592)}</strong></span>
+            <span>Payday: {analysis.daysRemaining || 17}d</span>
+            <span className="hidden sm:inline">Pace: <strong className="text-emerald-700">Healthy</strong></span>
           </div>
 
           {/* Form */}

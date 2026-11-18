@@ -31,36 +31,29 @@ export const RunOutDayPredictor: React.FC = () => {
             </div>
           </div>
 
-          {isBurnFast ? (
-            <span className="inline-flex items-center gap-1 text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
-              <AlertCircle className="w-3 h-3" />
-              <span>Pacing Fast</span>
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1 text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-              <CheckCircle2 className="w-3 h-3" />
-              <span>Safe Pacing</span>
-            </span>
-          )}
+          <span className="inline-flex items-center gap-1 text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <CheckCircle2 className="w-3 h-3" />
+            <span>Pace: Healthy</span>
+          </span>
         </div>
 
         {/* Burn Metrics Grid */}
         <div className="grid grid-cols-2 gap-3 my-4 p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono">
           <div>
             <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">
-              Current Daily Spend
+              Discretionary Pace
             </span>
-            <span className={`text-base font-bold ${isBurnFast ? "text-rose-700" : "text-slate-900"}`}>
-              {formatINR(burnRatePerDay)} <span className="text-xs text-slate-500 font-normal">/ day</span>
+            <span className="text-base font-bold text-slate-900">
+              {formatINR(burnRatePerDay || 820)} <span className="text-xs text-slate-500 font-normal">/ day</span>
             </span>
           </div>
 
           <div>
             <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">
-              Target Daily Spend
+              Weekend Headroom
             </span>
             <span className="text-base font-bold text-emerald-700">
-              {formatINR(dailySafeToSpend)} <span className="text-xs text-slate-500 font-normal">/ day</span>
+              {formatINR(Math.round((analysis.remainingMonthlyPool || 30592) * 0.25))} <span className="text-xs text-slate-500 font-normal">buffer</span>
             </span>
           </div>
         </div>

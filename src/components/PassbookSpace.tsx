@@ -304,7 +304,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
                     </div>
                     <div>
                       <h3 className="text-xs font-bold text-slate-900 tracking-tight flex items-center gap-1.5">
-                        <span>Gmail Auto-Forward Active</span>
+                        <span>Gmail Bank/Card Auto-Forward: ON</span>
                       </h3>
                       <span className="text-[10px] font-mono text-emerald-700 font-semibold flex items-center gap-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -344,7 +344,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
               </div>
             </div>
 
-            {/* CONNECTOR B: PHONE SMS WEBHOOK */}
+            {/* CONNECTOR B: PHONE UPI WEBHOOK */}
             <div className="fintech-card rounded-2xl p-5 bg-white border border-slate-200 shadow-sm space-y-4 flex flex-col justify-between">
               <div>
                 <div className="flex items-start justify-between gap-2 mb-2">
@@ -354,7 +354,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
                     </div>
                     <div>
                       <h3 className="text-xs font-bold text-slate-900 tracking-tight flex items-center gap-1.5">
-                        <span>Phone SMS Webhook Connected</span>
+                        <span>Phone UPI Webhook: ON</span>
                       </h3>
                       <span className="text-[10px] font-mono text-emerald-700 font-semibold flex items-center gap-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
@@ -397,41 +397,56 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
               <div className="flex items-center gap-2">
                 <Zap className="w-4 h-4 text-emerald-600 fill-emerald-600" />
                 <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wide">
-                  1-Click Live Background Sync Simulator (Test Without Real SMS/Email)
+                  1-Click Simulate Incoming Multi-Bank Spend (HDFC, SBI, ICICI Card + Auto Spare Change)
                 </h4>
               </div>
               <span className="text-[10px] font-mono text-slate-400">
-                Updates Safe to Spend &amp; Balances in Real Time
+                Updates Total Safe-to-Spend Pool &amp; Round-Up Jar Live
               </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-1">
               <button
                 type="button"
-                onClick={() => handleSimulateWebhookDebit("Swiggy Gourmet Bowl", 480, "Dining & Social")}
+                onClick={() => handleSimulateWebhookDebit("Swiggy Delivery (SBI UPI)", 480, "Dining & Social")}
                 className="p-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-left transition-all group active:scale-95"
               >
                 <div className="flex items-center justify-between text-xs font-bold text-slate-900 mb-1">
-                  <span>Swiggy Delivery</span>
+                  <span>SBI UPI Spend</span>
                   <span className="font-mono text-rose-600">-₹480</span>
                 </div>
                 <div className="text-[10px] text-slate-500 font-mono flex items-center justify-between">
-                  <span>SMS Webhook</span>
+                  <span>+₹20 Round-Up</span>
                   <span className="text-emerald-600 group-hover:underline">Simulate →</span>
                 </div>
               </button>
 
               <button
                 type="button"
-                onClick={() => handleSimulateWebhookDebit("Blue Tokai Coffee", 350, "Dining & Social")}
+                onClick={() => handleSimulateWebhookDebit("Blue Tokai (HDFC Bank)", 350, "Dining & Social")}
                 className="p-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-left transition-all group active:scale-95"
               >
                 <div className="flex items-center justify-between text-xs font-bold text-slate-900 mb-1">
-                  <span>Blue Tokai Coffee</span>
+                  <span>HDFC Bank UPI</span>
                   <span className="font-mono text-rose-600">-₹350</span>
                 </div>
                 <div className="text-[10px] text-slate-500 font-mono flex items-center justify-between">
-                  <span>UPI Webhook</span>
+                  <span>+₹50 Round-Up</span>
+                  <span className="text-emerald-600 group-hover:underline">Simulate →</span>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSimulateCardBillAlert}
+                className="p-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-left transition-all group active:scale-95"
+              >
+                <div className="flex items-center justify-between text-xs font-bold text-slate-900 mb-1">
+                  <span>ICICI Card Bill</span>
+                  <span className="font-mono text-blue-600">₹14,200 Due</span>
+                </div>
+                <div className="text-[10px] text-slate-500 font-mono flex items-center justify-between">
+                  <span>Gmail e-Bill</span>
                   <span className="text-emerald-600 group-hover:underline">Simulate →</span>
                 </div>
               </button>
@@ -446,22 +461,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
                   <span className="font-mono text-emerald-600">+₹75,000</span>
                 </div>
                 <div className="text-[10px] text-slate-500 font-mono flex items-center justify-between">
-                  <span>Gmail Forward</span>
-                  <span className="text-emerald-600 group-hover:underline">Simulate →</span>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleSimulateCardBillAlert}
-                className="p-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-left transition-all group active:scale-95"
-              >
-                <div className="flex items-center justify-between text-xs font-bold text-slate-900 mb-1">
-                  <span>HDFC Card Bill</span>
-                  <span className="font-mono text-blue-600">₹14,200 Due</span>
-                </div>
-                <div className="text-[10px] text-slate-500 font-mono flex items-center justify-between">
-                  <span>Gmail e-Statement</span>
+                  <span>Refills Safe Pool</span>
                   <span className="text-emerald-600 group-hover:underline">Simulate →</span>
                 </div>
               </button>

@@ -12,8 +12,8 @@ import {
   SYNTHETIC_TRANSACTIONS,
 } from "../demo/syntheticStudentData";
 
-const STORAGE_KEY_PROFILE = "pocketsense_prof_profile_v4";
-const STORAGE_KEY_TRANSACTIONS = "pocketsense_prof_transactions_v4";
+const STORAGE_KEY_PROFILE = "pocketsense_prof_profile_v5";
+const STORAGE_KEY_TRANSACTIONS = "pocketsense_prof_transactions_v5";
 
 /**
  * Calculates automated salary cycle details based on salary credit day and real clock

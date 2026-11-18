@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     let merchant = "This purchase";
     if (/dinner|drinks|brewery|beer|pub|bar/i.test(prompt)) merchant = "Weekend Dinner & Drinks";
     else if (/coffee|tokai|starbucks/i.test(prompt)) merchant = "Specialty Coffee";
-    else if (/headphones|watch|gadget|macbook/i.test(prompt)) merchant = "Electronics / Tech Gear";
+    else if (/iphone|apple|phone|headphones|watch|gadget|macbook/i.test(prompt)) merchant = "Flagship Tech / iPhone";
     else if (/zara|h&m|shirt|jacket/i.test(prompt)) merchant = "Apparel & Shopping";
     else if (/staycation|resort|hotel/i.test(prompt)) merchant = "Weekend Staycation";
     else if (/zepto|blinkit|swiggy|zomato/i.test(prompt)) merchant = "Quick Food & Commerce";

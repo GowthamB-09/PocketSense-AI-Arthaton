@@ -2,48 +2,48 @@ import { FinancialMemoryProfile, GoalJar, SpendingTrap, Transaction } from "@/ty
 
 export const INITIAL_GOAL_JARS: GoalJar[] = [
   {
-    id: "goal_nifty50",
-    title: "Nifty 50 Index Fund SIP",
-    targetAmount: 250000,
-    currentAmount: 42500,
-    deadline: "2027-12-31",
-    emoji: "📈",
-    category: "Wealth",
-    color: "#10B981", // Emerald
-    totalSavedFromNudges: 18500,
+    id: "goal_iphone",
+    title: "New iPhone",
+    targetAmount: 80000,
+    currentAmount: 36000,
+    deadline: "2027-10-15",
+    emoji: "📱",
+    category: "Tech",
+    color: "#3B82F6", // Blue
+    totalSavedFromNudges: 14000,
   },
   {
-    id: "goal_emergency_fd",
-    title: "Emergency FD Shield (6.5%)",
-    targetAmount: 100000,
-    currentAmount: 65000,
+    id: "goal_gold_wealth",
+    title: "24K Digital Gold & Wealth",
+    targetAmount: 150000,
+    currentAmount: 68000,
+    deadline: "2027-12-31",
+    emoji: "🪙",
+    category: "Wealth",
+    color: "#F59E0B", // Gold / Amber
+    totalSavedFromNudges: 22000,
+  },
+  {
+    id: "goal_emergency_shield",
+    title: "3-Month Emergency Shield",
+    targetAmount: 90000,
+    currentAmount: 55000,
     deadline: "2027-06-30",
     emoji: "🛡️",
     category: "Emergency",
-    color: "#0284C7", // Cyan/Blue
-    totalSavedFromNudges: 9500,
+    color: "#10B981", // Emerald
+    totalSavedFromNudges: 12500,
   },
   {
     id: "goal_japan_trip",
     title: "Japan Spring Trip",
     targetAmount: 150000,
-    currentAmount: 68000,
+    currentAmount: 48000,
     deadline: "2027-04-10",
     emoji: "🇯🇵",
     category: "Travel",
     color: "#8B5CF6", // Violet
-    totalSavedFromNudges: 12500,
-  },
-  {
-    id: "goal_macbook",
-    title: "M3 Max MacBook Pro",
-    targetAmount: 120000,
-    currentAmount: 54000,
-    deadline: "2027-02-15",
-    emoji: "💻",
-    category: "Tech",
-    color: "#F59E0B", // Amber
-    totalSavedFromNudges: 8400,
+    totalSavedFromNudges: 8500,
   },
 ];
 

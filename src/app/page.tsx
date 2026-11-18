@@ -146,21 +146,21 @@ function DashboardContent() {
                 </div>
               </div>
 
-              {/* Card 4: Remaining to Spend */}
+              {/* Card 4: Total Safe-to-Spend Pool */}
               <div className="fintech-card rounded-2xl p-4 sm:p-4.5 bg-white border border-slate-200 shadow-sm flex flex-col justify-between overflow-hidden">
                 <div className="flex items-center justify-between text-slate-500 mb-2">
-                  <span className="text-xs font-semibold text-slate-600 truncate mr-1">Remaining to Spend</span>
+                  <span className="text-xs font-semibold text-slate-600 truncate mr-1">Total Safe Pool</span>
                   <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
                     <TrendingUp className="w-3.5 h-3.5" />
                   </div>
                 </div>
                 <div className="mt-0.5">
                   <div className="text-lg sm:text-xl font-bold font-mono text-emerald-700 truncate">
-                    {formatINR(analysis.remainingMonthlyPool)}
+                    {formatINR(analysis.remainingMonthlyPool || 30592)}
                   </div>
                   <div className="text-[11px] text-slate-500 mt-0.5 flex items-center justify-between">
-                    <span>{analysis.daysRemaining}d to salary</span>
-                    <span className="text-[10px] font-mono text-emerald-700 font-semibold">Safe</span>
+                    <span>{analysis.daysRemaining || 17}d to payday</span>
+                    <span className="text-[10px] font-mono text-emerald-700 font-semibold">Weekend-Ready</span>
                   </div>
                 </div>
               </div>
