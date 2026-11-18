@@ -105,7 +105,7 @@ export function parseSmsHeuristically(smsText: string): SmsParseResult {
     category = "Rent & Fixed Utilities";
     spendingType = "Survival Need";
   }
-  // Investments & SIPs
+  // Investments & SIPs & FDs
   else if (
     lower.includes("sip") ||
     lower.includes("zerodha") ||
@@ -113,10 +113,31 @@ export function parseSmsHeuristically(smsText: string): SmsParseResult {
     lower.includes("mutual fund") ||
     lower.includes("coin") ||
     lower.includes("nps") ||
-    lower.includes("ppf")
+    lower.includes("ppf") ||
+    lower.includes("nifty 50") ||
+    lower.includes("bse star") ||
+    lower.includes("index fund") ||
+    lower.includes("fixed deposit") ||
+    lower.includes("fd no.")
   ) {
     category = "Investments & SIPs";
     spendingType = "Survival Need";
+    if (lower.includes("fixed deposit") || lower.includes("fd no.")) {
+      merchant = "Axis Bank Fixed Deposit (FD)";
+    } else if (lower.includes("nifty 50") || lower.includes("index fund")) {
+      merchant = "UTI Nifty 50 Index Fund SIP";
+    }
+  }
+  // Credit Card Bill Dues
+  else if (
+    (lower.includes("total amt due") || lower.includes("total due") || lower.includes("min amt due")) &&
+    lower.includes("card")
+  ) {
+    category = "Rent & Fixed Utilities";
+    spendingType = "Survival Need";
+    merchant = lower.includes("icici")
+      ? "ICICI Amazon Pay Credit Card Bill"
+      : "HDFC Millennia Credit Card Bill";
   }
   // Subscriptions & Cloud
   else if (

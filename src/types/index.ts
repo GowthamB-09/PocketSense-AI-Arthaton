@@ -140,3 +140,51 @@ export interface ImpulseVerdict {
   smartHacks: string[];
   recalledMemories: string[];
 }
+
+export interface BankAccountBadge {
+  id: string;
+  bankName: string;
+  accountType: "Salary" | "Savings" | "UPI Stash";
+  accountNumber: string;
+  balance: number;
+  color: string;
+}
+
+export interface CreditCardBadge {
+  id: string;
+  cardName: string;
+  bank: string;
+  last4: string;
+  totalDue: number;
+  minDue: number;
+  dueDate: string;
+  color: string;
+  daysUntilDue: number;
+}
+
+export interface InvestmentBadge {
+  id: string;
+  name: string;
+  type: "FD" | "Index Fund" | "SIP";
+  institution: string;
+  amount: number;
+  rateOrCagr: string;
+  status: string;
+  color: string;
+}
+
+export interface MoneyBrainFeed {
+  totalBankCash: number;
+  totalCreditCardBills: number;
+  trueSafeToSpendCash: number;
+  totalInvestments: number;
+  roundUpTotal: number;
+  roundUpTransactionsCount: number;
+  bankBadges: BankAccountBadge[];
+  cardBadges: CreditCardBadge[];
+  investmentBadges: InvestmentBadge[];
+  rawSmsFeed: string[];
+}
+
+export type PortfolioRiskPresetKey = "inflation_trap" | "debt_danger" | "balanced_autopilot";
+

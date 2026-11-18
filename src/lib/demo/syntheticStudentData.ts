@@ -333,3 +333,149 @@ export const RAW_SMS_SNIPPETS_DEMO = [
   `Txn of INR 2990.00 on ICICI CC ending 8810 at ZARA INDIA on 08-Nov-2026. Ref: 6318334912`,
   `Paid Rs. 850.00 to SWIGGY via PhonePe on 11-Nov-2026. Ref: 6321667281`,
 ];
+
+export const MULTI_BANK_SMS_FEED_DEMO = [
+  // HDFC Bank Salary & Balance Alert
+  `HDFC Bank: Salary of INR 75,000.00 credited to A/C **4412 on 01-Nov-2026 by TECH CORP PVT LTD. Avail Bal: INR 28,400.00. Ref: 9921440123.`,
+  // SBI Secondary Account & UPI Debit
+  `SBI UPI: Rs 1,450.00 debited from A/C **9012 to DMART SUPERSTORE on 11-Nov-2026. Avail Bal: Rs 14,800.00. Ref: 6322998811.`,
+  // ICICI Amazon Pay Credit Card Statement Due
+  `ICICI Bank Credit Card ending 8810: Total Amt Due is INR 16,200.00, Min Amt Due INR 1,600.00. Payment Due Date: 22-Nov-2026. Avoid 42% APR charges.`,
+  // HDFC Millennia Credit Card Bill Due
+  `HDFC Bank Card ending 3321: Total Due INR 12,800.00 by 26-Nov-2026. Pay full bill to prevent interest fee. Ref: CC332199.`,
+  // Axis Bank Fixed Deposit (FD)
+  `Axis Bank: Your Fixed Deposit No. **7721 of INR 50,000.00 @ 6.85% p.a. is active. Quarterly interest accrued INR 856. Maturity date: 15-Oct-2027.`,
+  // UTI Nifty 50 Index Fund SIP
+  `BSE StAR MF: Auto-debit of INR 8,000.00 for UTI NIFTY 50 INDEX FUND DIRECT-GROWTH executed on 01-Nov-2026. Current Portfolio NAV Value: INR 45,200.00.`,
+  // PhonePe UPI Spend with Spare Change Round-up
+  `PhonePe: Paid Rs. 165.00 to CHAI POINT on 13-Nov-2026. Rs. 35.00 spare change rounded-up and added to Vault Jar. Ref: 6323110022.`,
+  // Google Pay UPI Spend with Spare Change Round-up
+  `Google Pay: Sent Rs. 420.00 to BLUE TOKAI on 14-Nov-2026. Rs. 80.00 spare change round-up deposited. Ref: 6324221133.`,
+  // Rent Transfer
+  `Debited Rs. 20,000.00 from HDFC Bank A/C **4412 to RAJESH (APARTMENT RENT) on 01-Nov-2026. Ref: 6311029381.`,
+  // Quick Commerce Zepto
+  `Paid Rs. 680.00 to ZEPTO QUICK via PhonePe on 03-Nov-2026 from SBI A/C **9012. Ref: 6313498112.`,
+];
+
+export const INITIAL_MONEY_BRAIN_DATA = {
+  totalBankCash: 43200, // HDFC 28,400 + SBI 14,800
+  totalCreditCardBills: 29000, // ICICI CC 16,200 + HDFC CC 12,800
+  trueSafeToSpendCash: 14200, // 43,200 - 29,000 = 14,200
+  totalInvestments: 95200, // Axis FD 50,000 + UTI Nifty 50 Index Fund 45,200
+  roundUpTotal: 2150,
+  roundUpTransactionsCount: 28,
+  bankBadges: [
+    {
+      id: "acc_hdfc",
+      bankName: "HDFC Bank",
+      accountType: "Salary" as const,
+      accountNumber: "**4412",
+      balance: 28400,
+      color: "#059669",
+    },
+    {
+      id: "acc_sbi",
+      bankName: "SBI Account",
+      accountType: "UPI Stash" as const,
+      accountNumber: "**9012",
+      balance: 14800,
+      color: "#0284C7",
+    },
+  ],
+  cardBadges: [
+    {
+      id: "card_icici",
+      cardName: "Amazon Pay Card",
+      bank: "ICICI Bank",
+      last4: "8810",
+      totalDue: 16200,
+      minDue: 1600,
+      dueDate: "22-Nov-2026",
+      daysUntilDue: 4,
+      color: "#E11D48",
+    },
+    {
+      id: "card_hdfc",
+      cardName: "Millennia Credit Card",
+      bank: "HDFC Bank",
+      last4: "3321",
+      totalDue: 12800,
+      minDue: 1280,
+      dueDate: "26-Nov-2026",
+      daysUntilDue: 8,
+      color: "#E11D48",
+    },
+  ],
+  investmentBadges: [
+    {
+      id: "inv_axis_fd",
+      name: "Emergency Reserve FD",
+      type: "FD" as const,
+      institution: "Axis Bank",
+      amount: 50000,
+      rateOrCagr: "6.85% p.a.",
+      status: "Maturing Oct 2027",
+      color: "#8B5CF6",
+    },
+    {
+      id: "inv_uti_nifty",
+      name: "Nifty 50 Index Fund",
+      type: "Index Fund" as const,
+      institution: "UTI Mutual Fund",
+      amount: 45200,
+      rateOrCagr: "~12.8% CAGR",
+      status: "Active SIP (₹8k/mo)",
+      color: "#10B981",
+    },
+  ],
+  rawSmsFeed: MULTI_BANK_SMS_FEED_DEMO,
+};
+
+export const PORTFOLIO_RISK_PRESETS = {
+  inflation_trap: {
+    key: "inflation_trap" as const,
+    name: "Scattered FDs / Inflation Trap",
+    flagColor: "yellow" as const,
+    flagLabel: "Inflation Drag Alert",
+    tagline: "Your money is safe, but losing purchasing power every year",
+    trueCashModifier: 14200,
+    creditCardTotal: 12000,
+    idleCash: 14800,
+    fdTotal: 50000,
+    adviceBullets: [
+      "You have ₹50,000 locked in 6.85% FDs. After 30% slab taxes (~4.8% net return), inflation (5.5%) quietly eats away your purchasing power each year.",
+      "Smart Action: Move ₹5,000/month of idle SBI cash into a Nifty 50 Index Fund SIP, while keeping 3 months of fixed bills in your emergency FD helmet.",
+    ],
+  },
+  debt_danger: {
+    key: "debt_danger" as const,
+    name: "Multi-Card Debt Danger",
+    flagColor: "red" as const,
+    flagLabel: "Critical Debt Trap",
+    tagline: "Upcoming card bills are 39% of your salary • 42% APR risk",
+    trueCashModifier: -600, // Deficit scenario
+    creditCardTotal: 43800,
+    idleCash: 43200,
+    fdTotal: 50000,
+    adviceBullets: [
+      "Heads up: ICICI + HDFC credit card bills total ₹29,000 due in 4–8 days. Paying only minimum dues will trigger toxic ~42% p.a. interest (₹1,100/mo fees).",
+      "Immediate Action: Clear the ₹16,200 ICICI bill immediately using HDFC liquid balance before committing any new money to discretionary shopping or SIPs.",
+    ],
+  },
+  balanced_autopilot: {
+    key: "balanced_autopilot" as const,
+    name: "Balanced Autopilot",
+    flagColor: "green" as const,
+    flagLabel: "Optimal Wealth Mode",
+    tagline: "Zero high-interest debt • Guaranteed emergency shield + 12% compounding",
+    trueCashModifier: 24200,
+    creditCardTotal: 6500,
+    idleCash: 30700,
+    fdTotal: 50000,
+    adviceBullets: [
+      "Perfect health: Credit card balances are fully auto-paid on statement dates with zero interest. 3 months of emergency expenses safely protected in FD.",
+      "Wealth compounding: Automated ₹8,000 monthly SIP into Nifty 50 Index Fund compounder runs untouched on the 1st of every month without stress.",
+    ],
+  },
+};
+

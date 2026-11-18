@@ -16,6 +16,7 @@ import { SettingsModal } from "@/components/SettingsModal";
 import { SolutionSpaceSwitcher, SolutionSpace } from "@/components/SolutionSpaceSwitcher";
 import { BeforeIScanSpace } from "@/components/BeforeIScanSpace";
 import { PassbookSpace } from "@/components/PassbookSpace";
+import { MoneyBrainSpace } from "@/components/MoneyBrainSpace";
 import { formatINR } from "@/lib/utils";
 import {
   TrendingUp,
@@ -26,7 +27,7 @@ import {
 
 function DashboardContent() {
   const { profile, analysis } = useFinancialMemory();
-  const [activeSpace, setActiveSpace] = useState<SolutionSpace>("daily-safe");
+  const [activeSpace, setActiveSpace] = useState<SolutionSpace>("money-brain");
   const [isBeforeIScanOpen, setIsBeforeIScanOpen] = useState(false);
   const [isSmsParserOpen, setIsSmsParserOpen] = useState(false);
   const [isMemoryViewerOpen, setIsMemoryViewerOpen] = useState(false);
@@ -36,7 +37,7 @@ function DashboardContent() {
     <div className="min-h-screen fintech-mesh-bg text-slate-900 flex flex-col selection:bg-emerald-100 selection:text-emerald-900">
       {/* Navigation Bar */}
       <Navbar
-        onOpenDailySafe={() => setActiveSpace("daily-safe")}
+        onOpenDailySafe={() => setActiveSpace("money-brain")}
         onOpenBeforeIScan={() => setActiveSpace("before-i-scan")}
         onOpenSmsParser={() => setActiveSpace("passbook")}
         onOpenMemoryViewer={() => setIsMemoryViewerOpen(true)}
@@ -51,6 +52,14 @@ function DashboardContent() {
 
       {/* Main Solution Space Viewport */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 pb-24 sm:pb-8">
+        {/* SPACE 0: MONEY BRAIN (MULTI-ACCOUNT RECONCILIATION & ONE TRUE NUMBER) */}
+        {activeSpace === "money-brain" && (
+          <MoneyBrainSpace
+            onSwitchToScan={() => setActiveSpace("before-i-scan")}
+            onSwitchToGoals={() => setActiveSpace("goal-jars")}
+          />
+        )}
+
         {/* SPACE 1: DAILY SAFE & SALARY RUNWAY */}
         {activeSpace === "daily-safe" && (
           <div className="space-y-6 animate-fade-in">
