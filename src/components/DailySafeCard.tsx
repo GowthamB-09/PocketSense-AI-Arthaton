@@ -151,14 +151,14 @@ export const DailySafeCard: React.FC<DailySafeCardProps> = ({
       </div>
 
       {/* Footer */}
-      <div className="mt-5 pt-3.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-        <div className="font-mono text-[11px]">
+      <div className="mt-5 pt-3.5 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-500">
+        <div className="font-mono text-[11px] truncate">
           Salary: <strong className="text-slate-800">{formatINR(profile.monthlySalary)}</strong> • Fixed Bills: <strong className="text-slate-800">{formatINR(profile.fixedEssentials)}</strong>
         </div>
 
         <button
           onClick={onOpenSettings}
-          className="text-xs text-emerald-700 hover:text-emerald-800 font-semibold transition-colors"
+          className="text-xs text-emerald-700 hover:text-emerald-800 font-semibold transition-colors self-start sm:self-auto shrink-0 min-h-[32px] flex items-center"
         >
           Change Budget →
         </button>

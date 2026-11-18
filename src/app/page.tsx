@@ -55,60 +55,80 @@ function DashboardContent() {
         {activeSpace === "daily-safe" && (
           <div className="space-y-6 animate-fade-in">
             {/* Transparent 4-Card Monthly Balance Sheet */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-3.5">
               {/* Card 1: Monthly Salary */}
-              <div className="fintech-card rounded-2xl p-4.5 bg-white border border-slate-200 shadow-sm flex flex-col justify-between">
+              <div className="fintech-card rounded-2xl p-4 sm:p-4.5 bg-white border border-slate-200 shadow-sm flex flex-col justify-between overflow-hidden">
                 <div className="flex items-center justify-between text-slate-500 mb-2">
-                  <span className="text-xs font-semibold text-slate-500">Take-Home Salary</span>
-                  <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700">
+                  <span className="text-xs font-semibold text-slate-600 truncate mr-1">Take-Home Salary</span>
+                  <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700 shrink-0">
                     <Wallet className="w-3.5 h-3.5" />
                   </div>
                 </div>
-                <div className="flex items-baseline justify-between font-mono">
-                  <span className="text-xl font-bold text-slate-900">{formatINR(profile.monthlySalary)}</span>
-                  <span className="text-xs text-slate-500 font-normal">Income</span>
+                <div className="mt-0.5">
+                  <div className="text-lg sm:text-xl font-bold font-mono text-slate-900 truncate">
+                    {formatINR(profile.monthlySalary)}
+                  </div>
+                  <div className="text-[11px] text-slate-500 mt-0.5 flex items-center justify-between">
+                    <span>Monthly Income</span>
+                    <span className="text-[10px] font-mono text-slate-400">Total</span>
+                  </div>
                 </div>
               </div>
 
               {/* Card 2: Fixed Essentials */}
-              <div className="fintech-card rounded-2xl p-4.5 bg-white border border-slate-200 shadow-sm flex flex-col justify-between">
+              <div className="fintech-card rounded-2xl p-4 sm:p-4.5 bg-white border border-slate-200 shadow-sm flex flex-col justify-between overflow-hidden">
                 <div className="flex items-center justify-between text-slate-500 mb-2">
-                  <span className="text-xs font-semibold text-slate-500">Fixed Bills &amp; SIPs</span>
-                  <div className="p-1.5 rounded-lg bg-blue-50 text-blue-700">
+                  <span className="text-xs font-semibold text-slate-600 truncate mr-1">Fixed Bills &amp; SIPs</span>
+                  <div className="p-1.5 rounded-lg bg-blue-50 text-blue-700 shrink-0">
                     <ShieldCheck className="w-3.5 h-3.5" />
                   </div>
                 </div>
-                <div className="flex items-baseline justify-between font-mono">
-                  <span className="text-xl font-bold text-slate-900">{formatINR(profile.fixedEssentials)}</span>
-                  <span className="text-xs text-slate-500 font-normal">Committed</span>
+                <div className="mt-0.5">
+                  <div className="text-lg sm:text-xl font-bold font-mono text-slate-900 truncate">
+                    {formatINR(profile.fixedEssentials)}
+                  </div>
+                  <div className="text-[11px] text-slate-500 mt-0.5 flex items-center justify-between">
+                    <span>Rent &amp; Essentials</span>
+                    <span className="text-[10px] font-mono text-blue-600 font-semibold">Fixed</span>
+                  </div>
                 </div>
               </div>
 
               {/* Card 3: Spent This Month */}
-              <div className="fintech-card rounded-2xl p-4.5 bg-white border border-slate-200 shadow-sm flex flex-col justify-between">
+              <div className="fintech-card rounded-2xl p-4 sm:p-4.5 bg-white border border-slate-200 shadow-sm flex flex-col justify-between overflow-hidden">
                 <div className="flex items-center justify-between text-slate-500 mb-2">
-                  <span className="text-xs font-semibold text-slate-500">Spent This Month</span>
-                  <div className="p-1.5 rounded-lg bg-slate-50 text-slate-700 border border-slate-200">
+                  <span className="text-xs font-semibold text-slate-600 truncate mr-1">Spent This Month</span>
+                  <div className="p-1.5 rounded-lg bg-slate-50 text-slate-700 border border-slate-200 shrink-0">
                     <CreditCard className="w-3.5 h-3.5" />
                   </div>
                 </div>
-                <div className="flex items-baseline justify-between font-mono">
-                  <span className="text-xl font-bold text-slate-900">{formatINR(analysis.discretionarySpentSoFar)}</span>
-                  <span className="text-xs text-slate-500 font-normal">Discretionary</span>
+                <div className="mt-0.5">
+                  <div className="text-lg sm:text-xl font-bold font-mono text-slate-900 truncate">
+                    {formatINR(analysis.discretionarySpentSoFar)}
+                  </div>
+                  <div className="text-[11px] text-slate-500 mt-0.5 flex items-center justify-between">
+                    <span>Flexible Spends</span>
+                    <span className="text-[10px] font-mono text-slate-400">Month</span>
+                  </div>
                 </div>
               </div>
 
               {/* Card 4: Remaining to Spend */}
-              <div className="fintech-card rounded-2xl p-4.5 bg-white border border-slate-200 shadow-sm flex flex-col justify-between">
+              <div className="fintech-card rounded-2xl p-4 sm:p-4.5 bg-white border border-slate-200 shadow-sm flex flex-col justify-between overflow-hidden">
                 <div className="flex items-center justify-between text-slate-500 mb-2">
-                  <span className="text-xs font-semibold text-slate-500">Remaining to Spend</span>
-                  <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <span className="text-xs font-semibold text-slate-600 truncate mr-1">Remaining to Spend</span>
+                  <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
                     <TrendingUp className="w-3.5 h-3.5" />
                   </div>
                 </div>
-                <div className="flex items-baseline justify-between font-mono">
-                  <span className="text-xl font-bold text-emerald-700">{formatINR(analysis.remainingMonthlyPool)}</span>
-                  <span className="text-xs text-slate-500 font-normal">{analysis.daysRemaining}d to salary</span>
+                <div className="mt-0.5">
+                  <div className="text-lg sm:text-xl font-bold font-mono text-emerald-700 truncate">
+                    {formatINR(analysis.remainingMonthlyPool)}
+                  </div>
+                  <div className="text-[11px] text-slate-500 mt-0.5 flex items-center justify-between">
+                    <span>{analysis.daysRemaining}d to salary</span>
+                    <span className="text-[10px] font-mono text-emerald-700 font-semibold">Safe</span>
+                  </div>
                 </div>
               </div>
             </div>

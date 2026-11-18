@@ -384,10 +384,10 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = ({
                   <span className="text-[10px] text-slate-400 block">Rent + Mutual Fund SIP</span>
                 </div>
 
-                <div className="p-3 bg-white border border-slate-200 rounded-xl">
-                  <span className="text-[10px] text-slate-500 uppercase block font-semibold">Discretionary Runway</span>
-                  <span className="text-base font-bold text-emerald-700">{formatINR(Math.max(0, detectedSalary - detectedFixedBills))}</span>
-                  <span className="text-[10px] text-slate-400 block">For all daily spending</span>
+                <div className="p-3 bg-white border border-slate-200 rounded-xl overflow-hidden">
+                  <span className="text-[10px] text-slate-500 uppercase block font-semibold truncate">Safe Spending Pool</span>
+                  <span className="text-base font-bold text-emerald-700 truncate block">{formatINR(Math.max(0, detectedSalary - detectedFixedBills))}</span>
+                  <span className="text-[10px] text-slate-400 block truncate">For all daily spending</span>
                 </div>
               </div>
 
@@ -400,10 +400,12 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = ({
                 <button
                   type="button"
                   onClick={handleApplyAutoBudget}
-                  className="w-full py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm flex items-center justify-center gap-2 transition-all"
+                  className="w-full py-3 sm:py-2.5 px-3 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm flex items-center justify-center gap-2 transition-all min-h-[44px] active:scale-98"
                 >
-                  <Sliders className="w-3.5 h-3.5" />
-                  <span>Auto-Configure Monthly Budget ({formatINR(detectedSalary)} Salary • {formatINR(detectedFixedBills)} Fixed Bills)</span>
+                  <Sliders className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">
+                    Auto-Configure Budget <span className="hidden sm:inline font-mono">({formatINR(detectedSalary)} Salary • {formatINR(detectedFixedBills)} Fixed)</span>
+                  </span>
                 </button>
               )}
             </div>
@@ -638,8 +640,8 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = ({
                   <span className="font-bold text-slate-900">{formatINR(analysis.burnRatePerDay)}/day</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-500">Discretionary Runway:</span>
-                  <span className="font-bold text-slate-900">Day {analysis.projectedRunOutDay} of {analysis.daysInMonth}</span>
+                  <span className="text-slate-500 truncate mr-2">Safe Runway:</span>
+                  <span className="font-bold text-slate-900 shrink-0">Day {analysis.projectedRunOutDay} of {analysis.daysInMonth}</span>
                 </div>
               </div>
 

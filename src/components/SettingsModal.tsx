@@ -166,8 +166,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* Real-time Math Blueprint */}
           <div className="p-3.5 sm:p-4 rounded-xl bg-slate-50 border border-slate-200 font-mono text-xs space-y-1.5">
             <div className="flex justify-between items-center text-slate-600">
-              <span>Discretionary Pool:</span>
-              <strong className="text-slate-900">{formatINR(discretionaryPool)}</strong>
+              <span className="truncate mr-2">Safe Spending Pool:</span>
+              <strong className="text-slate-900 shrink-0">{formatINR(discretionaryPool)}</strong>
             </div>
             <div className="flex justify-between items-center text-slate-600">
               <span>Current Real Day:</span>
