@@ -23,17 +23,17 @@ export const RunOutDayPredictor: React.FC = () => {
             </div>
             <div>
               <h3 className="text-sm font-semibold text-slate-900 tracking-tight">
-                Month Runway
+                Days Left
               </h3>
               <p className="text-xs text-slate-500">
-                Pacing against next salary payday
+                Spend Speed until payday
               </p>
             </div>
           </div>
 
           <span className="inline-flex items-center gap-1 text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
             <CheckCircle2 className="w-3 h-3" />
-            <span>Pace: Healthy</span>
+            <span>Spend Speed: Good</span>
           </span>
         </div>
 
@@ -41,7 +41,7 @@ export const RunOutDayPredictor: React.FC = () => {
         <div className="grid grid-cols-2 gap-3 my-4 p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono">
           <div>
             <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">
-              Discretionary Pace
+              Spend Speed
             </span>
             <span className="text-base font-bold text-slate-900">
               {formatINR(burnRatePerDay || 820)} <span className="text-xs text-slate-500 font-normal">/ day</span>

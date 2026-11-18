@@ -57,7 +57,7 @@ export const INITIAL_SPENDING_TRAPS: SpendingTrap[] = [
     emoji: "🍻",
     severity: "high",
     coachAdvice:
-      "Pre-set a ₹1,800 discretionary UPI cap before heading out. Split rounds upfront rather than floating the whole table card.",
+      "Pre-set a ₹1,800 Extra Spend UPI cap before heading out. Split rounds upfront rather than floating the whole table card.",
   },
   {
     id: "trap_quick_commerce",
@@ -68,7 +68,7 @@ export const INITIAL_SPENDING_TRAPS: SpendingTrap[] = [
     emoji: "🛍️",
     severity: "medium",
     coachAdvice:
-      "Batch your weekly household groceries every Sunday. Individual ₹300-₹450 impulse carts quietly burn 15% of your discretionary runway.",
+      "Batch your weekly household groceries every Sunday. Individual ₹300-₹450 impulse carts quietly burn 15% of your Cash Left.",
   },
   {
     id: "trap_specialty_coffee",
@@ -173,7 +173,7 @@ export const SYNTHETIC_TRANSACTIONS: Transaction[] = [
     upiRef: "6316223401",
     bank: "Cred UPI",
     triggerTag: "weekend-hangout",
-    opportunityCostEquivalent: "Costs 6.2 days of your daily safe discretionary limit",
+    opportunityCostEquivalent: "Costs 6.2 days of your daily safe Extra Spend limit",
   },
   {
     id: "tx_08",
@@ -355,7 +355,7 @@ export const MULTI_BANK_SMS_FEED_DEMO = [
   // HDFC Millennia Credit Card Bill Due
   `HDFC Bank Card ending 3321: Total Due INR 12,800.00 by 26-Nov-2026. Pay full bill to prevent interest fee. Ref: CC332199.`,
   // Axis Bank Fixed Deposit (FD)
-  `Axis Bank: Your Fixed Deposit No. **7721 of INR 50,000.00 @ 6.85% p.a. is active. Quarterly interest accrued INR 856. Maturity date: 15-Oct-2027.`,
+  `Axis Bank: Your Fixed Deposit No. **7721 of INR 50,000.00 @ 6.85% / yr is active. Quarterly interest accrued INR 856. Maturity date: 15-Oct-2027.`,
   // UTI Nifty 50 Index Fund SIP
   `BSE StAR MF: Auto-debit of INR 8,000.00 for UTI NIFTY 50 INDEX FUND DIRECT-GROWTH executed on 01-Nov-2026. Current Portfolio NAV Value: INR 45,200.00.`,
   // PhonePe UPI Spend with Spare Change Round-up
@@ -424,7 +424,7 @@ export const INITIAL_MONEY_BRAIN_DATA = {
       type: "FD" as const,
       institution: "Axis Bank",
       amount: 50000,
-      rateOrCagr: "6.85% p.a.",
+      rateOrCagr: "6.85% / yr",
       status: "Maturing Oct 2027",
       color: "#8B5CF6",
     },
@@ -469,8 +469,8 @@ export const PORTFOLIO_RISK_PRESETS = {
     idleCash: 43200,
     fdTotal: 50000,
     adviceBullets: [
-      "Heads up: ICICI + HDFC credit card bills total ₹29,000 due in 4–8 days. Paying only minimum dues will trigger toxic ~42% p.a. interest (₹1,100/mo fees).",
-      "Immediate Action: Clear the ₹16,200 ICICI bill immediately using HDFC liquid balance before committing any new money to discretionary shopping or SIPs.",
+      "Heads up: ICICI + HDFC credit card bills total ₹29,000 due in 4–8 days. Paying only minimum dues will trigger toxic ~42% / yr interest (₹1,100/mo fees).",
+      "Immediate Action: Clear the ₹16,200 ICICI bill immediately using HDFC liquid balance before committing any new money to Extra Spend shopping or SIPs.",
     ],
   },
   balanced_autopilot: {
@@ -478,7 +478,7 @@ export const PORTFOLIO_RISK_PRESETS = {
     name: "Balanced Autopilot",
     flagColor: "green" as const,
     flagLabel: "Optimal Wealth Mode",
-    tagline: "Zero high-interest debt • Guaranteed emergency shield + 12% compounding",
+    tagline: "Zero high-interest debt • Guaranteed emergency shield + 12% Growth",
     trueCashModifier: 24200,
     creditCardTotal: 6500,
     idleCash: 30700,

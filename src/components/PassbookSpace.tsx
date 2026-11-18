@@ -581,7 +581,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
                 <span>Micro-Impulse Drain Summary</span>
               </div>
               <p className="text-xs text-slate-500">
-                Small spends (&lt; ₹500) that invisibly shorten your monthly salary runway.
+                Small spends (&lt; ₹500) that invisibly shorten your monthly Cash Left.
               </p>
               <div className="space-y-2 font-mono text-xs">
                 <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex justify-between items-center">

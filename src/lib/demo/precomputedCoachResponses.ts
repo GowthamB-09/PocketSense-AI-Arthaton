@@ -40,7 +40,7 @@ export const PRECOMPUTED_PROMPT_CATALOG: PrecomputedResponse[] = [
     recalledMemories: [
       "Remaining Safe Pool: ₹30,592 (17 days to payday)",
       "Active Goal: New iPhone (₹42,000 / ₹80,000)",
-      "Pacing: Healthy & Weekend-Ready"
+      "Spend Speed: Good"
     ],
     opportunityCostGoalTitle: "New iPhone",
     simplerOneLiner: "Spend ₹550 instead of ₹1,500 tonight—you have equal fun and save ₹950 for your iPhone.",
@@ -59,7 +59,7 @@ export const PRECOMPUTED_PROMPT_CATALOG: PrecomputedResponse[] = [
 • A ₹4,500 impulse spend wipes out 2.5 days of safe headroom.
 • Your New iPhone jar is 53% funded—keep the momentum going.
 
-👉 **Next Step:** Put ₹2,000 into your **6.8% Safe Liquid FD Vault** today to keep your money safe from impulse buys!`,
+👉 **Next Step:** Put ₹2,000 into **Instant Safe (~6.8% / yr)** today to keep your money safe from impulse buys!`,
     smartHacks: [
       "Bookmark the shoes and revisit on payday.",
       "Check upcoming festive sale coupons before paying full retail."
@@ -67,7 +67,7 @@ export const PRECOMPUTED_PROMPT_CATALOG: PrecomputedResponse[] = [
     recalledMemories: [
       "Remaining Safe Pool: ₹30,592",
       "Active Goal: New iPhone (₹42,000 / ₹80,000)",
-      "Safe Growth Vault: Safe Liquid FD (~6.8% p.a.)"
+      "Safe Growth Vault: Instant Safe (~6.8% / yr)"
     ],
     opportunityCostGoalTitle: "New iPhone",
     simplerOneLiner: "Hold off on the ₹4,500 shoes for 48 hours so you don't slow down your ₹80,000 iPhone goal.",
@@ -113,7 +113,7 @@ export const PRECOMPUTED_PROMPT_CATALOG: PrecomputedResponse[] = [
 • Spending ₹2,990 burns almost 2 full days of safe spending.
 • Most clothes carted on impulse are forgotten within a day.
 
-👉 **Next Step:** Sleep on it tonight. If you still want it tomorrow, take ₹1,500 from your discretionary pool!`,
+👉 **Next Step:** Sleep on it tonight. If you still want it tomorrow, take ₹1,500 from your Extra Spend pool!`,
     smartHacks: [
       "The 24-hour test stops 80% of regretful fashion buys.",
       "Check if you already own a similar staple piece."

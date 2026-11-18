@@ -202,7 +202,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-start gap-2">
               <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
               <span>
-                Your spent amount ({formatINR(analysis.discretionarySpentSoFar)}) exceeds this discretionary pool. Check &ldquo;Start Fresh&rdquo; above to reset spends.
+                Your spent amount ({formatINR(analysis.discretionarySpentSoFar)}) exceeds this Extra Spend pool. Check &ldquo;Start Fresh&rdquo; above to reset spends.
               </span>
             </div>
           )}

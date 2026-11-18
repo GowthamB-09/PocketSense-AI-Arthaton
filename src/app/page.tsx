@@ -53,7 +53,7 @@ function DashboardContent() {
 
       {/* Main Solution Space Viewport */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 pb-24 sm:pb-8">
-        {/* SPACE 1: DAILY SAFE CORE (LIMIT & RUNWAY) */}
+        {/* SPACE 1: DAILY SAFE CORE (LIMIT & CASH LEFT) */}
         {activeSpace === "daily-safe" && (
           <div className="space-y-6 animate-fade-in">
             {/* Silent Portfolio Risk Guard Quick Status Banner */}
@@ -140,7 +140,7 @@ function DashboardContent() {
                     {formatINR(analysis.discretionarySpentSoFar)}
                   </div>
                   <div className="text-[11px] text-slate-500 mt-0.5 flex items-center justify-between">
-                    <span>Flexible Spends</span>
+                    <span>Extra Spend</span>
                     <span className="text-[10px] font-mono text-slate-400">Month</span>
                   </div>
                 </div>
@@ -160,13 +160,13 @@ function DashboardContent() {
                   </div>
                   <div className="text-[11px] text-slate-500 mt-0.5 flex items-center justify-between">
                     <span>{analysis.daysRemaining || 17}d to payday</span>
-                    <span className="text-[10px] font-mono text-emerald-700 font-semibold">Weekend-Ready</span>
+                    <span className="text-[10px] font-mono text-emerald-700 font-semibold">Good Speed</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Hero Row: Daily Budget & Month Runway */}
+            {/* Hero Row: Daily Budget & Days Left */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
               <div className="lg:col-span-7">
                 <DailySafeCard

@@ -159,15 +159,15 @@ export function calculateDailyBudgetAnalysis(
 
   if (remainingMonthlyPool <= 0 && discretionarySpentSoFar > 0) {
     statusLevel = "red";
-    headline = "Discretionary Budget Exhausted";
-    comfortMessage = `Discretionary spend (₹${discretionarySpentSoFar.toLocaleString("en-IN")}) has consumed the full ₹${discretionaryPool.toLocaleString("en-IN")} pool. Reduce extra spending until next salary.`;
+    headline = "Extra Spend Exhausted";
+    comfortMessage = `Extra Spend (₹${discretionarySpentSoFar.toLocaleString("en-IN")}) has consumed the full ₹${discretionaryPool.toLocaleString("en-IN")} pool. Reduce extra spending until next salary.`;
   } else if (projectedRunOutDay <= 20) {
     statusLevel = "red";
-    headline = `Pacing Fast: Budget runs out by Day ${projectedRunOutDay}`;
+    headline = `Fast Spend Speed: Budget runs out by Day ${projectedRunOutDay}`;
     comfortMessage = `Spending ₹${burnRatePerDay}/day against a safe pace of ₹${safeDailySpend}/day. Cut back non-essentials to reach next payday comfortably.`;
   } else if (safeDailySpend < 400 || projectedRunOutDay < 26) {
     statusLevel = "amber";
-    headline = `Caution: Runway tightening`;
+    headline = `Caution: Days Left tightening`;
     comfortMessage = `Current safe rate is ₹${safeDailySpend}/day with ${daysRemaining} days left. Keep daily expenses low.`;
   } else {
     statusLevel = "green";

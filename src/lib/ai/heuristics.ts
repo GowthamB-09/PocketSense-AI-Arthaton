@@ -323,7 +323,7 @@ export function generateHeuristicCoachAdvice(
 
     smartHacks.push(`Cap your share strictly at ₹${Math.round(dailySafe * 0.7)}.`);
     smartHacks.push("Enjoy the moment without overspending your daily cushion.");
-    recalledMemories.push("Runway Notice: Tightens daily headroom");
+    recalledMemories.push("Days Left Notice: Tightens daily headroom");
   } else {
     verdict = "APPROVED";
     headline = `Yes—₹${amount} fits comfortably within your safe pool.`;

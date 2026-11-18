@@ -23,24 +23,26 @@ export interface CoachAnswer {
 }
 
 /**
- * Auto-Translator: Replaces heavy finance jargon with everyday plain language
+ * Auto-Translator: Replaces heavy finance jargon with ultra-short 1-to-2 word everyday synonyms
  */
 export function translateFinanceJargon(text: string): string {
   if (!text) return "";
   return text
-    .replace(/\basset allocation\b/gi, "how you split your money")
-    .replace(/\binflation hedge\b/gi, "keeps your money from losing value as prices rise")
-    .replace(/\bliquidity\b/gi, "cash you can pull out anytime in 1 click")
-    .replace(/\bliquid\b/gi, "easy-to-withdraw cash")
-    .replace(/\bexpense ratio\b/gi, "tiny yearly fund fee")
-    .replace(/\bvolatility\b/gi, "market ups and downs")
-    .replace(/\bvolatile\b/gi, "bumpy market")
-    .replace(/\bcompounding\b/gi, "growing your money on top of past gains")
-    .replace(/\bcompound\b/gi, "grow on top of past gains")
-    .replace(/\bdiversification\b/gi, "not putting all your eggs in one basket")
-    .replace(/\bdiversify\b/gi, "spread your money around")
-    .replace(/\binflation\b/gi, "prices rising over time")
-    .replace(/\barbitrage fund\b/gi, "safe tax-smart cash vault")
+    .replace(/\bdiscretionary\b/gi, "Extra Spend")
+    .replace(/\bcommitted obligations\b|\bfixed obligations\b|\bcommitted\b/gi, "Fixed Bills")
+    .replace(/\brunway\b/gi, "Cash Left")
+    .replace(/\bpacing\b/gi, "Spend Speed")
+    .replace(/\bliquid \/ arbitrage fund\b|\barbitrage fund\b|\bliquid fund\b/gi, "Instant Safe")
+    .replace(/\binflation hedge\b|\binflation\b/gi, "Price Rise")
+    .replace(/\basset allocation\b|\bdiversification\b|\bdiversify\b/gi, "Money Mix")
+    .replace(/\bvolatility\b|\bvolatile\b/gi, "Price Swings")
+    .replace(/\bcompounding\b|\bcompound\b/gi, "Growth")
+    .replace(/\be-mandate\b/gi, "Auto-Save")
+    .replace(/\bcorpus\b/gi, "Total Saved")
+    .replace(/\bprincipal\b/gi, "Base Cash")
+    .replace(/\bliquidity\b/gi, "Quick Cash")
+    .replace(/\bp\.a\.\b|\byield\b/gi, "/ yr")
+    .replace(/\bexpense ratio\b/gi, "fund fee")
     .replace(/\bdepreciation\b/gi, "falling rupee value");
 }
 
@@ -78,8 +80,8 @@ export const PRESET_COACH_QUESTIONS: CoachAnswer[] = [
       "Stock SIPs have market ups and downs; they need 3+ years.",
       "Your iPhone purchase is in October—keep that cash 100% safe."
     ],
-    concreteAction: "Keep your ₹42,000 iPhone savings in the 6.8% Safe Liquid FD Vault so every rupee is safe.",
-    actionPill: "Lock ₹42,000 in Safe Liquid FD Vault",
+    concreteAction: "Keep your ₹42,000 iPhone savings in Instant Safe (~6.8% / yr) so every rupee is safe.",
+    actionPill: "Lock ₹42,000 in Instant Safe",
     actionTone: "green",
     simplerOneLiner: "Because you're buying the iPhone in a few months, use a safe bank lockbox (FD) so market drops can't touch your money."
   },
@@ -257,8 +259,8 @@ export function generateBeginnerCoachAdvice(
           "Stock SIPs have market ups and downs; they need 3+ years.",
           `Your ${goalTitle} goal is coming soon—keep that cash 100% safe.`
         ],
-        concreteAction: `Keep your ₹${goalSaved.toLocaleString("en-IN")} savings in the 6.8% Safe Liquid FD Vault so every rupee is safe.`,
-        actionPill: `Lock in Safe Liquid FD Vault (~6.8%)`,
+        concreteAction: `Keep your ₹${goalSaved.toLocaleString("en-IN")} savings in Instant Safe (~6.8% / yr) so every rupee is safe.`,
+        actionPill: `Lock in Instant Safe (~6.8% / yr)`,
         actionTone: "green",
         simplerOneLiner: `Because you want to buy ${goalTitle} soon, keep it in a safe bank lockbox (FD) so market drops cannot touch it.`
       };
@@ -274,7 +276,7 @@ export function generateBeginnerCoachAdvice(
         "It historically grows at ~12% a year, beating everyday price rises.",
         "Automating it on payday means you build wealth with zero effort."
       ],
-      concreteAction: `Keep your ₹5,000 monthly Friday AutoPay mandate active to build wealth automatically!`,
+      concreteAction: `Keep your ₹5,000 monthly Friday AutoPay Auto-Save active to build wealth automatically!`,
       actionPill: `Auto-Invest in Top 50 Index Fund`,
       actionTone: "green",
       simplerOneLiner: `Index Funds put your money into India's 50 biggest companies so it grows faster than prices rise.`
@@ -308,8 +310,8 @@ export function generateBeginnerCoachAdvice(
     directAnswer: `Yes—you have ₹${pool.toLocaleString("en-IN")} safe to spend until payday.`,
     bulletPoints: [
       `Your take-home salary is ₹${salary.toLocaleString("en-IN")} with fixed bills taken care of.`,
-      `You have ${days} days until payday with a healthy spending pace.`,
-      `Your ${goalTitle} jar currently has ₹${goalSaved.toLocaleString("en-IN")} safely compounding.`
+      `You have ${days} days until payday with a good Spend Speed.`,
+      `Your ${goalTitle} jar currently has ₹${goalSaved.toLocaleString("en-IN")} safely growing.`
     ],
     concreteAction: `Check any purchase with Before-I-Scan to protect your ₹${pool.toLocaleString("en-IN")} safe pool!`,
     actionPill: `Safe Pool: ₹${pool.toLocaleString("en-IN")} Ready`,

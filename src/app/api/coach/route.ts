@@ -64,14 +64,18 @@ STRICT "FRIEND-TEXTING-YOU" RULES:
      • Remaining safe pool: ₹${safePool > 0 ? safePool : 30592} (${remainingDays} days left)
      • Credit card dues: ₹17,908
      • Active Goal: ${primaryGoal.title} (₹${primaryGoal.currentAmount}/₹${primaryGoal.targetAmount})
-3. COMPLETELY BAN ALL FINANCE JARGON:
-   - Never say "asset allocation" -> say "how you split your money"
-   - Never say "inflation hedge" -> say "keeps your money from losing value as prices rise"
-   - Never say "liquidity" -> say "cash you can pull out anytime in 1 click"
-   - Never say "expense ratio" -> say "tiny yearly fund fee"
-   - Never say "volatility" -> say "market ups and downs"
-   - Never say "compounding" -> say "growing your money on top of past gains"
-   - Never say "diversification" -> say "not putting all your eggs in one basket"
+3. COMPLETELY BAN ALL FINANCE JARGON (USE 1-TO-2 WORD SYNONYMS):
+   - Never say "asset allocation" or "diversification" -> say "Money Mix"
+   - Never say "inflation" -> say "Price Rise"
+   - Never say "liquidity" -> say "Quick Cash"
+   - Never say "volatility" -> say "Price Swings"
+   - Never say "compounding" -> say "Growth"
+   - Never say "discretionary" -> say "Extra Spend"
+   - Never say "runway" -> say "Cash Left"
+   - Never say "pacing" -> say "Spend Speed"
+   - Never say "p.a." or "yield" -> say "/ yr"
+   - Never say "principal" -> say "Base Cash"
+   - Never say "corpus" -> say "Total Saved"
 4. Add a final line: "💡 Explain Even Simpler: <1 simple sentence>"`;
 
         const result = streamText({

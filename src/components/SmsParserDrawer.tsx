@@ -373,7 +373,7 @@ export const SmsParserDrawer: React.FC<SmsParserDrawerProps> = ({
                 ) : (
                   <>
                     <Plus className="w-4 h-4" />
-                    <span>Commit {parsedResults.length} Records to Ledger</span>
+                    <span>Save {parsedResults.length} Records to Ledger</span>
                   </>
                 )}
               </button>

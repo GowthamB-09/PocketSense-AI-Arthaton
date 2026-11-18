@@ -190,7 +190,7 @@ export const MoneyBrainSpace: React.FC<MoneyBrainSpaceProps> = ({
         [pick.fromBank === "sbi" ? "sbiStash" : "hdfcSalary"]: Math.max(
           0,
           (pick.fromBank === "sbi" ? prev.bankBalances.sbiStash : prev.bankBalances.hdfcSalary) -
-            pick.amount
+          pick.amount
         ),
       },
       roundUpJar: prev.roundUpJar + roundUp,
@@ -563,7 +563,7 @@ export const MoneyBrainSpace: React.FC<MoneyBrainSpaceProps> = ({
               <div className="p-3 rounded-xl bg-emerald-50/70 border border-emerald-200">
                 <span className="text-[10px] text-emerald-800 uppercase font-semibold block">15% to Nifty 50 Index SIP</span>
                 <span className="text-base font-bold text-emerald-950">{formatINR(autopilotSIPAmount)}</span>
-                <span className="text-[10px] text-emerald-700 block font-sans">Compounding Wealth</span>
+                <span className="text-[10px] text-emerald-700 block font-sans">Money Growth</span>
               </div>
 
               <div className="p-3 rounded-xl bg-purple-50/70 border border-purple-200">
@@ -697,13 +697,12 @@ export const MoneyBrainSpace: React.FC<MoneyBrainSpaceProps> = ({
                 Real-Life Trade-Off for {formatINR(realityCheck.numericPrice)}:
               </span>
               <span
-                className={`font-mono text-[11px] px-2 py-0.5 rounded font-bold ${
-                  realityCheck.isAffordable
+                className={`font-mono text-[11px] px-2 py-0.5 rounded font-bold ${realityCheck.isAffordable
                     ? "bg-slate-200 text-slate-800"
                     : "bg-rose-100 text-rose-800"
-                }`}
+                  }`}
               >
-                {realityCheck.isAffordable ? "Consumes Discretionary Headroom" : "Exceeds Safe Cash"}
+                {realityCheck.isAffordable ? "Consumes Extra Spend" : "Exceeds Safe Cash"}
               </span>
             </div>
 
@@ -802,7 +801,7 @@ export const MoneyBrainSpace: React.FC<MoneyBrainSpaceProps> = ({
               </span>
             </div>
             <p className="text-slate-700 text-xs leading-relaxed">
-              Auto-invests a fixed slice of your salary on payday before you can impulsively spend it. Pure lazy wealth compounding on complete autopilot.
+              Auto-invests a fixed slice of your salary on payday before you can impulsively spend it. Pure lazy Money Growth on complete autopilot.
             </p>
           </div>
         </div>

@@ -249,12 +249,12 @@ export function FinancialMemoryProvider({ children }: { children: React.ReactNod
 === USER FINANCIAL MEMORY PROFILE ===
 Professional: ${profile.userName} (${profile.role})
 Monthly Take-Home: ₹${profile.monthlySalary}
-Fixed Commitments: ₹${profile.fixedEssentials} (Rent, SIPs, Utilities)
+Fixed Bills: ₹${profile.fixedEssentials} (Rent, SIPs, Utilities)
 Day of Month: Day ${profile.currentDayOfMonth} / 30
-Remaining Discretionary Pool: ₹${remainingMonthlyPool}
+Remaining Extra Spend: ₹${remainingMonthlyPool}
 Days Left: ${daysRemaining} days
-Current Safe Discretionary Limit: ₹${dailySafeToSpend} / day
-Projected Runway Exhaustion: Day ${projectedRunOutDay} (Status: ${statusLevel.toUpperCase()})
+Current Safe Extra Spend: ₹${dailySafeToSpend} / day
+Projected Cash Left End: Day ${projectedRunOutDay} (Status: ${statusLevel.toUpperCase()})
 Discipline Streak: ${profile.disciplineStreak} days
 Total Diverted to Wealth Jars: ₹${profile.totalSavedToJars}
 

@@ -59,10 +59,10 @@ export const FinancialMemoryViewer: React.FC<FinancialMemoryViewerProps> = ({
             </div>
 
             <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-              <span className="text-[10px] text-slate-500 block uppercase font-semibold">Runway Status</span>
+              <span className="text-[10px] text-slate-500 block uppercase font-semibold">Days Left</span>
               <span className="font-bold text-emerald-700 text-sm flex items-center gap-1.5 mt-0.5">
                 <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                {analysis.projectedRunOutDay >= analysis.daysInMonth ? "Full Month Safe" : `Pacing Day ${analysis.projectedRunOutDay}`}
+                {analysis.projectedRunOutDay >= analysis.daysInMonth ? "Full Month Safe" : `Spend Speed: Day ${analysis.projectedRunOutDay}`}
               </span>
             </div>
 

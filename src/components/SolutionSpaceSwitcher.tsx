@@ -26,7 +26,7 @@ export const SolutionSpaceSwitcher: React.FC<SolutionSpaceSwitcherProps> = ({
       id: "daily-safe" as SolutionSpace,
       label: "Safe Pool Core",
       mobileLabel: "Safe Pool",
-      subtitle: "Flexible Pool & Runway",
+      subtitle: "Safe Pool & Cash Left",
       icon: Wallet,
       badge: "Pool",
     },

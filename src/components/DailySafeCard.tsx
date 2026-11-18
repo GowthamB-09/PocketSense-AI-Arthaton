@@ -53,7 +53,7 @@ export const DailySafeCard: React.FC<DailySafeCardProps> = ({
           <div className="flex items-center gap-2 flex-wrap">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 border border-emerald-200 text-emerald-800">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Spending Pace: Healthy (Weekend-Ready)</span>
+              <span>Spend Speed: Good</span>
             </div>
             <span className="text-xs text-slate-500 font-mono flex items-center gap-1">
               <Calendar className="w-3.5 h-3.5 text-slate-400" />
@@ -95,7 +95,7 @@ export const DailySafeCard: React.FC<DailySafeCardProps> = ({
               <CheckCircle2 className="w-3.5 h-3.5" />
             </div>
             <p className="text-xs font-semibold text-emerald-800 font-mono">
-              {daysToPayday} Days to Payday • Spending Pace: Healthy (Weekend-Ready)
+              {daysToPayday} Days Left • Spend Speed: Good
             </p>
           </div>
 
@@ -137,7 +137,7 @@ export const DailySafeCard: React.FC<DailySafeCardProps> = ({
               {formatINR(safePoolAmount)}
             </span>
             <span className="text-[10px] text-emerald-600 block mt-0.5 font-sans">
-              100% Discretionary
+              100% Extra Spend
             </span>
           </div>
         </div>

@@ -44,7 +44,7 @@ export const GoalJarsSection: React.FC = () => {
   const [newTimeline, setNewTimeline] = useState<"short-term" | "long-term">("short-term");
   const [newCategory, setNewCategory] = useState<GoalJar["category"]>("Tech");
 
-  // UPI AutoPay e-Mandate States
+  // UPI AutoPay Auto-Save States
   const [isMandateActive, setIsMandateActive] = useState<boolean>(true);
   const [mandateCap, setMandateCap] = useState<number>(5000);
   const [sweepFeedback, setSweepFeedback] = useState<{
@@ -78,9 +78,9 @@ export const GoalJarsSection: React.FC = () => {
         bestTimeToBuy: "October (Diwali Festive Sale)",
         insight:
           "New model launches in September & Diwali festive sales drop prices by 12–18%. Best Time to Buy: October (Wait 6 weeks to save ~₹11,000).",
-        vaultName: "Safe Liquid / FD Vault ~6.8%",
-        vaultTag: "Short-Term (<1Y) • Zero market risk • Hidden from daily UPI • Bonus interest",
-        vaultRate: "~6.8% p.a.",
+        vaultName: "Instant Safe ~6.8% / yr",
+        vaultTag: "Short-Term (<1Y) • Base Cash safe • Hidden from daily UPI • Bonus interest",
+        vaultRate: "~6.8% / yr",
         vaultEarned: 2450,
         smartSwapsEarned: 14000,
         counterLabel: "+₹2,450 Extra Earned While Waiting",
@@ -97,9 +97,9 @@ export const GoalJarsSection: React.FC = () => {
         bestTimeToBuy: "Lock in Gradually (Micro-Buys)",
         insight:
           "Central bank buying and wedding season demand push prices up. Best Time to Buy: Lock in monthly micro-buys rather than waiting.",
-        vaultName: "Nifty 50 Index Fund SIP + Digital Gold ~11.5%",
-        vaultTag: "Long-Term (1–3Y) • Beats inflation & multiplies savings",
-        vaultRate: "~11.5% p.a.",
+        vaultName: "Index Fund + Gold ~11.5% / yr",
+        vaultTag: "Long-Term (1–3Y) • Beats Price Rise & multiplies savings",
+        vaultRate: "~11.5% / yr",
         vaultEarned: 3820,
         smartSwapsEarned: 22000,
         counterLabel: "+₹3,820 Extra Earned While Waiting",
@@ -116,9 +116,9 @@ export const GoalJarsSection: React.FC = () => {
         bestTimeToBuy: "Buy anytime once funded",
         insight:
           "No major hardware refresh or import duty change expected. Best Time to Buy: Buy anytime once funded.",
-        vaultName: "Safe Liquid / FD Vault ~6.8%",
-        vaultTag: "Short-Term (<1Y) • Zero market risk • Hidden from UPI temptation",
-        vaultRate: "~6.8% p.a.",
+        vaultName: "Instant Safe ~6.8% / yr",
+        vaultTag: "Short-Term (<1Y) • Base Cash safe • Hidden from UPI temptation",
+        vaultRate: "~6.8% / yr",
         vaultEarned: 1240,
         smartSwapsEarned: 6800,
         counterLabel: "+₹1,240 Extra Earned While Waiting",
@@ -138,9 +138,9 @@ export const GoalJarsSection: React.FC = () => {
         bestTimeToBuy: "Q4 Festive Sales (Save ~10–15%)",
         insight:
           "Electronics routinely discount during quarterly platform promotions. Wait for sales to unlock cashback and card bonuses.",
-        vaultName: "Safe Liquid / FD Vault ~6.8%",
-        vaultTag: "Short-Term (<1Y) • Zero market risk • Locked away from UPI spending",
-        vaultRate: "~6.8% p.a.",
+        vaultName: "Instant Safe ~6.8% / yr",
+        vaultTag: "Short-Term (<1Y) • Base Cash safe • Locked away from UPI spending",
+        vaultRate: "~6.8% / yr",
         vaultEarned: 950,
         smartSwapsEarned: 3500,
         counterLabel: "+₹950 Extra Earned While Waiting",
@@ -156,9 +156,9 @@ export const GoalJarsSection: React.FC = () => {
         bestTimeToBuy: "Midweek Booking Window",
         insight:
           "Aviation fuel surcharges and seasonal surges push travel costs higher closer to departure. Book flights early on Tuesdays/Wednesdays.",
-        vaultName: "Safe Liquid / FD Vault ~6.8%",
+        vaultName: "Instant Safe ~6.8% / yr",
         vaultTag: "Short-Term (<1Y) • Easy-to-withdraw cash for quick booking",
-        vaultRate: "~6.8% p.a.",
+        vaultRate: "~6.8% / yr",
         vaultEarned: 1100,
         smartSwapsEarned: 4000,
         counterLabel: "+₹1,100 Extra Earned While Waiting",
@@ -173,9 +173,9 @@ export const GoalJarsSection: React.FC = () => {
       bestTimeToBuy: "When Target Reached",
       insight:
         "Stable pricing pattern. Keep funds accumulating in your Out-of-Sight Safe Growth Vault until 100% funded.",
-      vaultName: "Safe Liquid / FD Vault ~6.8%",
-      vaultTag: "Short-Term (<1Y) • Principal-protected lockbox",
-      vaultRate: "~6.8% p.a.",
+      vaultName: "Instant Safe ~6.8% / yr",
+      vaultTag: "Short-Term (<1Y) • Base Cash safe lockbox",
+      vaultRate: "~6.8% / yr",
       vaultEarned: 750,
       smartSwapsEarned: 2200,
       counterLabel: "+₹750 Extra Earned While Waiting",
@@ -417,7 +417,7 @@ export const GoalJarsSection: React.FC = () => {
                     <span>{trendData.counterLabel}:</span>
                   </div>
                   <span className="text-[10px] block font-semibold text-emerald-800">
-                    +{formatINR(trendData.vaultEarned)} safe vault yield + {formatINR(trendData.smartSwapsEarned)} from Smart Swaps
+                    +{formatINR(trendData.vaultEarned)} vault growth + {formatINR(trendData.smartSwapsEarned)} from Smart Swaps
                   </span>
                 </div>
               </div>
@@ -472,7 +472,7 @@ export const GoalJarsSection: React.FC = () => {
       </div>
 
       {/* ─────────────────────────────────────────────────────────────────────────────
-          4. UPI AUTOPAY E-MANDATE CARD (ZERO-CLICK MONTHLY INVESTING)
+          4. UPI AUTOPAY AUTO-SAVE CARD (ZERO-CLICK MONTHLY INVESTING)
       ───────────────────────────────────────────────────────────────────────────── */}
       <div className="fintech-card rounded-2xl p-6 bg-white border border-slate-200 shadow-sm space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
@@ -483,7 +483,7 @@ export const GoalJarsSection: React.FC = () => {
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="text-base font-bold text-slate-900 tracking-tight">
-                  UPI AutoPay e-Mandate: {isMandateActive ? "ACTIVE" : "PAUSED"}
+                  AutoPay Auto-Save: {isMandateActive ? "ACTIVE" : "PAUSED"}
                 </h3>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -531,7 +531,7 @@ export const GoalJarsSection: React.FC = () => {
                 Schedule: <strong>Every Friday @ 6:00 PM</strong>
               </span>
               <span className="text-slate-500">
-                Rule: <strong>70% Wealth / Gold Vault + 30% Safe FD Vault</strong>
+                Rule: <strong>70% Wealth / Gold Vault + 30% Instant Safe Vault</strong>
               </span>
             </div>
 
@@ -541,29 +541,29 @@ export const GoalJarsSection: React.FC = () => {
                 <div
                   className="h-full bg-amber-500 transition-all"
                   style={{ width: "70%" }}
-                  title="70% Digital Gold & Index Fund Vault (~11.5% p.a.)"
+                  title="70% Digital Gold & Index Fund Vault (~11.5% / yr)"
                 />
                 <div
                   className="h-full bg-emerald-500 transition-all"
                   style={{ width: "30%" }}
-                  title="30% Safe Liquid FD Vault (~6.8% p.a.)"
+                  title="30% Instant Safe Vault (~6.8% / yr)"
                 />
               </div>
               <div className="flex items-center justify-between text-[11px] font-mono">
                 <span className="text-amber-800 font-bold flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-amber-500" />
-                  70% Digital Gold &amp; Index Vault (~11.5% p.a.)
+                  70% Gold &amp; Index Vault (~11.5% / yr)
                 </span>
                 <span className="text-emerald-700 font-bold flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  30% Safe FD Vault (~6.8% p.a.)
+                  30% Instant Safe (~6.8% / yr)
                 </span>
               </div>
             </div>
 
             {/* Mandate Preset Caps */}
             <div className="flex items-center gap-2 pt-1">
-              <span className="text-xs text-slate-500">Monthly Mandate Cap:</span>
+              <span className="text-xs text-slate-500">Monthly Auto-Save Cap:</span>
               {[3000, 5000, 10000].map((cap) => (
                 <button
                   key={cap}
@@ -649,7 +649,7 @@ export const GoalJarsSection: React.FC = () => {
               </span>
             </div>
             <p className="text-xs text-slate-600 leading-relaxed">
-              A safe bank lockbox. Zero chance of losing money. Yields ~6.5–7% interest without market ups and downs.
+              A safe bank lockbox. Zero chance of losing money. Yields ~6.5–7% / yr without Price Swings.
             </p>
           </div>
 
@@ -667,7 +667,7 @@ export const GoalJarsSection: React.FC = () => {
               </span>
             </div>
             <p className="text-xs text-slate-600 leading-relaxed">
-              A single basket holding India&apos;s 50 biggest companies (TCS, Reliance, HDFC). Beats prices rising over time.
+              A single basket holding India&apos;s 50 biggest companies (TCS, Reliance, HDFC). Beats Price Rise over time.
             </p>
           </div>
 
@@ -685,7 +685,7 @@ export const GoalJarsSection: React.FC = () => {
               </span>
             </div>
             <p className="text-xs text-slate-600 leading-relaxed">
-              Zero-discipline savings autopilot. Automatically sweeps idle Friday cash and UPI spare change into safe vaults without asking for a UPI PIN every month.
+              Zero-discipline Growth. Automatically sweeps idle Friday cash and UPI spare change into safe vaults without asking for a UPI PIN every month.
             </p>
           </div>
         </div>

@@ -171,7 +171,7 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
     const estimatedDays = Math.max(2, Math.round(origCost / 135));
 
     return {
-      originalItem: text || "Discretionary Item",
+      originalItem: text || "Extra Spend Item",
       originalCost: origCost,
       delayDays: estimatedDays,
       activeGoalTitle: activeGoal.title,
