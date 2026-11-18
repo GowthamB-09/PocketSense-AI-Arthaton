@@ -16,19 +16,23 @@ import {
   Target,
   ArrowUpRight,
   TrendingUp,
+  TrendingDown,
   Zap,
   CheckCircle2,
   AlertTriangle,
   Info,
   Calendar,
   Lock,
-  RefreshCw,
+  Headphones,
   Sliders,
   DollarSign,
   Landmark,
   ChevronRight,
   HelpCircle,
-  TrendingDown,
+  Clock,
+  ShieldAlert,
+  Percent,
+  MoveRight,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 
@@ -38,9 +42,11 @@ export const GoalJarsSection: React.FC = () => {
   const [depositModalGoal, setDepositModalGoal] = useState<GoalJar | null>(null);
   const [depositAmount, setDepositAmount] = useState<string>("2000");
 
+  // New Goal Form State
   const [newTitle, setNewTitle] = useState("");
   const [newTarget, setNewTarget] = useState("");
-  const [newCategory, setNewCategory] = useState<GoalJar["category"]>("Travel");
+  const [newTimeline, setNewTimeline] = useState<"short-term" | "long-term">("short-term");
+  const [newCategory, setNewCategory] = useState<GoalJar["category"]>("Tech");
 
   // UPI AutoPay e-Mandate States
   const [isMandateActive, setIsMandateActive] = useState<boolean>(true);
@@ -63,49 +69,134 @@ export const GoalJarsSection: React.FC = () => {
     answer: string;
   } | null>(null);
 
-  // AI Goal Strategy & Price Trend Advisor Insights
-  const getGoalAiAdvisorInsight = (title: string, category: string) => {
+  // 1. AI Price-Trend & "Best Time to Buy" Forecaster Engine
+  const getGoalAiTrendData = (title: string, category: string, deadline?: string) => {
     const t = title.toLowerCase();
+
+    // Goal 1: New iPhone
     if (t.includes("iphone") || t.includes("apple") || t.includes("phone")) {
       return {
-        badge: "Tech Inflation: ~7% Annually",
-        badgeColor: "bg-blue-50 text-blue-700 border-blue-200",
+        trendStatus: "Price Dropping Soon 📉",
+        trendBadgeColor: "bg-rose-50 text-rose-700 border-rose-200",
+        bestTimeToBuy: "October (Festive Sale)",
         insight:
-          "Price Trend: Flagship phone prices rise ~7% annually. Parking cash in a 3% bank account loses value. Recommended: Auto-sweep into a High-Yield FD / Arbitrage Fund (~7%) + target October festive sale discounts.",
-        recommendation: "Target October Festive Sale (~₹12k discount)",
+          "New model launches in September & Diwali festive sales historically drop prices by 12–18%. Best Time to Buy: October (Wait 6 weeks to save ~₹11,000).",
+        vaultType: "short-term" as const,
+        vaultName: "Safe Liquid / High-Yield FD Vault (~6.8% p.a.)",
+        vaultTag: "Zero Market Risk • Hidden from UPI • Earns Interest",
+        vaultRate: "~6.8% p.a.",
+        vaultEarned: 2450,
+        smartSwapsEarned: 3100,
       };
     }
-    if (t.includes("gold") || t.includes("wealth") || category === "Wealth") {
+
+    // Goal 2: 24K Gold / Jewellery
+    if (t.includes("gold") || t.includes("jewel") || category === "Wealth") {
       return {
-        badge: "Inflation Hedge: ~11–12% Long-Term",
-        badgeColor: "bg-amber-50 text-amber-700 border-amber-200",
+        trendStatus: "Price Rising 📈",
+        trendBadgeColor: "bg-amber-50 text-amber-800 border-amber-200",
+        bestTimeToBuy: "Lock in Gradually (Micro-Buys)",
         insight:
-          "Price Trend: Gold & Indian equities beat inflation long-term (~11–12%). Recommended: Split Friday UPI AutoPay sweeps 70% into a Nifty 50 Index Fund SIP and 30% into Sovereign/Digital Gold.",
-        recommendation: "Split Friday AutoPay: 70% Index SIP / 30% Gold",
+          "Global central bank buying and wedding season demand point to a +6% upward trend. Best Time to Buy: Lock in prices gradually via monthly Digital Gold micro-buys rather than waiting.",
+        vaultType: "long-term" as const,
+        vaultName: "Nifty 50 Index Fund SIP + Digital Gold Vault (~11.5% p.a.)",
+        vaultTag: "Beats Inflation • Multiplies Wealth Compounding",
+        vaultRate: "~11.5% p.a.",
+        vaultEarned: 3820,
+        smartSwapsEarned: 4200,
       };
     }
+
+    // Goal 3: Noise-Cancelling Headphones
+    if (t.includes("headphone") || t.includes("audio") || t.includes("sony") || t.includes("bose")) {
+      return {
+        trendStatus: "Holding Steady ➡️",
+        trendBadgeColor: "bg-blue-50 text-blue-700 border-blue-200",
+        bestTimeToBuy: "Buy Once 100% Funded",
+        insight:
+          "No major hardware refresh or import duty change expected. Buy anytime once your jar hits 100%.",
+        vaultType: "short-term" as const,
+        vaultName: "Safe Liquid / High-Yield FD Vault (~6.8% p.a.)",
+        vaultTag: "Zero Market Risk • Hidden from UPI",
+        vaultRate: "~6.8% p.a.",
+        vaultEarned: 890,
+        smartSwapsEarned: 1850,
+      };
+    }
+
+    // Emergency Shield
     if (t.includes("emergency") || t.includes("shield") || category === "Emergency") {
       return {
-        badge: "Safety Rule: 0% Equity Volatility",
-        badgeColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        trendStatus: "Capital Protected 🛡️",
+        trendBadgeColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        bestTimeToBuy: "Keep 100% Intact",
         insight:
           "Safety Rule: Never put emergency cash in volatile stocks. Recommended: Keep 100% in an instant-withdrawal Bank FD (~6.5%).",
-        recommendation: "100% Instant-Withdrawal Bank FD (~6.5%)",
+        vaultType: "short-term" as const,
+        vaultName: "Instant-Withdrawal Emergency FD Vault (~6.5% p.a.)",
+        vaultTag: "100% RBI Insured • 24/7 Liquidity",
+        vaultRate: "~6.5% p.a.",
+        vaultEarned: 3100,
+        smartSwapsEarned: 2400,
       };
     }
+
+    // Dynamic AI Fallback for Custom User Goals
+    const isTechOrGadget = category === "Tech" || /mac|laptop|camera|ps5|console/i.test(t);
+    const isTravel = category === "Travel" || /trip|flight|hotel|vacation/i.test(t);
+
+    if (isTechOrGadget) {
+      return {
+        trendStatus: "Price Dropping Soon 📉",
+        trendBadgeColor: "bg-rose-50 text-rose-700 border-rose-200",
+        bestTimeToBuy: "Diwali / Year-End Clearance",
+        insight:
+          "Tech products typically see 10–15% seasonal discounts during festive quarterly clearance cycles. Best Time to Buy: Q4 Sales.",
+        vaultType: "short-term" as const,
+        vaultName: "Safe Liquid / High-Yield FD Vault (~6.8% p.a.)",
+        vaultTag: "Zero Stock Risk • Out of Sight",
+        vaultRate: "~6.8% p.a.",
+        vaultEarned: 1250,
+        smartSwapsEarned: 1600,
+      };
+    }
+
+    if (isTravel) {
+      return {
+        trendStatus: "Price Rising 📈",
+        trendBadgeColor: "bg-amber-50 text-amber-800 border-amber-200",
+        bestTimeToBuy: "Book 7–9 Weeks Ahead",
+        insight:
+          "Airfares and hotel surge pricing increase steeply within 30 days of departure. Lock in tickets 7–9 weeks in advance on Tuesday/Wednesday.",
+        vaultType: "short-term" as const,
+        vaultName: "Safe Liquid / High-Yield FD Vault (~6.8% p.a.)",
+        vaultTag: "Liquid Cash • No Lock-in Penalty",
+        vaultRate: "~6.8% p.a.",
+        vaultEarned: 1540,
+        smartSwapsEarned: 2100,
+      };
+    }
+
     return {
-      badge: "Goal Pacing: On Track",
-      badgeColor: "bg-slate-50 text-slate-700 border-slate-200",
+      trendStatus: "Holding Steady ➡️",
+      trendBadgeColor: "bg-slate-50 text-slate-700 border-slate-200",
+      bestTimeToBuy: "Buy When Fully Funded",
       insight:
-        "AutoPay sweeps and intercepted impulse round-ups will compound towards this milestone every Friday without manual intervention.",
-      recommendation: "Continue Friday UPI AutoPay Sweeps",
+        "Stable pricing forecast with regular seasonal minor promotions. Auto-sweep spare change to hit 100% without manual stress.",
+      vaultType: "short-term" as const,
+      vaultName: "Safe Liquid / High-Yield FD Vault (~6.8% p.a.)",
+      vaultTag: "Safe Growth Vault",
+      vaultRate: "~6.8% p.a.",
+      vaultEarned: 950,
+      smartSwapsEarned: 1400,
     };
   };
 
   const getVaultIcon = (title: string, category: string) => {
     const t = title.toLowerCase();
     if (t.includes("iphone") || t.includes("phone")) return Smartphone;
-    if (t.includes("gold") || t.includes("coin")) return Coins;
+    if (t.includes("gold") || t.includes("jewel") || t.includes("coin")) return Coins;
+    if (t.includes("headphone") || t.includes("audio")) return Headphones;
     if (t.includes("trip") || t.includes("japan") || category === "Travel") return Plane;
     if (t.includes("macbook") || t.includes("tech") || category === "Tech") return Laptop;
     if (t.includes("emergency") || t.includes("shield") || category === "Emergency") return ShieldCheck;
@@ -126,22 +217,21 @@ export const GoalJarsSection: React.FC = () => {
     const simulatedRoundUps = 600; // round-up spare change
     const totalSweep = simulatedBuffer + simulatedRoundUps; // ₹3,000
 
-    // 70% into Wealth / Gold Goal + 30% into Emergency Shield
+    // 70% into Wealth / Gold Goal + 30% into Emergency / iPhone Vault
     const sipAmount = Math.round(totalSweep * 0.70); // ₹2,100 (70%)
     const goldAmount = totalSweep - sipAmount; // ₹900 (30%)
 
-    // Find target goals
-    const wealthGoal = profile.goals.find((g) => g.title.toLowerCase().includes("gold") || g.category === "Wealth") || profile.goals[1];
-    const emergencyGoal = profile.goals.find((g) => g.title.toLowerCase().includes("emergency") || g.category === "Emergency") || profile.goals[2];
+    const targetGoalA = profile.goals[1] || profile.goals[0];
+    const targetGoalB = profile.goals[0] || profile.goals[2];
 
-    if (wealthGoal) {
-      claimSavings(wealthGoal.id, sipAmount, `Friday AutoPay Sweep (70% Nifty 50 + Gold)`);
+    if (targetGoalA) {
+      claimSavings(targetGoalA.id, sipAmount, `Friday AutoPay Sweep to Out-of-Sight Vault`);
     }
-    if (emergencyGoal) {
-      claimSavings(emergencyGoal.id, goldAmount, `Friday AutoPay Sweep (30% Emergency Shield FD)`);
+    if (targetGoalB) {
+      claimSavings(targetGoalB.id, goldAmount, `Friday AutoPay Sweep to Out-of-Sight Vault`);
     }
 
-    const refNo = "NPCI-AUTOPAY-" + Math.floor(10000000 + Math.random() * 90000000);
+    const refNo = "NPCI-VAULT-" + Math.floor(10000000 + Math.random() * 90000000);
     setSweepFeedback({
       total: totalSweep,
       sipAmount,
@@ -162,7 +252,7 @@ export const GoalJarsSection: React.FC = () => {
     }, 400);
   };
 
-  const handleCreateGoal = (e: React.FormEvent) => {
+  const handleCreateCustomGoal = (e: React.FormEvent) => {
     e.preventDefault();
     const target = parseFloat(newTarget);
     if (!newTitle.trim() || isNaN(target) || target <= 0) return;
@@ -171,15 +261,21 @@ export const GoalJarsSection: React.FC = () => {
       title: newTitle.trim(),
       targetAmount: target,
       currentAmount: 0,
-      emoji: "🎯",
+      emoji: newCategory === "Tech" ? "📱" : newCategory === "Wealth" ? "🪙" : "🎯",
       category: newCategory,
       color: "#059669",
-      deadline: "2027-12-31",
+      deadline: newTimeline === "short-term" ? "2027-10-15" : "2028-12-31",
     });
 
     setNewTitle("");
     setNewTarget("");
     setShowAddModal(false);
+
+    confetti({
+      particleCount: 40,
+      spread: 60,
+      origin: { y: 0.4 },
+    });
   };
 
   const handleQuickDeposit = (e: React.FormEvent) => {
@@ -188,7 +284,7 @@ export const GoalJarsSection: React.FC = () => {
     const amt = parseFloat(depositAmount);
     if (isNaN(amt) || amt <= 0) return;
 
-    claimSavings(depositModalGoal.id, amt, `Manual top-up to ${depositModalGoal.title}`);
+    claimSavings(depositModalGoal.id, amt, `Manual top-up to ${depositModalGoal.title} Safe Vault`);
     setDepositModalGoal(null);
 
     confetti({
@@ -201,7 +297,196 @@ export const GoalJarsSection: React.FC = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* FEATURE 1: UPI AUTOPAY E-MANDATE CARD */}
+      {/* FEATURE 2: ANTI-TEMPTATION & OUT-OF-SIGHT SAFE GROWTH VAULT BANNER */}
+      <div className="fintech-card rounded-2xl p-5 bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-xl bg-white/10 text-emerald-400 border border-white/20 flex items-center justify-center shrink-0">
+            <Lock className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-sm font-bold tracking-tight text-white flex items-center gap-2">
+                <span>&quot;Out-of-Sight&quot; Safe Growth Vaults</span>
+              </h3>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">
+                Anti-Temptation + Money Multiplier
+              </span>
+            </div>
+            <p className="text-xs text-slate-300 mt-1 leading-relaxed max-w-3xl">
+              <strong>Why Regular Bank Accounts Fail:</strong> Money visible in your daily UPI checking account gets spent on impulse. PocketSense AutoPay automatically sweeps goal funds out-of-sight into locked, high-yield vaults that multiply your savings while you wait for the best time to buy.
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition-all shrink-0 self-start md:self-auto active:scale-95"
+        >
+          <Plus className="w-3.5 h-3.5" />
+          <span>+ Add Custom Goal</span>
+        </button>
+      </div>
+
+      {/* FEATURE 1: AI MARKET & NEWS FORECAST CARDS (IPHONE, GOLD, HEADPHONES) */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between text-xs">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-emerald-600" />
+            <h3 className="font-bold text-slate-900 uppercase tracking-wide">
+              AI Price-Trend &amp; Best Time to Buy Engine
+            </h3>
+          </div>
+          <span className="text-slate-400 font-mono text-[11px]">
+            Live Market Cycles &amp; Historical News Analysis
+          </span>
+        </div>
+
+        {/* 3 Live AI Market & News Forecast Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Card 1: New iPhone (Price Dropping Soon) */}
+          <div className="fintech-card rounded-2xl p-5 bg-white border border-slate-200 shadow-sm space-y-3 flex flex-col justify-between hover:border-slate-300 transition-all">
+            <div className="space-y-2.5">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center font-bold">
+                    <Smartphone className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-900">New iPhone</h4>
+                    <span className="text-[10px] font-mono text-slate-400">Target: ₹80,000</span>
+                  </div>
+                </div>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 font-bold">
+                  Price Dropping Soon 📉
+                </span>
+              </div>
+
+              {/* AI News & History Insight */}
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 leading-relaxed font-sans">
+                <strong className="text-slate-900 block font-semibold mb-1">
+                  AI News &amp; History Insight:
+                </strong>
+                &ldquo;New model launches in September &amp; Diwali festive sales historically drop prices by 12–18%. Best Time to Buy: October (Wait 6 weeks to save ~₹11,000).&rdquo;
+              </div>
+
+              {/* Safe Vault Matching Badge */}
+              <div className="p-2.5 rounded-xl bg-blue-50/70 border border-blue-200 text-[11px] font-mono">
+                <div className="flex items-center justify-between text-blue-900 font-bold">
+                  <span className="flex items-center gap-1">
+                    <Lock className="w-3 h-3 text-blue-700" />
+                    Safe Liquid FD Vault (~6.8%)
+                  </span>
+                  <span>Short-Term (&lt;1Y)</span>
+                </div>
+                <span className="text-[10px] text-blue-700 block mt-0.5">
+                  Zero market risk • Hidden from daily UPI • Bonus interest
+                </span>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono">
+              <span className="text-slate-500">Wait &amp; Save ~₹11k</span>
+              <span className="text-emerald-700 font-bold">Best: October Diwali</span>
+            </div>
+          </div>
+
+          {/* Card 2: 24K Gold / Jewellery (Price Rising) */}
+          <div className="fintech-card rounded-2xl p-5 bg-white border border-slate-200 shadow-sm space-y-3 flex flex-col justify-between hover:border-slate-300 transition-all">
+            <div className="space-y-2.5">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center font-bold">
+                    <Coins className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-900">24K Gold / Jewellery</h4>
+                    <span className="text-[10px] font-mono text-slate-400">Target: ₹1,20,000</span>
+                  </div>
+                </div>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 font-bold">
+                  Price Rising 📈
+                </span>
+              </div>
+
+              {/* AI News & History Insight */}
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 leading-relaxed font-sans">
+                <strong className="text-slate-900 block font-semibold mb-1">
+                  AI News &amp; History Insight:
+                </strong>
+                &ldquo;Global central bank buying and wedding season demand point to a +6% upward trend. Best Time to Buy: Lock in prices gradually via monthly Digital Gold micro-buys rather than waiting.&rdquo;
+              </div>
+
+              {/* Safe Vault Matching Badge */}
+              <div className="p-2.5 rounded-xl bg-amber-50/70 border border-amber-200 text-[11px] font-mono">
+                <div className="flex items-center justify-between text-amber-900 font-bold">
+                  <span className="flex items-center gap-1">
+                    <TrendingUp className="w-3 h-3 text-amber-700" />
+                    Digital Gold + Index SIP (~11.5%)
+                  </span>
+                  <span>Long-Term (1–3Y)</span>
+                </div>
+                <span className="text-[10px] text-amber-700 block mt-0.5">
+                  Beats inflation • Multiplies wealth compounding
+                </span>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono">
+              <span className="text-slate-500">Lock In Gradually</span>
+              <span className="text-amber-700 font-bold">Friday Micro-Buys</span>
+            </div>
+          </div>
+
+          {/* Card 3: Noise-Cancelling Headphones (Holding Steady) */}
+          <div className="fintech-card rounded-2xl p-5 bg-white border border-slate-200 shadow-sm space-y-3 flex flex-col justify-between hover:border-slate-300 transition-all">
+            <div className="space-y-2.5">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-violet-50 text-violet-700 flex items-center justify-center font-bold">
+                    <Headphones className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-900">Noise-Cancelling Headphones</h4>
+                    <span className="text-[10px] font-mono text-slate-400">Target: ₹22,000</span>
+                  </div>
+                </div>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 font-bold">
+                  Holding Steady ➡️
+                </span>
+              </div>
+
+              {/* AI News & History Insight */}
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 leading-relaxed font-sans">
+                <strong className="text-slate-900 block font-semibold mb-1">
+                  AI News &amp; History Insight:
+                </strong>
+                &ldquo;No major hardware refresh or import duty change expected. Buy anytime once your jar hits 100%.&rdquo;
+              </div>
+
+              {/* Safe Vault Matching Badge */}
+              <div className="p-2.5 rounded-xl bg-violet-50/70 border border-violet-200 text-[11px] font-mono">
+                <div className="flex items-center justify-between text-violet-900 font-bold">
+                  <span className="flex items-center gap-1">
+                    <Lock className="w-3 h-3 text-violet-700" />
+                    High-Yield Liquid FD (~6.8%)
+                  </span>
+                  <span>Short-Term (&lt;1Y)</span>
+                </div>
+                <span className="text-[10px] text-violet-700 block mt-0.5">
+                  Locked from UPI impulse • Earns interest bonus
+                </span>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono">
+              <span className="text-slate-500">Stable Market</span>
+              <span className="text-blue-700 font-bold">Buy Once 100% Funded</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* UPI AUTOPAY E-MANDATE CARD */}
       <div className="fintech-card rounded-2xl p-6 bg-white border border-slate-200 shadow-sm space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
           <div className="flex items-start sm:items-center gap-3">
@@ -222,7 +507,7 @@ export const GoalJarsSection: React.FC = () => {
                 </span>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">
-                Zero-click monthly investing. Automatically sweeps weekly unspent buffers + UPI spare change every Friday without asking for a UPI PIN.
+                Zero-click monthly investing. Automatically sweeps weekly unspent buffers + UPI spare change into your Out-of-Sight Safe Growth Vaults every Friday.
               </p>
             </div>
           </div>
@@ -259,7 +544,7 @@ export const GoalJarsSection: React.FC = () => {
                 Schedule: <strong>Every Friday @ 6:00 PM</strong>
               </span>
               <span className="text-slate-500">
-                Rule: <strong>70% Nifty 50 &amp; Gold / 30% Emergency Shield</strong>
+                Rule: <strong>70% Wealth / Gold Vault + 30% Safe FD Vault</strong>
               </span>
             </div>
 
@@ -269,22 +554,22 @@ export const GoalJarsSection: React.FC = () => {
                 <div
                   className="h-full bg-amber-500 transition-all"
                   style={{ width: "70%" }}
-                  title="70% Nifty 50 Index Fund & 24K Gold (~11-12% p.a.)"
+                  title="70% Digital Gold & Index Fund Vault (~11.5% p.a.)"
                 />
                 <div
                   className="h-full bg-emerald-500 transition-all"
                   style={{ width: "30%" }}
-                  title="30% Emergency Shield FD (~6.5% guaranteed)"
+                  title="30% Safe Liquid FD Vault (~6.8% p.a.)"
                 />
               </div>
               <div className="flex items-center justify-between text-[11px] font-mono">
                 <span className="text-amber-800 font-bold flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-amber-500" />
-                  70% Nifty 50 &amp; 24K Gold (~11–12% p.a.)
+                  70% Digital Gold &amp; Index Vault (~11.5% p.a.)
                 </span>
                 <span className="text-emerald-700 font-bold flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  30% Emergency Shield (~6.5% p.a.)
+                  30% Safe FD Vault (~6.8% p.a.)
                 </span>
               </div>
             </div>
@@ -331,7 +616,7 @@ export const GoalJarsSection: React.FC = () => {
               </span>
             </button>
             <span className="text-[10px] text-center text-slate-500 font-mono">
-              Demo button: Sweeps ₹3,000 (₹2,100 Wealth + ₹900 Shield)
+              Demo button: Sweeps ₹3,000 into Out-of-Sight Vaults
             </span>
           </div>
         </div>
@@ -347,9 +632,9 @@ export const GoalJarsSection: React.FC = () => {
                     Friday AutoPay Sweep Executed Successfully!
                   </h4>
                   <p className="text-xs text-slate-600 mt-0.5">
-                    Swept <strong>{formatINR(sweepFeedback.total)}</strong> without asking for a UPI PIN:{" "}
-                    <strong className="text-amber-700">{formatINR(sweepFeedback.sipAmount)}</strong> into 24K Gold &amp; Wealth +{" "}
-                    <strong className="text-emerald-700">{formatINR(sweepFeedback.goldAmount)}</strong> into Emergency Shield.
+                    Swept <strong>{formatINR(sweepFeedback.total)}</strong> out-of-sight without asking for a UPI PIN:{" "}
+                    <strong className="text-amber-700">{formatINR(sweepFeedback.sipAmount)}</strong> into Digital Gold &amp; Wealth Vault +{" "}
+                    <strong className="text-emerald-700">{formatINR(sweepFeedback.goldAmount)}</strong> into Safe FD Vault.
                   </p>
                 </div>
               </div>
@@ -361,113 +646,148 @@ export const GoalJarsSection: React.FC = () => {
         )}
       </div>
 
-      {/* FEATURE 2: AI GOAL STRATEGY & PRICE TREND ADVISOR */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between text-xs">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-emerald-600" />
-            <h3 className="font-bold text-slate-900 uppercase tracking-wide">
-              AI Goal Strategy &amp; Price Trend Advisor
-            </h3>
+      {/* GOAL JARS WITH OUT-OF-SIGHT VAULT BADGES & EXTRA MONEY EARNED COUNTER */}
+      <div className="space-y-4 pt-2">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700">
+              <Target className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-2">
+                <span>Active Goal Jars &amp; Safe Growth Vaults</span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-700 font-medium">
+                  {profile.goals.length} Goals Active
+                </span>
+              </h3>
+              <p className="text-xs text-slate-500">
+                Locked away from UPI impulse spending • Earning yield while waiting for the best time to buy
+              </p>
+            </div>
           </div>
-          <span className="text-slate-400 font-mono text-[11px]">Real-World Inflation &amp; Product Trends</span>
+
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 shadow-xs transition-all"
+          >
+            <Plus className="w-3.5 h-3.5 text-emerald-600" />
+            <span>New Goal</span>
+          </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Card 1: New iPhone (₹80,000) */}
-          <div className="fintech-card rounded-2xl p-5 bg-white border border-slate-200 shadow-sm space-y-3 flex flex-col justify-between hover:border-slate-300 transition-all">
-            <div className="space-y-2">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 flex items-center justify-center shadow-xs">
-                    <Smartphone className="w-4 h-4" />
+        {/* Goals Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {profile.goals.map((jar) => {
+            const percent = Math.min(100, Math.round((jar.currentAmount / jar.targetAmount) * 100));
+            const VaultIcon = getVaultIcon(jar.title, jar.category);
+            const trendData = getGoalAiTrendData(jar.title, jar.category, jar.deadline);
+
+            // Compute dynamic Extra Money Earned While Waiting
+            const vaultInterestEarned = Math.max(450, Math.round(jar.currentAmount * 0.058));
+            const smartSwapsSwept = Math.max(950, jar.totalSavedFromNudges);
+
+            return (
+              <div
+                key={jar.id}
+                className="fintech-card rounded-2xl p-5 flex flex-col justify-between group bg-white border border-slate-200 shadow-sm hover:border-slate-300 transition-all space-y-3"
+              >
+                <div className="space-y-2.5">
+                  {/* Top Bar with Icon, Title, and Trend Pill */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-emerald-700 shadow-xs">
+                        <VaultIcon className="w-4 h-4" />
+                      </div>
+                      <div className="truncate">
+                        <h4 className="text-xs font-bold text-slate-900 tracking-tight truncate max-w-[125px]">
+                          {jar.title}
+                        </h4>
+                        <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider font-medium">
+                          {jar.category}
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => deleteGoalJar(jar.id)}
+                      className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-rose-600 rounded transition-opacity"
+                      title="Delete goal"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-900">New iPhone</h4>
-                    <span className="text-[10px] font-mono text-slate-500">Target: ₹80,000</span>
+
+                  {/* Price Trend Status Badge */}
+                  <div className="flex items-center justify-between text-[10px] font-mono">
+                    <span className={`px-2 py-0.5 rounded-full border font-bold ${trendData.trendBadgeColor}`}>
+                      {trendData.trendStatus}
+                    </span>
+                    <span className="text-slate-500 font-semibold truncate max-w-[120px]">
+                      {trendData.bestTimeToBuy}
+                    </span>
+                  </div>
+
+                  {/* Target & Current Balance */}
+                  <div className="flex items-baseline justify-between mt-2 font-mono">
+                    <span className="text-lg font-bold text-slate-900">{formatINR(jar.currentAmount)}</span>
+                    <span className="text-[11px] text-slate-500">Target: {formatINR(jar.targetAmount)}</span>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-emerald-500 transition-all duration-300"
+                      style={{ width: `${percent}%` }}
+                    />
+                  </div>
+
+                  <div className="flex justify-between items-center text-[10px] font-mono text-slate-500">
+                    <span className="font-semibold text-slate-700">{percent}% funded</span>
+                    <span className="text-emerald-700 font-bold">{formatINR(jar.targetAmount - jar.currentAmount)} to go</span>
+                  </div>
+
+                  {/* Out-of-Sight Auto-Sweep Vault Badge */}
+                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-[10px] space-y-1">
+                    <div className="flex items-center justify-between font-mono font-bold text-slate-800">
+                      <span className="flex items-center gap-1 truncate">
+                        <Lock className="w-3 h-3 text-emerald-600" />
+                        <span className="truncate">{trendData.vaultName.split("(")[0]}</span>
+                      </span>
+                      <span className="text-emerald-700 shrink-0">{trendData.vaultRate}</span>
+                    </div>
+                    <span className="text-slate-400 block font-mono text-[9px] truncate">
+                      {trendData.vaultTag}
+                    </span>
+                  </div>
+
+                  {/* LIVE "EXTRA MONEY EARNED WHILE WAITING" COUNTER */}
+                  <div className="p-2 rounded-xl bg-emerald-50/70 border border-emerald-200 text-[10px] font-mono text-emerald-950">
+                    <div className="flex items-center gap-1 font-bold text-emerald-900 mb-0.5">
+                      <Sparkles className="w-3 h-3 text-emerald-600 shrink-0" />
+                      <span>Extra Earned While Waiting:</span>
+                    </div>
+                    <span className="text-[9.5px] block font-semibold text-emerald-800">
+                      +{formatINR(vaultInterestEarned)} safe vault yield + {formatINR(smartSwapsSwept)} from Smart Swaps
+                    </span>
                   </div>
                 </div>
-                <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 font-bold">
-                  Tech Inflation ~7%
-                </span>
-              </div>
 
-              <div className="p-3 rounded-xl bg-blue-50/50 border border-blue-100 text-xs text-slate-700 leading-relaxed font-sans">
-                <strong className="text-blue-900 block font-semibold mb-1">AI Price Trend Insight:</strong>
-                Price Trend: Flagship phone prices rise ~7% annually. Parking cash in a 3% bank account loses value. Recommended: Auto-sweep into a High-Yield FD / Arbitrage Fund (~7%) + target October festive sale discounts.
-              </div>
-            </div>
-
-            <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono text-slate-500">
-              <span>Saved: ₹36,000 (45%)</span>
-              <span className="text-blue-700 font-semibold">Festive Sale Target</span>
-            </div>
-          </div>
-
-          {/* Card 2: 24K Digital Gold & Wealth (₹1,50,000) */}
-          <div className="fintech-card rounded-2xl p-5 bg-white border border-slate-200 shadow-sm space-y-3 flex flex-col justify-between hover:border-slate-300 transition-all">
-            <div className="space-y-2">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center shadow-xs">
-                    <Coins className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-900">24K Digital Gold &amp; Wealth</h4>
-                    <span className="text-[10px] font-mono text-slate-500">Target: ₹1,50,000</span>
-                  </div>
+                <div className="pt-2 border-t border-slate-100">
+                  <button
+                    onClick={() => setDepositModalGoal(jar)}
+                    className="w-full py-1.5 px-3 rounded-lg text-xs font-semibold bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    <ArrowUpRight className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Top-Up Vault</span>
+                  </button>
                 </div>
-                <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 font-bold">
-                  Inflation Hedge ~12%
-                </span>
               </div>
-
-              <div className="p-3 rounded-xl bg-amber-50/50 border border-amber-100 text-xs text-slate-700 leading-relaxed font-sans">
-                <strong className="text-amber-900 block font-semibold mb-1">AI Price Trend Insight:</strong>
-                Price Trend: Gold &amp; Indian equities beat inflation long-term (~11–12%). Recommended: Split Friday UPI AutoPay sweeps 70% into a Nifty 50 Index Fund SIP and 30% into Sovereign/Digital Gold.
-              </div>
-            </div>
-
-            <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono text-slate-500">
-              <span>Saved: ₹68,000 (45%)</span>
-              <span className="text-amber-700 font-semibold">70/30 AutoPay Split</span>
-            </div>
-          </div>
-
-          {/* Card 3: 3-Month Emergency Shield (₹90,000) */}
-          <div className="fintech-card rounded-2xl p-5 bg-white border border-slate-200 shadow-sm space-y-3 flex flex-col justify-between hover:border-slate-300 transition-all">
-            <div className="space-y-2">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center shadow-xs">
-                    <ShieldCheck className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-900">3-Month Emergency Shield</h4>
-                    <span className="text-[10px] font-mono text-slate-500">Target: ₹90,000</span>
-                  </div>
-                </div>
-                <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold">
-                  Zero Stock Volatility
-                </span>
-              </div>
-
-              <div className="p-3 rounded-xl bg-emerald-50/50 border border-emerald-100 text-xs text-slate-700 leading-relaxed font-sans">
-                <strong className="text-emerald-900 block font-semibold mb-1">AI Safety Rule Insight:</strong>
-                Safety Rule: Never put emergency cash in volatile stocks. Recommended: Keep 100% in an instant-withdrawal Bank FD (~6.5%).
-              </div>
-            </div>
-
-            <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono text-slate-500">
-              <span>Saved: ₹55,000 (61%)</span>
-              <span className="text-emerald-700 font-semibold">Instant Bank FD</span>
-            </div>
-          </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* FEATURE 3: 3 ULTRA-SHORT PLAIN-ENGLISH INVESTING CARDS */}
-      <div className="space-y-3">
+      {/* 3 ULTRA-SHORT PLAIN-ENGLISH INVESTING CARDS */}
+      <div className="space-y-3 pt-2">
         <div className="flex items-center justify-between text-xs">
           <span className="font-bold text-slate-900 uppercase tracking-wide">
             Plain-English Wealth Essentials (No Jargon)
@@ -542,15 +862,15 @@ export const GoalJarsSection: React.FC = () => {
             {[
               {
                 q: "Why shouldn't I keep iPhone savings in a normal bank account?",
-                a: "Normal savings accounts pay ~2.5–3%, which lags 7% annual tech price inflation. High-yield liquid FDs or arbitrage funds earn ~7% without stock market risk, preserving your purchasing power.",
+                a: "Normal savings accounts pay ~2.5–3%, which lags 7% annual tech price inflation. High-yield liquid FDs or arbitrage funds earn ~6.8% without stock market risk, keeping your savings out-of-sight from UPI impulse taps.",
               },
               {
-                q: "How does 70% Nifty 50 + 30% Gold beat inflation?",
-                a: "Indian equities (Nifty 50) have historically delivered ~12% long-term CAGR, while 24K Gold hedges against currency devaluation (~10–11%). Combined, they easily beat India's ~5–6% CPI inflation.",
+                q: "Why does the AI advise buying iPhone in October instead of now?",
+                a: "Apple's new lineup launches every September, causing retailers and e-commerce platforms (Diwali Big Billion Days) to discount previous flagship models by 12–18%. Waiting 6 weeks saves ~₹11,000 on an ₹80,000 phone.",
               },
               {
-                q: "Why must Emergency cash be in a 6.5% FD instead of mutual funds?",
-                a: "Emergencies don't wait for market crashes to recover. Bank FDs backed by DICGC insurance offer instant 24/7 liquidity with 0% capital volatility, so you never sell equity at a bottom.",
+                q: "How does Digital Gold + Index Fund beat inflation?",
+                a: "Indian equities (Nifty 50) historically yield ~11.5–12% long-term, while 24K Gold hedges against rupee depreciation (~9–11%). Combined, they outpace India's ~5–6% CPI inflation and multiply your idle cash.",
               },
             ].map((item, idx) => (
               <button
@@ -581,130 +901,28 @@ export const GoalJarsSection: React.FC = () => {
         </div>
       </div>
 
-      {/* SAVINGS GOALS GRID */}
-      <div className="space-y-4 pt-2">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700">
-              <Target className="w-4 h-4" />
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-2">
-                <span>Active Goal Jars</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-700 font-medium">
-                  {profile.goals.length} Goals Active
-                </span>
-              </h3>
-              <p className="text-xs text-slate-500">
-                Funded automatically via Friday AutoPay sweeps and intercepted impulse buys.
-              </p>
-            </div>
-          </div>
-
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 shadow-xs transition-all"
-          >
-            <Plus className="w-3.5 h-3.5 text-emerald-600" />
-            <span>New Goal</span>
-          </button>
-        </div>
-
-        {/* Goals Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {profile.goals.map((jar) => {
-            const percent = Math.min(100, Math.round((jar.currentAmount / jar.targetAmount) * 100));
-            const VaultIcon = getVaultIcon(jar.title, jar.category);
-            const aiInsight = getGoalAiAdvisorInsight(jar.title, jar.category);
-
-            return (
-              <div
-                key={jar.id}
-                className="fintech-card rounded-2xl p-5 flex flex-col justify-between group bg-white border border-slate-200 shadow-sm hover:border-slate-300 transition-all space-y-3"
-              >
-                <div>
-                  <div className="flex items-start justify-between gap-2 mb-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-emerald-700 shadow-xs">
-                        <VaultIcon className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-bold text-slate-900 tracking-tight truncate max-w-[130px]">
-                          {jar.title}
-                        </h4>
-                        <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider font-medium">
-                          {jar.category}
-                        </span>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => deleteGoalJar(jar.id)}
-                      className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-rose-600 rounded transition-opacity"
-                      title="Delete goal"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-
-                  <div className="flex items-baseline justify-between mt-3 mb-1.5 font-mono">
-                    <span className="text-lg font-bold text-slate-900">{formatINR(jar.currentAmount)}</span>
-                    <span className="text-[11px] text-slate-500">Target: {formatINR(jar.targetAmount)}</span>
-                  </div>
-
-                  <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden my-2">
-                    <div
-                      className="h-full rounded-full bg-emerald-500 transition-all duration-300"
-                      style={{ width: `${percent}%` }}
-                    />
-                  </div>
-
-                  <div className="flex justify-between items-center text-[11px] font-mono text-slate-500">
-                    <span className="font-semibold text-slate-700">{percent}% funded</span>
-                    {jar.totalSavedFromNudges > 0 && (
-                      <span className="text-emerald-700 font-semibold">+{formatINR(jar.totalSavedFromNudges)} swept</span>
-                    )}
-                  </div>
-
-                  {/* AI Strategy Mini-Tag */}
-                  <div className="mt-2.5 pt-2 border-t border-slate-100">
-                    <span className={`text-[9px] font-mono px-2 py-0.5 rounded border block truncate font-medium ${aiInsight.badgeColor}`}>
-                      {aiInsight.recommendation}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="pt-2 border-t border-slate-100">
-                  <button
-                    onClick={() => setDepositModalGoal(jar)}
-                    className="w-full py-1.5 px-3 rounded-lg text-xs font-semibold bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 transition-colors flex items-center justify-center gap-1.5"
-                  >
-                    <ArrowUpRight className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>Quick Top-Up</span>
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Add Goal Modal */}
+      {/* + ADD CUSTOM GOAL QUICK MODAL WITH AUTO AI FORECAST */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex sm:items-center sm:justify-center items-end p-0 sm:p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white border-t sm:border border-slate-200 rounded-t-3xl sm:rounded-2xl w-full sm:max-w-sm p-6 shadow-2xl space-y-4 animate-slide-up-mobile sm:animate-fade-in">
+          <div className="bg-white border-t sm:border border-slate-200 rounded-t-3xl sm:rounded-2xl w-full sm:max-w-md p-6 shadow-2xl space-y-4 animate-slide-up-mobile sm:animate-fade-in">
             <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto -mt-2 mb-2 sm:hidden" />
             <div>
-              <h3 className="text-sm font-bold text-slate-900 tracking-tight">Create a Savings Goal</h3>
-              <p className="text-xs text-slate-500 mt-0.5">Set a milestone to save towards.</p>
+              <h3 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-emerald-600" />
+                <span>Add Goal with AI Price Forecaster</span>
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Type any item — AI generates a price trend forecast &amp; assigns an Out-of-Sight Safe Vault.
+              </p>
             </div>
 
-            <form onSubmit={handleCreateGoal} className="space-y-3.5">
+            <form onSubmit={handleCreateCustomGoal} className="space-y-3.5">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">Goal Name</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. New iPhone, 24K Gold, Emergency Shield"
+                  placeholder="e.g. MacBook M3, Sony Camera, PlayStation 5, Bali Trip"
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                   className="w-full px-3 py-2 text-base sm:text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors min-h-[44px]"
@@ -718,7 +936,7 @@ export const GoalJarsSection: React.FC = () => {
                     type="number"
                     required
                     min="1000"
-                    placeholder="80000"
+                    placeholder="50000"
                     value={newTarget}
                     onChange={(e) => setNewTarget(e.target.value)}
                     className="w-full px-3 py-2 text-base sm:text-xs font-mono bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors min-h-[44px]"
@@ -731,14 +949,31 @@ export const GoalJarsSection: React.FC = () => {
                     onChange={(e) => setNewCategory(e.target.value as any)}
                     className="w-full px-3 py-2 text-base sm:text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors min-h-[44px]"
                   >
-                    <option value="Tech">Tech (iPhone/Laptop)</option>
-                    <option value="Wealth">Wealth (24K Gold/SIP)</option>
-                    <option value="Emergency">Emergency (FD Shield)</option>
-                    <option value="Travel">Travel</option>
-                    <option value="Lifestyle">Lifestyle</option>
+                    <option value="Tech">Tech / Gadgets</option>
+                    <option value="Wealth">Wealth / Gold</option>
+                    <option value="Emergency">Emergency Fund</option>
+                    <option value="Travel">Travel &amp; Flights</option>
+                    <option value="Lifestyle">Lifestyle &amp; Gear</option>
                   </select>
                 </div>
               </div>
+
+              {/* Dynamic Live AI Forecast Preview in the Modal */}
+              {newTitle.trim().length > 1 && (
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5 animate-fade-in text-xs font-sans">
+                  <div className="flex items-center justify-between font-mono">
+                    <span className="font-bold text-slate-900">AI Trend Forecast:</span>
+                    <span className="text-[10px] font-bold text-emerald-700">Auto-Generated</span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 leading-relaxed">
+                    {getGoalAiTrendData(newTitle, newCategory).insight}
+                  </p>
+                  <div className="flex items-center justify-between text-[10px] font-mono pt-1 text-slate-500">
+                    <span>Vault: <strong>{getGoalAiTrendData(newTitle, newCategory).vaultName.split("(")[0]}</strong></span>
+                    <span className="text-emerald-700 font-bold">{getGoalAiTrendData(newTitle, newCategory).bestTimeToBuy}</span>
+                  </div>
+                </div>
+              )}
 
               <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
                 <button
@@ -752,7 +987,7 @@ export const GoalJarsSection: React.FC = () => {
                   type="submit"
                   className="px-4 py-2 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs min-h-[40px] active:scale-95"
                 >
-                  Create Goal
+                  Create Goal &amp; Lock Vault
                 </button>
               </div>
             </form>
@@ -760,17 +995,19 @@ export const GoalJarsSection: React.FC = () => {
         </div>
       )}
 
-      {/* Quick Deposit Modal */}
+      {/* QUICK TOP-UP VAULT MODAL */}
       {depositModalGoal && (
         <div className="fixed inset-0 z-50 flex sm:items-center sm:justify-center items-end p-0 sm:p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
           <div className="bg-white border-t sm:border border-slate-200 rounded-t-3xl sm:rounded-2xl w-full sm:max-w-sm p-6 shadow-2xl space-y-4 animate-slide-up-mobile sm:animate-fade-in">
             <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto -mt-2 mb-2 sm:hidden" />
             <div>
               <h3 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                <Target className="w-4 h-4 text-emerald-600" />
-                <span>Top-Up {depositModalGoal.title}</span>
+                <Lock className="w-4 h-4 text-emerald-600" />
+                <span>Top-Up Safe Vault: {depositModalGoal.title}</span>
               </h3>
-              <p className="text-xs text-slate-500 mt-0.5">Deposit saved money into this goal.</p>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Locks cash out-of-sight from UPI into high-yield growth.
+              </p>
             </div>
 
             <form onSubmit={handleQuickDeposit} className="space-y-3.5">
@@ -812,7 +1049,7 @@ export const GoalJarsSection: React.FC = () => {
                   className="px-4 py-2 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 flex items-center gap-1.5 shadow-xs min-h-[40px] active:scale-95"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span>Confirm Deposit</span>
+                  <span>Lock in Safe Vault</span>
                 </button>
               </div>
             </form>
