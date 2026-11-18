@@ -70,3 +70,19 @@ body {
   font-family: var(--font-mono);
   font-feature-settings: "tnum" on, "zero" on;
 }
+
+/* Phone Hand-Friendly Thumb Utilities */
+.pb-safe {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0.75rem));
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+/* Touch-action optimization to eliminate 300ms tap delay */
+button, a, input, select, textarea {
+  touch-action: manipulation;
+}

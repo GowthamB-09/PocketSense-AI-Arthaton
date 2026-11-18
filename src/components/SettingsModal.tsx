@@ -10,7 +10,6 @@ import {
   RotateCcw,
   Calendar,
   AlertTriangle,
-  Sparkles,
 } from "lucide-react";
 
 interface SettingsModalProps {
@@ -63,12 +62,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-lg bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+      <div className="w-full max-w-lg bg-white border-t sm:border border-slate-200 rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[90vh]">
+        {/* Mobile Grab Handle */}
+        <div className="w-12 h-1.5 bg-slate-300 rounded-full mx-auto my-2.5 sm:hidden shrink-0" />
+
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/70">
+        <div className="px-5 sm:px-6 py-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50/70">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700">
+            <div className="p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700">
               <Sliders className="w-4 h-4" />
             </div>
             <div>
@@ -76,20 +78,21 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 Budget &amp; Salary Settings
               </h3>
               <p className="text-xs text-slate-500">
-                Set your salary cycle once — runs on autopilot with zero daily effort
+                Set once — runs on autopilot with zero daily effort
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+            className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
+            aria-label="Close"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSave} className="p-6 overflow-y-auto space-y-4">
+        <form onSubmit={handleSave} className="p-5 sm:p-6 overflow-y-auto space-y-4 pb-safe">
           {/* Salary & Fixed Inputs */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div>
@@ -103,7 +106,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 required
                 value={salary}
                 onChange={(e) => setSalary(e.target.value)}
-                className="w-full px-3.5 py-2 text-xs font-mono bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors"
+                className="w-full px-3.5 py-2.5 text-xs font-mono bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors"
               />
               <span className="text-[10px] text-slate-500 block mt-1">Monthly in-hand credit</span>
             </div>
@@ -119,21 +122,21 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 required
                 value={fixed}
                 onChange={(e) => setFixed(e.target.value)}
-                className="w-full px-3.5 py-2 text-xs font-mono bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors"
+                className="w-full px-3.5 py-2.5 text-xs font-mono bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors"
               />
               <span className="text-[10px] text-slate-500 block mt-1">Rent, SIPs, utilities</span>
             </div>
           </div>
 
           {/* Salary Payday Date Selector */}
-          <div className="p-4 rounded-xl bg-slate-50/70 border border-slate-200 space-y-3">
+          <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-200 space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5 text-emerald-700" />
                 <span>When Does Your Salary Arrive?</span>
               </span>
               <span className="text-[11px] font-mono text-emerald-700 font-semibold">
-                Autopilot Pacing
+                Autopilot
               </span>
             </div>
 
@@ -142,7 +145,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <button
                 type="button"
                 onClick={() => setSalaryCreditDay(1)}
-                className={`p-2.5 rounded-xl border text-center transition-all ${
+                className={`py-2.5 px-1.5 rounded-xl border text-center transition-all min-h-[44px] flex items-center justify-center ${
                   salaryCreditDay === 1
                     ? "bg-white border-emerald-500 text-slate-900 shadow-sm ring-1 ring-emerald-500/20 font-bold"
                     : "bg-white/60 border-slate-200 text-slate-600 hover:text-slate-900"
@@ -154,7 +157,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <button
                 type="button"
                 onClick={() => setSalaryCreditDay(25)}
-                className={`p-2.5 rounded-xl border text-center transition-all ${
+                className={`py-2.5 px-1.5 rounded-xl border text-center transition-all min-h-[44px] flex items-center justify-center ${
                   salaryCreditDay === 25
                     ? "bg-white border-emerald-500 text-slate-900 shadow-sm ring-1 ring-emerald-500/20 font-bold"
                     : "bg-white/60 border-slate-200 text-slate-600 hover:text-slate-900"
@@ -166,13 +169,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <button
                 type="button"
                 onClick={() => setSalaryCreditDay(realDay)}
-                className={`p-2.5 rounded-xl border text-center transition-all ${
+                className={`py-2.5 px-1.5 rounded-xl border text-center transition-all min-h-[44px] flex items-center justify-center ${
                   salaryCreditDay === realDay
                     ? "bg-white border-emerald-500 text-slate-900 shadow-sm ring-1 ring-emerald-500/20 font-bold"
                     : "bg-white/60 border-slate-200 text-slate-600 hover:text-slate-900"
                 }`}
               >
-                Today (Day 1)
+                Today (Day {realDay})
               </button>
             </div>
 
@@ -189,19 +192,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   onChange={(e) => setSalaryCreditDay(Math.min(31, Math.max(1, parseInt(e.target.value, 10) || 1)))}
                   className="w-14 px-2 py-1 text-xs text-center font-bold bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:border-emerald-500"
                 />
-                <span className="text-slate-500">of each month</span>
+                <span className="text-slate-500">of month</span>
               </div>
             </div>
           </div>
 
           {/* Ledger Handling */}
-          <div className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-200 space-y-2">
+          <div className="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200 space-y-2">
             <span className="text-xs font-semibold text-slate-800 block">
               Recorded Expenses ({formatINR(analysis.discretionarySpentSoFar)} logged)
             </span>
 
             <div className="flex flex-col sm:flex-row gap-2 text-xs">
-              <label className="flex-1 flex items-center gap-2 p-2.5 rounded-xl bg-white border border-slate-200 cursor-pointer hover:border-slate-300">
+              <label className="flex-1 flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200 cursor-pointer hover:border-slate-300 min-h-[44px]">
                 <input
                   type="radio"
                   name="ledgerOption"
@@ -209,10 +212,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   onChange={() => setResetLedger(false)}
                   className="accent-emerald-600"
                 />
-                <span className="text-slate-700 text-xs font-medium">Keep existing transactions</span>
+                <span className="text-slate-700 text-xs font-medium">Keep existing spends</span>
               </label>
 
-              <label className="flex-1 flex items-center gap-2 p-2.5 rounded-xl bg-white border border-slate-200 cursor-pointer hover:border-slate-300">
+              <label className="flex-1 flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200 cursor-pointer hover:border-slate-300 min-h-[44px]">
                 <input
                   type="radio"
                   name="ledgerOption"
@@ -227,7 +230,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
           {/* Deficit Alert if expenses exceed pool */}
           {isPoolDeficit && (
-            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2">
+            <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2">
               <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
               <p className="text-[11px] leading-relaxed">
                 Recorded expenses ({formatINR(analysis.discretionarySpentSoFar)}) exceed your new discretionary pool ({formatINR(discretionaryPool)}). Select <strong>&ldquo;Start fresh&rdquo;</strong> to track clean from today.
@@ -235,15 +238,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
           )}
 
-          {/* Actions */}
-          <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+          {/* Actions - Thumb Friendly Bottom Row */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3 border-t border-slate-100">
             <button
               type="button"
               onClick={() => {
                 loadSyntheticDemo();
                 onClose();
               }}
-              className="text-xs text-slate-500 hover:text-slate-900 flex items-center gap-1.5 transition-colors font-medium"
+              className="text-xs text-slate-500 hover:text-slate-900 flex items-center justify-center gap-1.5 transition-colors font-medium py-2.5 min-h-[40px]"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Reset to Demo Data</span>
@@ -253,13 +256,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900"
+                className="flex-1 sm:flex-initial px-4 py-3 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 sm:bg-transparent min-h-[44px]"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-1.5 shadow-sm transition-all"
+                className="flex-1 sm:flex-initial px-6 py-3 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-1.5 shadow-sm transition-all min-h-[44px]"
               >
                 {savedAlert ? (
                   <>

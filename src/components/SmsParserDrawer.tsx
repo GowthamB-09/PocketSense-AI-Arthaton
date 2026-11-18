@@ -123,12 +123,15 @@ export const SmsParserDrawer: React.FC<SmsParserDrawerProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/40 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-lg h-full bg-white border-l border-slate-200 shadow-2xl flex flex-col justify-between overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-stretch sm:justify-end bg-black/50 backdrop-blur-sm animate-fade-in">
+      <div className="w-full sm:max-w-lg max-h-[92vh] sm:max-h-full h-auto sm:h-full bg-white rounded-t-3xl sm:rounded-none border-t sm:border-t-0 sm:border-l border-slate-200 shadow-2xl flex flex-col justify-between overflow-hidden">
+        {/* Mobile Grab Handle */}
+        <div className="w-12 h-1.5 bg-slate-300 rounded-full mx-auto my-2.5 sm:hidden shrink-0" />
+
         {/* Header */}
-        <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between bg-slate-50/70">
+        <div className="px-5 sm:px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/70">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-emerald-50 text-emerald-700">
+            <div className="p-2 rounded-xl bg-emerald-50 text-emerald-700">
               <Smartphone className="w-4 h-4" />
             </div>
             <div>
@@ -140,7 +143,8 @@ export const SmsParserDrawer: React.FC<SmsParserDrawerProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors"
+            className="p-2 text-slate-400 hover:text-slate-700 rounded-xl hover:bg-slate-100 transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
+            aria-label="Close"
           >
             <X className="w-4 h-4" />
           </button>

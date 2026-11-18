@@ -98,37 +98,34 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
       const merchant = response.headers.get("x-pocketsense-merchant") || "This purchase";
       const source = response.headers.get("x-pocketsense-source") || "AI Engine";
 
-      setVerdictData({
-        verdict,
-        amount,
-        merchant,
-        source,
-      });
+      setVerdictData({ verdict, amount, merchant, source });
 
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-
-      if (reader) {
+      if (response.body) {
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let done = false;
         let accumulated = "";
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
 
-          const chunk = decoder.decode(value, { stream: true });
-          const lines = chunk.split("\n");
-          for (const line of lines) {
-            if (line.startsWith("0:")) {
-              try {
-                const textChunk = JSON.parse(line.slice(2));
-                accumulated += textChunk;
-                setStreamedText(accumulated);
-              } catch {
-                accumulated += line.slice(2);
+        while (!done) {
+          const { value, done: doneReading } = await reader.read();
+          done = doneReading;
+          if (value) {
+            const chunk = decoder.decode(value, { stream: true });
+            const lines = chunk.split("\n");
+            for (const line of lines) {
+              if (line.startsWith("0:")) {
+                try {
+                  const textChunk = JSON.parse(line.slice(2));
+                  accumulated += textChunk;
+                  setStreamedText(accumulated);
+                } catch {
+                  accumulated += line.slice(2);
+                  setStreamedText(accumulated);
+                }
+              } else if (line.trim() && !line.startsWith("d:") && !line.startsWith("e:")) {
+                accumulated += line;
                 setStreamedText(accumulated);
               }
-            } else if (line.trim() && !line.startsWith("d:") && !line.startsWith("e:")) {
-              accumulated += line;
-              setStreamedText(accumulated);
             }
           }
         }
@@ -171,34 +168,38 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-xl bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+      <div className="relative w-full max-w-xl bg-white border-t sm:border border-slate-200 rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[85vh]">
+        {/* Mobile Grab Handle */}
+        <div className="w-12 h-1.5 bg-slate-300 rounded-full mx-auto my-2.5 sm:hidden shrink-0" />
+
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50/70">
+        <div className="flex items-center justify-between px-5 sm:px-6 py-3.5 border-b border-slate-200 bg-slate-50/70">
           <div className="flex items-center gap-2.5">
             <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700">
               <Zap className="w-4 h-4 fill-emerald-700" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-900 tracking-tight">Pre-Transaction Interceptor</h3>
-              <p className="text-[11px] text-slate-500">Evaluate impulse purchases against your real-time discretionary runway</p>
+              <h3 className="text-sm font-bold text-slate-900 tracking-tight">Before I Scan AI Guard</h3>
+              <p className="text-[11px] text-slate-500">Evaluate impulse buys before paying</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors"
+            className="p-2 text-slate-400 hover:text-slate-700 rounded-xl hover:bg-slate-100 transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
+            aria-label="Close"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 overflow-y-auto space-y-4">
+        <div className="p-5 sm:p-6 overflow-y-auto space-y-4 pb-safe">
           {/* Status strip */}
-          <div className="flex items-center justify-between px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono text-slate-600">
-            <span>Safe Pacing: <strong className="text-emerald-700">{formatINR(analysis.dailySafeToSpend)}/day</strong></span>
+          <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono text-slate-600">
+            <span>Safe: <strong className="text-emerald-700">{formatINR(analysis.dailySafeToSpend)}/day</strong></span>
             <span>Runway: {analysis.daysRemaining}d</span>
-            <span>Target Vault: <strong className="text-slate-900">{profile.goals[0]?.title}</strong></span>
+            <span>Target: <strong className="text-slate-900">{profile.goals[0]?.title}</strong></span>
           </div>
 
           {/* Form */}
@@ -214,8 +215,8 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
               type="text"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="e.g. Should I spend ₹3,500 on dinner tonight?"
-              className="w-full pl-4 pr-24 py-3 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors"
+              placeholder="e.g. Can I spend ₹3,500 on dinner tonight?"
+              className="w-full pl-3.5 pr-24 py-3.5 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors"
             />
             <button
               type="submit"
@@ -243,7 +244,7 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
                   setPrompt(suggestion);
                   handleSubmit(suggestion);
                 }}
-                className="text-[11px] px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors font-medium"
+                className="text-[11px] px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors font-medium active:scale-95 text-left"
               >
                 {suggestion}
               </button>
@@ -253,7 +254,7 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
           {/* Verdict Banner */}
           {verdictData && (
             <div
-              className={`rounded-xl border p-4 space-y-3 ${
+              className={`rounded-2xl border p-4 space-y-3 ${
                 verdictData.verdict === "DENIED"
                   ? "bg-rose-50 border-rose-200 text-rose-950"
                   : verdictData.verdict === "CAUTION"
@@ -275,19 +276,19 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
                 )}
               </div>
 
-              <div className="text-xs text-slate-800 whitespace-pre-line leading-relaxed bg-white p-3.5 rounded-lg border border-slate-200 shadow-sm">
+              <div className="text-xs text-slate-800 whitespace-pre-line leading-relaxed bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
                 {streamedText || "Calculating opportunity cost & behavioral impact..."}
               </div>
 
               {verdictData.amount > 0 && verdictData.verdict !== "APPROVED" && (
-                <div className="pt-2 flex items-center justify-between gap-3 border-t border-slate-200/80">
+                <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 border-t border-slate-200/80">
                   <span className="text-[11px] text-slate-600 font-medium">
                     Reallocate to {profile.goals[0]?.title || "Reserve"}
                   </span>
                   <button
                     disabled={savedSuccess}
                     onClick={handleSkipAndSave}
-                    className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm ${
+                    className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm min-h-[44px] flex items-center justify-center ${
                       savedSuccess
                         ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
                         : "bg-emerald-600 text-white hover:bg-emerald-700"
