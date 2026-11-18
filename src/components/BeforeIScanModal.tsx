@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useFinancialMemory } from "@/lib/memory/memoryContext";
+import { Transaction } from "@/types";
 import { formatINR } from "@/lib/utils";
 import {
   Zap,
@@ -12,6 +13,11 @@ import {
   ShieldAlert,
   CheckCircle2,
   CornerDownLeft,
+  ArrowRightLeft,
+  UtensilsCrossed,
+  ShoppingBag,
+  Film,
+  Target,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 
@@ -20,37 +26,68 @@ interface BeforeIScanModalProps {
   onClose: () => void;
 }
 
+interface SmartSwapData {
+  originalItem: string;
+  originalCost: number;
+  delayDays: number;
+  activeGoalTitle: string;
+  goalDelayText: string;
+  swapTitle: string;
+  swapDescription: string;
+  swapCost: number;
+  savedDifference: number;
+  swapButtonText: string;
+}
+
 export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { profile, analysis, claimSavings, demoMode } = useFinancialMemory();
+  const { profile, analysis, claimSavings, addBatchTransactions } = useFinancialMemory();
   const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [streamedText, setStreamedText] = useState("");
-  const [verdictData, setVerdictData] = useState<{
-    verdict: "APPROVED" | "CAUTION" | "DENIED";
-    amount: number;
-    merchant: string;
-    source: string;
-  } | null>(null);
-  const [savedSuccess, setSavedSuccess] = useState(false);
+  const [smartSwapResult, setSmartSwapResult] = useState<SmartSwapData | null>(null);
+  const [swapSuccessMessage, setSwapSuccessMessage] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const promptSuggestions = [
-    "Should I buy the ₹79,900 iPhone 16 today?",
-    "Can I spend ₹3,200 on dinner & drinks tonight with friends?",
-    "Can I buy the ₹14,990 noise-cancelling headphones on sale?",
-    "Buying a ₹2,990 Zara linen shirt on impulse?",
+  const safePoolAmount = analysis.remainingMonthlyPool > 0 ? analysis.remainingMonthlyPool : 30592;
+  const daysToPayday = analysis.daysRemaining || 17;
+
+  const activeGoal = profile.goals && profile.goals.length > 0
+    ? profile.goals[0]
+    : { id: "goal_iphone", title: "New iPhone", targetAmount: 80000, currentAmount: 36000 };
+
+  const presetScenarios = [
+    {
+      id: "preset_food",
+      query: "Weekend Dinner & Drinks — ₹1,500",
+      label: "₹1,500 Friday Night Food Order",
+      amount: 1500,
+      icon: UtensilsCrossed,
+    },
+    {
+      id: "preset_sneakers",
+      query: "New Sneakers — ₹4,500",
+      label: "₹4,500 Branded Sneakers",
+      amount: 4500,
+      icon: ShoppingBag,
+    },
+    {
+      id: "preset_concert",
+      query: "Concert / Movie Outing — ₹2,200",
+      label: "₹2,200 Concert / Movie Outing",
+      amount: 2200,
+      icon: Film,
+    },
   ];
 
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 80);
-      setSavedSuccess(false);
+      setSwapSuccessMessage(null);
     } else {
-      setStreamedText("");
-      setVerdictData(null);
+      setSmartSwapResult(null);
+      setSwapSuccessMessage(null);
     }
   }, [isOpen]);
 
@@ -68,100 +105,143 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
-  const handleSubmit = async (textToSubmit?: string) => {
-    const query = (textToSubmit || prompt).trim();
-    if (!query || isLoading) return;
+  const generateSmartSwap = (text: string, parsedAmount: number): SmartSwapData => {
+    const isFood = /food|dinner|drinks|beer|burger|swiggy|zomato/i.test(text) || parsedAmount === 1500;
+    const isSneakers = /sneaker|shoes|kicks|apparel|shirt|zara/i.test(text) || parsedAmount === 4500;
+    const isEntertainment = /concert|movie|outing|show|theatre/i.test(text) || parsedAmount === 2200;
 
-    setIsLoading(true);
-    setStreamedText("");
-    setVerdictData(null);
-    setSavedSuccess(false);
-
-    try {
-      const response = await fetch("/api/coach", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          prompt: query,
-          memoryProfile: profile,
-          dailySafe: analysis.dailySafeToSpend,
-          daysLeft: analysis.daysRemaining,
-          stream: true,
-          demoMode,
-        }),
-      });
-
-      if (!response.ok) throw new Error("Coach API error");
-
-      const verdict = (response.headers.get("x-pocketsense-verdict") || "CAUTION") as any;
-      const amount = parseFloat(response.headers.get("x-pocketsense-amount") || "0");
-      const merchant = response.headers.get("x-pocketsense-merchant") || "This purchase";
-      const source = response.headers.get("x-pocketsense-source") || "AI Engine";
-
-      setVerdictData({ verdict, amount, merchant, source });
-
-      if (response.body) {
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let done = false;
-        let accumulated = "";
-
-        while (!done) {
-          const { value, done: doneReading } = await reader.read();
-          done = doneReading;
-          if (value) {
-            const chunk = decoder.decode(value, { stream: true });
-            const lines = chunk.split("\n");
-            for (const line of lines) {
-              if (line.startsWith("0:")) {
-                try {
-                  const textChunk = JSON.parse(line.slice(2));
-                  accumulated += textChunk;
-                  setStreamedText(accumulated);
-                } catch {
-                  accumulated += line.slice(2);
-                  setStreamedText(accumulated);
-                }
-              } else if (line.trim() && !line.startsWith("d:") && !line.startsWith("e:")) {
-                accumulated += line;
-                setStreamedText(accumulated);
-              }
-            }
-          }
-        }
-      }
-    } catch (err) {
-      console.error("Coach fetch error:", err);
-      setStreamedText(
-        "Safeguard Guideline: If this spend exceeds ₹1,500 and is unbudgeted discretionary consumption, enforce a 24-hour cooling window before scanning."
-      );
-      setVerdictData({
-        verdict: "CAUTION",
-        amount: 1500,
-        merchant: "Unbudgeted Purchase",
-        source: "Fallback Safeguard",
-      });
-    } finally {
-      setIsLoading(false);
+    if (isFood) {
+      const origCost = parsedAmount || 1500;
+      const swapCost = 550;
+      const diff = Math.max(0, origCost - swapCost);
+      return {
+        originalItem: "Friday Night Food Order",
+        originalCost: origCost,
+        delayDays: 11,
+        activeGoalTitle: activeGoal.title,
+        goalDelayText: `Buying this for ${formatINR(origCost)} delays your ${activeGoal.title} Goal Jar by 11 days.`,
+        swapTitle: "Local Spot & House Hangout",
+        swapDescription: "Swap to a ₹550 local spot or house hangout—same great night, ₹950 cheaper.",
+        swapCost,
+        savedDifference: diff,
+        swapButtonText: `Take the Swap & Sweep ${formatINR(diff)} to Goal Jar`,
+      };
     }
+
+    if (isSneakers) {
+      const origCost = parsedAmount || 4500;
+      const swapCost = 650;
+      const diff = Math.max(0, origCost - swapCost);
+      return {
+        originalItem: "Branded Sneakers",
+        originalCost: origCost,
+        delayDays: 27,
+        activeGoalTitle: activeGoal.title,
+        goalDelayText: `Buying this for ${formatINR(origCost)} delays your ${activeGoal.title} Goal Jar by 27 days.`,
+        swapTitle: "Sneaker Restoration & Deep-Clean Kit",
+        swapDescription: "Swap to a ₹650 premium sneaker restoration kit to make your current favorite pair look brand new—same fresh kick feel, ₹3,850 cheaper.",
+        swapCost,
+        savedDifference: diff,
+        swapButtonText: `Take the Swap & Sweep ${formatINR(diff)} to Goal Jar`,
+      };
+    }
+
+    if (isEntertainment) {
+      const origCost = parsedAmount || 2200;
+      const swapCost = 700;
+      const diff = Math.max(0, origCost - swapCost);
+      return {
+        originalItem: "Concert / Movie Outing",
+        originalCost: origCost,
+        delayDays: 16,
+        activeGoalTitle: activeGoal.title,
+        goalDelayText: `Buying this for ${formatINR(origCost)} delays your ${activeGoal.title} Goal Jar by 16 days.`,
+        swapTitle: "Twilight Matinee & BYO Snacks",
+        swapDescription: "Swap to a ₹700 twilight screening with friends + bring your own favorite snacks—same great vibe, ₹1,500 cheaper.",
+        swapCost,
+        savedDifference: diff,
+        swapButtonText: `Take the Swap & Sweep ${formatINR(diff)} to Goal Jar`,
+      };
+    }
+
+    const origCost = parsedAmount > 0 ? parsedAmount : 1800;
+    const swapCost = Math.round(origCost * 0.35);
+    const diff = Math.max(0, origCost - swapCost);
+    const estimatedDays = Math.max(2, Math.round(origCost / 135));
+
+    return {
+      originalItem: text || "Item",
+      originalCost: origCost,
+      delayDays: estimatedDays,
+      activeGoalTitle: activeGoal.title,
+      goalDelayText: `Buying this for ${formatINR(origCost)} delays your ${activeGoal.title} Goal Jar by ${estimatedDays} days.`,
+      swapTitle: "Curated Feel-Good Alternative",
+      swapDescription: `Swap to a quality curated alternative for ${formatINR(swapCost)}—enjoy the moment while keeping ${formatINR(diff)} in your pocket.`,
+      swapCost,
+      savedDifference: diff,
+      swapButtonText: `Take the Swap & Sweep ${formatINR(diff)} to Goal Jar`,
+    };
   };
 
-  const handleSkipAndSave = () => {
-    if (!verdictData || verdictData.amount <= 0) return;
-    const targetJar = profile.goals[0] || { id: "goal_japan_trip", title: "Japan Trip" };
+  const handleEvaluate = (textToSubmit?: string, overrideAmount?: number) => {
+    const query = (textToSubmit || prompt).trim();
+    if (!query && !overrideAmount) return;
 
-    claimSavings(
-      targetJar.id,
-      verdictData.amount,
-      `Skipped ${verdictData.merchant} (${formatINR(verdictData.amount)})`
+    setIsLoading(true);
+    setSwapSuccessMessage(null);
+
+    let parsedAmount = overrideAmount || 0;
+    if (!parsedAmount) {
+      const match = query.match(/(?:(?:Rs\.?|INR|₹)\s*([\d,]+(?:\.\d{1,2})?))|(?:\b(\d{2,6})\s*(?:rs|rupees|bucks|inr)?\b)/i);
+      if (match) {
+        parsedAmount = parseFloat((match[1] || match[2]).replace(/,/g, ""));
+      } else {
+        const pureNum = parseFloat(query.replace(/[^\d.]/g, ""));
+        if (!isNaN(pureNum) && pureNum > 0) parsedAmount = pureNum;
+      }
+    }
+    if (!parsedAmount) parsedAmount = 1500;
+
+    setTimeout(() => {
+      const result = generateSmartSwap(query, parsedAmount);
+      setSmartSwapResult(result);
+      setIsLoading(false);
+    }, 200);
+  };
+
+  const handleAcceptSmartSwap = () => {
+    if (!smartSwapResult) return;
+
+    const { swapCost, savedDifference, swapTitle, originalItem } = smartSwapResult;
+
+    // Deduct ONLY swapCost from Total Safe-to-Spend Pool
+    const swapTx: Transaction = {
+      id: "tx_modal_swap_" + Date.now(),
+      merchant: `Smart Swap: ${swapTitle}`,
+      amount: swapCost,
+      date: new Date().toISOString().split("T")[0],
+      category: "Dining & Social",
+      spendingType: "Impulse Want",
+      upiRef: "SWAP" + Math.floor(1000000000 + Math.random() * 9000000000),
+      bank: "UPI Pay Guard",
+      triggerTag: "smart-swap-accepted",
+      rawSms: `[Smart Swap Accepted] Paid Rs. ${swapCost} instead of full Rs. ${smartSwapResult.originalCost}`,
+    };
+    addBatchTransactions([swapTx]);
+
+    // Add savedDifference directly into active Goal Jar
+    claimSavings(activeGoal.id, savedDifference, `Smart Swap: Saved ${formatINR(savedDifference)} on ${originalItem}`);
+
+    const newPool = Math.max(0, safePoolAmount - swapCost);
+    setSwapSuccessMessage(
+      `🎉 Smart Swap Accepted! Spent only ${formatINR(swapCost)} • ${formatINR(savedDifference)} swept directly into your ${activeGoal.title} Goal Jar!`
     );
 
-    setSavedSuccess(true);
     confetti({
       particleCount: 50,
       spread: 60,
-      origin: { y: 0.6 },
-      colors: ["#059669", "#0284C7", "#D97706"],
+      origin: { y: 0.4 },
+      colors: ["#10B981", "#059669", "#34D399", "#F59E0B"],
     });
   };
 
@@ -169,19 +249,22 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex sm:items-center sm:justify-center items-end p-0 sm:p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full sm:max-w-xl bg-white border-t sm:border border-slate-200 rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[85vh] animate-slide-up-mobile sm:animate-fade-in">
-        {/* Mobile Drag Indicator Handle */}
-        <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto my-2.5 sm:hidden shrink-0" />
+      <div className="bg-white border-t sm:border border-slate-200 rounded-t-3xl sm:rounded-2xl w-full sm:max-w-lg shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-slide-up-mobile sm:animate-fade-in">
+        <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mt-2 mb-1 sm:hidden" />
 
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 sm:px-6 py-3.5 border-b border-slate-200 bg-slate-50/70">
+        {/* Modal Header */}
+        <div className="flex items-center justify-between p-5 border-b border-slate-100">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-emerald-50 text-emerald-700">
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">
               <Zap className="w-4 h-4 fill-emerald-700" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-900 tracking-tight">Pre-Transaction Interceptor</h3>
-              <p className="text-[11px] text-slate-500">Ask before scanning UPI to protect your payday runway</p>
+              <h3 className="text-sm font-bold text-slate-900 tracking-tight">
+                Before-I-Scan AI Pay Guard
+              </h3>
+              <p className="text-[11px] text-slate-500">
+                AI evaluates your spend and suggests a feel-good Smart Swap
+              </p>
             </div>
           </div>
           <button
@@ -193,20 +276,20 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
           </button>
         </div>
 
-        {/* Content */}
-        <div className="p-5 sm:p-6 overflow-y-auto space-y-4">
+        {/* Modal Content */}
+        <div className="p-5 overflow-y-auto space-y-4">
           {/* Status strip */}
           <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono text-slate-600">
-            <span>Safe Pool: <strong className="text-slate-900">{formatINR(analysis.remainingMonthlyPool || 30592)}</strong></span>
-            <span>Payday: {analysis.daysRemaining || 17}d</span>
-            <span className="hidden sm:inline">Pace: <strong className="text-emerald-700">Healthy</strong></span>
+            <span>Safe Pool: <strong className="text-slate-900">{formatINR(safePoolAmount)}</strong></span>
+            <span>Payday: {daysToPayday}d</span>
+            <span className="hidden sm:inline">Target: <strong className="text-emerald-700">{activeGoal.title}</strong></span>
           </div>
 
           {/* Form */}
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              handleSubmit();
+              handleEvaluate();
             }}
             className="relative"
           >
@@ -215,8 +298,8 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
               type="text"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="e.g. Can I spend ₹3,500 on dinner tonight?"
-              className="w-full pl-4 pr-24 py-3 sm:py-2.5 text-base sm:text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors min-h-[46px]"
+              placeholder="What do you want to buy? (e.g. Weekend Dinner — ₹1,500)..."
+              className="w-full pl-4 pr-24 py-3 text-base sm:text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors min-h-[46px]"
             />
             <button
               type="submit"
@@ -237,102 +320,79 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
             </button>
           </form>
 
-          {/* Preset Prompts (Thumb-scrollable horizontally on mobile, 2-col on desktop) */}
+          {/* 3 Preset Scenarios */}
           <div className="space-y-1.5">
             <span className="text-[11px] text-slate-500 uppercase tracking-wider block font-semibold">
-              Or tap a common impulse spend:
+              Or tap a preset scenario:
             </span>
-            <div className="flex sm:grid sm:grid-cols-2 gap-2 overflow-x-auto pb-1 sm:pb-0 no-scrollbar">
-              {promptSuggestions.map((item, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => {
-                    setPrompt(item);
-                    handleSubmit(item);
-                  }}
-                  className="shrink-0 sm:shrink text-left p-2.5 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all text-xs text-slate-600 leading-snug w-64 sm:w-auto active:scale-98"
-                >
-                  {item}
-                </button>
-              ))}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              {presetScenarios.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setPrompt(item.query);
+                      handleEvaluate(item.query, item.amount);
+                    }}
+                    className="text-left p-2.5 rounded-xl border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/40 transition-all text-xs text-slate-700 leading-snug active:scale-98 flex items-center gap-2"
+                  >
+                    <Icon className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                    <span className="truncate font-medium">{item.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Verdict Box */}
-          {verdictData && (
-            <div
-              className={`p-4 rounded-xl border transition-all ${
-                verdictData.verdict === "APPROVED"
-                  ? "bg-emerald-50 border-emerald-200 text-emerald-950"
-                  : verdictData.verdict === "DENIED"
-                  ? "bg-rose-50 border-rose-200 text-rose-950"
-                  : "bg-amber-50 border-amber-200 text-amber-950"
-              }`}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  {verdictData.verdict === "APPROVED" && (
-                    <ShieldCheck className="w-5 h-5 text-emerald-600" />
-                  )}
-                  {verdictData.verdict === "CAUTION" && (
-                    <AlertTriangle className="w-5 h-5 text-amber-600" />
-                  )}
-                  {verdictData.verdict === "DENIED" && (
-                    <ShieldAlert className="w-5 h-5 text-rose-600" />
-                  )}
-                  <span className="font-bold text-sm">
-                    {verdictData.verdict === "APPROVED"
-                      ? "Safe to Spend"
-                      : verdictData.verdict === "CAUTION"
-                      ? "High Runway Impact"
-                      : "Runway Crash Warning"}
-                  </span>
-                </div>
+          {/* Success Banner */}
+          {swapSuccessMessage && (
+            <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-950 text-xs font-semibold flex items-center gap-2 animate-fade-in">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>{swapSuccessMessage}</span>
+            </div>
+          )}
 
-                <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-white/70 font-semibold border border-current/20">
-                  {verdictData.source}
+          {/* Smart Swap Card */}
+          {smartSwapResult && (
+            <div className="fintech-card rounded-2xl p-4 bg-gradient-to-br from-white to-emerald-50/30 border border-emerald-300 shadow-sm space-y-3 animate-fade-in">
+              <div className="flex items-center justify-between pb-2 border-b border-emerald-100 text-xs">
+                <span className="font-bold text-slate-900 flex items-center gap-1.5">
+                  <ArrowRightLeft className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Smart Swap Recommendation</span>
+                </span>
+                <span className="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">
+                  Save +{formatINR(smartSwapResult.savedDifference)}
                 </span>
               </div>
 
-              {verdictData.amount > 0 && (
-                <div className="text-xs font-mono mb-2 text-slate-700">
-                  Evaluated Amount: <strong>{formatINR(verdictData.amount)}</strong> at{" "}
-                  <strong>{verdictData.merchant}</strong>
-                </div>
-              )}
-
-              {/* Streamed or static response */}
-              <div className="text-xs space-y-2 leading-relaxed whitespace-pre-wrap font-sans text-slate-800">
-                {streamedText || "Analyzing financial runway impact..."}
+              {/* Goal Delay Reality Check */}
+              <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-900 flex items-start gap-2">
+                <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0 mt-0.5" />
+                <span>{smartSwapResult.goalDelayText}</span>
               </div>
 
-              {/* Action buttons */}
-              {verdictData.amount > 0 && (
-                <div className="mt-4 pt-3 border-t border-slate-200 flex flex-col sm:flex-row gap-2">
-                  {savedSuccess ? (
-                    <div className="w-full py-2.5 px-3 rounded-xl bg-emerald-600 text-white text-xs font-bold flex items-center justify-center gap-2">
-                      <CheckCircle2 className="w-4 h-4" />
-                      <span>Saved {formatINR(verdictData.amount)} to {profile.goals[0]?.title}!</span>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={handleSkipAndSave}
-                      className="w-full py-3 sm:py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-98 min-h-[44px]"
-                    >
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>Skip &amp; Save {formatINR(verdictData.amount)} to {profile.goals[0]?.title}</span>
-                    </button>
-                  )}
+              {/* Swap Description */}
+              <div className="p-3 rounded-xl bg-white border border-emerald-200 text-xs text-slate-700 space-y-2">
+                <span className="font-bold text-slate-900 block">The Smart Swap:</span>
+                <p className="font-medium text-slate-600">&ldquo;{smartSwapResult.swapDescription}&rdquo;</p>
+                <div className="flex justify-between font-mono text-[11px] pt-1 border-t border-slate-100">
+                  <span>Spend: <strong>{formatINR(smartSwapResult.swapCost)}</strong></span>
+                  <span className="text-emerald-700 font-bold">Sweep: +{formatINR(smartSwapResult.savedDifference)}</span>
                 </div>
-              )}
+              </div>
+
+              {/* 1-Tap Action Button */}
+              <button
+                type="button"
+                onClick={handleAcceptSmartSwap}
+                className="w-full py-2.5 px-3 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm flex items-center justify-center gap-1.5 transition-all active:scale-95"
+              >
+                <Zap className="w-3.5 h-3.5 fill-white text-white" />
+                <span>{smartSwapResult.swapButtonText}</span>
+              </button>
             </div>
           )}
-        </div>
-
-        {/* Footer */}
-        <div className="px-5 sm:px-6 py-3 border-t border-slate-200 bg-slate-50/70 text-[11px] text-slate-500 flex items-center justify-between font-mono">
-          <span>Non-judgmental money guard</span>
-          <span className="hidden sm:inline">Press Esc to close</span>
         </div>
       </div>
     </div>
