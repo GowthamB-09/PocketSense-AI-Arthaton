@@ -12,8 +12,8 @@ import {
   SYNTHETIC_TRANSACTIONS,
 } from "../demo/syntheticStudentData";
 
-const STORAGE_KEY_PROFILE = "pocketsense_prof_profile_v6";
-const STORAGE_KEY_TRANSACTIONS = "pocketsense_prof_transactions_v6";
+const STORAGE_KEY_PROFILE = "pocketsense_prof_profile_v8";
+const STORAGE_KEY_TRANSACTIONS = "pocketsense_prof_transactions_v8";
 
 /**
  * Calculates automated salary cycle details based on salary credit day and real clock
@@ -204,7 +204,16 @@ export function getStoredProfile(): FinancialMemoryProfile {
   if (typeof window === "undefined") return SYNTHETIC_DEMO_PROFILE;
   try {
     const saved = localStorage.getItem(STORAGE_KEY_PROFILE);
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      const parsed: FinancialMemoryProfile = JSON.parse(saved);
+      // Auto-heal: verify 3 target goal jars exist
+      const hasTargetGoals = parsed.goals && parsed.goals.some((g) => g.title.toLowerCase().includes("iphone"));
+      if (!hasTargetGoals) {
+        parsed.goals = INITIAL_GOAL_JARS;
+        localStorage.setItem(STORAGE_KEY_PROFILE, JSON.stringify(parsed));
+      }
+      return parsed;
+    }
   } catch (e) {
     console.error("Failed to load profile", e);
   }

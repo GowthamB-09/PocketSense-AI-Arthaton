@@ -5,7 +5,6 @@ import { FinancialMemoryProvider, useFinancialMemory } from "@/lib/memory/memory
 import { Navbar } from "@/components/Navbar";
 import { DailySafeCard } from "@/components/DailySafeCard";
 import { RunOutDayPredictor } from "@/components/RunOutDayPredictor";
-import { OpportunityCostBanner } from "@/components/OpportunityCostBanner";
 import { GoalJarsSection } from "@/components/GoalJarsSection";
 import { BeforeIScanModal } from "@/components/BeforeIScanModal";
 import { SmsParserDrawer } from "@/components/SmsParserDrawer";
@@ -193,7 +192,6 @@ function DashboardContent() {
         {/* SPACE 3: GOAL JARS (UPI AUTOPAY & WEALTH) */}
         {activeSpace === "goal-jars" && (
           <div className="space-y-6 animate-fade-in">
-            <OpportunityCostBanner />
             <GoalJarsSection />
           </div>
         )}

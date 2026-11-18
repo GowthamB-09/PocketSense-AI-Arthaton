@@ -14,7 +14,7 @@ export const INITIAL_GOAL_JARS: GoalJar[] = [
   },
   {
     id: "goal_gold",
-    title: "24K Gold / Jewellery",
+    title: "24K Gold",
     targetAmount: 120000,
     currentAmount: 68000,
     deadline: "2027-12-31",
