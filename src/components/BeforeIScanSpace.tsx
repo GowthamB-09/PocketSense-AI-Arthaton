@@ -219,33 +219,33 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="e.g. Can I spend ₹3,500 on dinner & craft beer tonight with friends?"
-              className="w-full px-4 py-3.5 pr-28 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 shadow-inner font-sans transition-all"
+              className="w-full px-4 py-3.5 pr-28 text-base sm:text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 shadow-inner font-sans transition-all min-h-[48px]"
             />
             <button
               type="submit"
               disabled={isLoading || !prompt.trim()}
-              className="absolute right-2 top-2 bottom-2 px-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
+              className="absolute right-1.5 top-1.5 bottom-1.5 px-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm active:scale-95"
             >
               {isLoading ? (
                 <>
                   <Sparkles className="w-3.5 h-3.5 animate-spin" />
-                  <span>Analyzing...</span>
+                  <span className="hidden sm:inline">Analyzing...</span>
                 </>
               ) : (
                 <>
                   <span>Evaluate</span>
-                  <CornerDownLeft className="w-3.5 h-3.5" />
+                  <CornerDownLeft className="w-3.5 h-3.5 hidden sm:inline" />
                 </>
               )}
             </button>
           </div>
 
-          {/* Quick Scenario Chips */}
+          {/* Quick Scenario Chips (Thumb-swipeable carousel on mobile, 4-col on laptop) */}
           <div>
             <span className="text-[11px] font-semibold text-slate-500 block mb-2 uppercase tracking-wider">
               Test Common Impulse Scenarios:
             </span>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+            <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-2 overflow-x-auto pb-1 sm:pb-0 no-scrollbar snap-x">
               {promptSuggestions.map((item, idx) => (
                 <button
                   key={idx}
@@ -254,7 +254,7 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
                     setPrompt(item.query);
                     handleSubmit(item.query);
                   }}
-                  className="text-left p-3 rounded-xl bg-white border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/40 text-xs text-slate-700 transition-all flex flex-col justify-between group shadow-2xs"
+                  className="shrink-0 w-[240px] sm:w-auto snap-start text-left p-3 rounded-xl bg-white border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/40 text-xs text-slate-700 transition-all flex flex-col justify-between group shadow-2xs active:scale-98"
                 >
                   <div className="flex items-center justify-between gap-1 w-full mb-1">
                     <span className="font-semibold text-slate-900 group-hover:text-emerald-900">
@@ -337,7 +337,7 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
                   <button
                     onClick={handleDivertSavings}
                     disabled={savedSuccess}
-                    className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 ${
+                    className={`w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 min-h-[44px] active:scale-98 ${
                       savedSuccess
                         ? "bg-emerald-100 text-emerald-800 border border-emerald-300 cursor-default"
                         : "bg-emerald-600 hover:bg-emerald-700 text-white"

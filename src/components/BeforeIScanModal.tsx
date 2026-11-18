@@ -46,7 +46,7 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 50);
+      setTimeout(() => inputRef.current?.focus(), 80);
       setSavedSuccess(false);
     } else {
       setStreamedText("");
@@ -168,25 +168,25 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-xl bg-white border-t sm:border border-slate-200 rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[85vh]">
-        {/* Mobile Grab Handle */}
-        <div className="w-12 h-1.5 bg-slate-300 rounded-full mx-auto my-2.5 sm:hidden shrink-0" />
+    <div className="fixed inset-0 z-50 flex sm:items-center sm:justify-center items-end p-0 sm:p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
+      <div className="relative w-full sm:max-w-xl bg-white border-t sm:border border-slate-200 rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[85vh] animate-slide-up-mobile sm:animate-fade-in">
+        {/* Mobile Drag Indicator Handle */}
+        <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto my-2.5 sm:hidden shrink-0" />
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 sm:px-6 py-3.5 border-b border-slate-200 bg-slate-50/70">
           <div className="flex items-center gap-2.5">
-            <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700">
+            <div className="p-2 rounded-lg bg-emerald-50 text-emerald-700">
               <Zap className="w-4 h-4 fill-emerald-700" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-900 tracking-tight">Before I Scan AI Guard</h3>
-              <p className="text-[11px] text-slate-500">Evaluate impulse buys before paying</p>
+              <h3 className="text-sm font-bold text-slate-900 tracking-tight">Pre-Transaction Interceptor</h3>
+              <p className="text-[11px] text-slate-500">Ask before scanning UPI to protect your payday runway</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-700 rounded-xl hover:bg-slate-100 transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
+            className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors"
             aria-label="Close"
           >
             <X className="w-4 h-4" />
@@ -194,12 +194,12 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
         </div>
 
         {/* Content */}
-        <div className="p-5 sm:p-6 overflow-y-auto space-y-4 pb-safe">
+        <div className="p-5 sm:p-6 overflow-y-auto space-y-4">
           {/* Status strip */}
           <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono text-slate-600">
             <span>Safe: <strong className="text-emerald-700">{formatINR(analysis.dailySafeToSpend)}/day</strong></span>
             <span>Runway: {analysis.daysRemaining}d</span>
-            <span>Target: <strong className="text-slate-900">{profile.goals[0]?.title}</strong></span>
+            <span className="hidden sm:inline">Target Vault: <strong className="text-slate-900">{profile.goals[0]?.title}</strong></span>
           </div>
 
           {/* Form */}
@@ -216,97 +216,123 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="e.g. Can I spend ₹3,500 on dinner tonight?"
-              className="w-full pl-3.5 pr-24 py-3.5 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors"
+              className="w-full pl-4 pr-24 py-3 sm:py-2.5 text-base sm:text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors min-h-[46px]"
             />
             <button
               type="submit"
               disabled={isLoading || !prompt.trim()}
-              className="absolute right-1.5 top-1.5 bottom-1.5 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold disabled:opacity-40 flex items-center gap-1.5 shadow-sm transition-all"
+              className="absolute right-1.5 top-1.5 bottom-1.5 px-3.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm active:scale-95"
             >
               {isLoading ? (
-                <Sparkles className="w-3.5 h-3.5 animate-spin" />
+                <>
+                  <Sparkles className="w-3.5 h-3.5 animate-spin" />
+                  <span className="hidden sm:inline">Evaluating...</span>
+                </>
               ) : (
                 <>
                   <span>Evaluate</span>
-                  <CornerDownLeft className="w-3 h-3" />
+                  <CornerDownLeft className="w-3 h-3 hidden sm:inline" />
                 </>
               )}
             </button>
           </form>
 
-          {/* Prompt chips */}
-          <div className="flex flex-wrap gap-1.5">
-            {promptSuggestions.map((suggestion) => (
-              <button
-                key={suggestion}
-                type="button"
-                onClick={() => {
-                  setPrompt(suggestion);
-                  handleSubmit(suggestion);
-                }}
-                className="text-[11px] px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors font-medium active:scale-95 text-left"
-              >
-                {suggestion}
-              </button>
-            ))}
+          {/* Preset Prompts (Thumb-scrollable horizontally on mobile, 2-col on desktop) */}
+          <div className="space-y-1.5">
+            <span className="text-[11px] text-slate-500 uppercase tracking-wider block font-semibold">
+              Or tap a common impulse spend:
+            </span>
+            <div className="flex sm:grid sm:grid-cols-2 gap-2 overflow-x-auto pb-1 sm:pb-0 no-scrollbar">
+              {promptSuggestions.map((item, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    setPrompt(item);
+                    handleSubmit(item);
+                  }}
+                  className="shrink-0 sm:shrink text-left p-2.5 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all text-xs text-slate-600 leading-snug w-64 sm:w-auto active:scale-98"
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Verdict Banner */}
+          {/* Verdict Box */}
           {verdictData && (
             <div
-              className={`rounded-2xl border p-4 space-y-3 ${
-                verdictData.verdict === "DENIED"
+              className={`p-4 rounded-xl border transition-all ${
+                verdictData.verdict === "APPROVED"
+                  ? "bg-emerald-50 border-emerald-200 text-emerald-950"
+                  : verdictData.verdict === "DENIED"
                   ? "bg-rose-50 border-rose-200 text-rose-950"
-                  : verdictData.verdict === "CAUTION"
-                  ? "bg-amber-50 border-amber-200 text-amber-950"
-                  : "bg-emerald-50 border-emerald-200 text-emerald-950"
+                  : "bg-amber-50 border-amber-200 text-amber-950"
               }`}
             >
-              <div className="flex items-center justify-between text-xs font-bold">
+              <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  {verdictData.verdict === "DENIED" && <ShieldAlert className="w-4 h-4 text-rose-600" />}
-                  {verdictData.verdict === "CAUTION" && <AlertTriangle className="w-4 h-4 text-amber-600" />}
-                  {verdictData.verdict === "APPROVED" && <ShieldCheck className="w-4 h-4 text-emerald-600" />}
-                  <span>VERDICT: {verdictData.verdict}</span>
+                  {verdictData.verdict === "APPROVED" && (
+                    <ShieldCheck className="w-5 h-5 text-emerald-600" />
+                  )}
+                  {verdictData.verdict === "CAUTION" && (
+                    <AlertTriangle className="w-5 h-5 text-amber-600" />
+                  )}
+                  {verdictData.verdict === "DENIED" && (
+                    <ShieldAlert className="w-5 h-5 text-rose-600" />
+                  )}
+                  <span className="font-bold text-sm">
+                    {verdictData.verdict === "APPROVED"
+                      ? "Safe to Spend"
+                      : verdictData.verdict === "CAUTION"
+                      ? "High Runway Impact"
+                      : "Runway Crash Warning"}
+                  </span>
                 </div>
-                {verdictData.amount > 0 && (
-                  <span className="font-mono text-xs px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-900 shadow-sm">
-                    {formatINR(verdictData.amount)}
-                  </span>
-                )}
+
+                <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-white/70 font-semibold border border-current/20">
+                  {verdictData.source}
+                </span>
               </div>
 
-              <div className="text-xs text-slate-800 whitespace-pre-line leading-relaxed bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
-                {streamedText || "Calculating opportunity cost & behavioral impact..."}
+              {verdictData.amount > 0 && (
+                <div className="text-xs font-mono mb-2 text-slate-700">
+                  Evaluated Amount: <strong>{formatINR(verdictData.amount)}</strong> at{" "}
+                  <strong>{verdictData.merchant}</strong>
+                </div>
+              )}
+
+              {/* Streamed or static response */}
+              <div className="text-xs space-y-2 leading-relaxed whitespace-pre-wrap font-sans text-slate-800">
+                {streamedText || "Analyzing financial runway impact..."}
               </div>
 
-              {verdictData.amount > 0 && verdictData.verdict !== "APPROVED" && (
-                <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 border-t border-slate-200/80">
-                  <span className="text-[11px] text-slate-600 font-medium">
-                    Reallocate to {profile.goals[0]?.title || "Reserve"}
-                  </span>
-                  <button
-                    disabled={savedSuccess}
-                    onClick={handleSkipAndSave}
-                    className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm min-h-[44px] flex items-center justify-center ${
-                      savedSuccess
-                        ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
-                        : "bg-emerald-600 text-white hover:bg-emerald-700"
-                    }`}
-                  >
-                    {savedSuccess ? (
-                      <span className="flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        Transferred to Savings Goal
-                      </span>
-                    ) : (
-                      <span>Divert &amp; Save {formatINR(verdictData.amount)}</span>
-                    )}
-                  </button>
+              {/* Action buttons */}
+              {verdictData.amount > 0 && (
+                <div className="mt-4 pt-3 border-t border-slate-200 flex flex-col sm:flex-row gap-2">
+                  {savedSuccess ? (
+                    <div className="w-full py-2.5 px-3 rounded-xl bg-emerald-600 text-white text-xs font-bold flex items-center justify-center gap-2">
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>Saved {formatINR(verdictData.amount)} to {profile.goals[0]?.title}!</span>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handleSkipAndSave}
+                      className="w-full py-3 sm:py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-98 min-h-[44px]"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Skip &amp; Save {formatINR(verdictData.amount)} to {profile.goals[0]?.title}</span>
+                    </button>
+                  )}
                 </div>
               )}
             </div>
           )}
+        </div>
+
+        {/* Footer */}
+        <div className="px-5 sm:px-6 py-3 border-t border-slate-200 bg-slate-50/70 text-[11px] text-slate-500 flex items-center justify-between font-mono">
+          <span>Non-judgmental money guard</span>
+          <span className="hidden sm:inline">Press Esc to close</span>
         </div>
       </div>
     </div>

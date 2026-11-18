@@ -10,6 +10,7 @@ import {
   RotateCcw,
   Calendar,
   AlertTriangle,
+  Sparkles,
 } from "lucide-react";
 
 interface SettingsModalProps {
@@ -62,15 +63,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-lg bg-white border-t sm:border border-slate-200 rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[90vh]">
-        {/* Mobile Grab Handle */}
-        <div className="w-12 h-1.5 bg-slate-300 rounded-full mx-auto my-2.5 sm:hidden shrink-0" />
+    <div className="fixed inset-0 z-50 flex sm:items-center sm:justify-center items-end p-0 sm:p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
+      <div className="w-full sm:max-w-lg bg-white border-t sm:border border-slate-200 rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[90vh] animate-slide-up-mobile sm:animate-fade-in">
+        {/* Mobile Drag Indicator Handle */}
+        <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto my-2.5 sm:hidden shrink-0" />
 
         {/* Header */}
         <div className="px-5 sm:px-6 py-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50/70">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700">
+            <div className="p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700">
               <Sliders className="w-4 h-4" />
             </div>
             <div>
@@ -78,13 +79,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 Budget &amp; Salary Settings
               </h3>
               <p className="text-xs text-slate-500">
-                Set once — runs on autopilot with zero daily effort
+                Runs on calendar autopilot with zero daily effort
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
             aria-label="Close"
           >
             <X className="w-4 h-4" />
@@ -92,7 +93,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSave} className="p-5 sm:p-6 overflow-y-auto space-y-4 pb-safe">
+        <form onSubmit={handleSave} className="p-5 sm:p-6 overflow-y-auto space-y-4">
           {/* Salary & Fixed Inputs */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div>
@@ -106,7 +107,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 required
                 value={salary}
                 onChange={(e) => setSalary(e.target.value)}
-                className="w-full px-3.5 py-2.5 text-xs font-mono bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors"
+                className="w-full px-3.5 py-2.5 sm:py-2 text-base sm:text-xs font-mono bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors min-h-[44px]"
               />
               <span className="text-[10px] text-slate-500 block mt-1">Monthly in-hand credit</span>
             </div>
@@ -122,160 +123,131 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 required
                 value={fixed}
                 onChange={(e) => setFixed(e.target.value)}
-                className="w-full px-3.5 py-2.5 text-xs font-mono bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors"
+                className="w-full px-3.5 py-2.5 sm:py-2 text-base sm:text-xs font-mono bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors min-h-[44px]"
               />
               <span className="text-[10px] text-slate-500 block mt-1">Rent, SIPs, utilities</span>
             </div>
           </div>
 
-          {/* Salary Payday Date Selector */}
-          <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-200 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-emerald-700" />
-                <span>When Does Your Salary Arrive?</span>
+          {/* Salary Credit Day Selector */}
+          <div className="p-3.5 sm:p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+            <div className="flex items-center justify-between text-xs font-semibold text-slate-800">
+              <span className="flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Salary Credit Day of Month</span>
               </span>
-              <span className="text-[11px] font-mono text-emerald-700 font-semibold">
-                Autopilot
+              <span className="font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                Day {salaryCreditDay}
               </span>
             </div>
+            
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              When does your salary hit your account? PocketSense automatically aligns your monthly pay cycle to this day.
+            </p>
 
-            {/* Quick Presets */}
-            <div className="grid grid-cols-3 gap-2 text-xs">
-              <button
-                type="button"
-                onClick={() => setSalaryCreditDay(1)}
-                className={`py-2.5 px-1.5 rounded-xl border text-center transition-all min-h-[44px] flex items-center justify-center ${
-                  salaryCreditDay === 1
-                    ? "bg-white border-emerald-500 text-slate-900 shadow-sm ring-1 ring-emerald-500/20 font-bold"
-                    : "bg-white/60 border-slate-200 text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                1st of Month
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setSalaryCreditDay(25)}
-                className={`py-2.5 px-1.5 rounded-xl border text-center transition-all min-h-[44px] flex items-center justify-center ${
-                  salaryCreditDay === 25
-                    ? "bg-white border-emerald-500 text-slate-900 shadow-sm ring-1 ring-emerald-500/20 font-bold"
-                    : "bg-white/60 border-slate-200 text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                25th of Month
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setSalaryCreditDay(realDay)}
-                className={`py-2.5 px-1.5 rounded-xl border text-center transition-all min-h-[44px] flex items-center justify-center ${
-                  salaryCreditDay === realDay
-                    ? "bg-white border-emerald-500 text-slate-900 shadow-sm ring-1 ring-emerald-500/20 font-bold"
-                    : "bg-white/60 border-slate-200 text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                Today (Day {realDay})
-              </button>
-            </div>
-
-            {/* Custom Day input */}
-            <div className="flex items-center justify-between pt-1 text-xs">
-              <span className="text-slate-600">Custom Salary Date:</span>
-              <div className="flex items-center gap-1.5 font-mono">
-                <span>Day</span>
-                <input
-                  type="number"
-                  min="1"
-                  max="31"
-                  value={salaryCreditDay}
-                  onChange={(e) => setSalaryCreditDay(Math.min(31, Math.max(1, parseInt(e.target.value, 10) || 1)))}
-                  className="w-14 px-2 py-1 text-xs text-center font-bold bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:border-emerald-500"
-                />
-                <span className="text-slate-500">of month</span>
-              </div>
+            <div className="flex items-center gap-2 pt-1">
+              {[1, 5, 25, 28, 30].map((day) => (
+                <button
+                  key={day}
+                  type="button"
+                  onClick={() => setSalaryCreditDay(day)}
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-mono font-medium border transition-all ${
+                    salaryCreditDay === day
+                      ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
+                      : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
+                  }`}
+                >
+                  {day}
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* Ledger Handling */}
-          <div className="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200 space-y-2">
-            <span className="text-xs font-semibold text-slate-800 block">
-              Recorded Expenses ({formatINR(analysis.discretionarySpentSoFar)} logged)
-            </span>
-
-            <div className="flex flex-col sm:flex-row gap-2 text-xs">
-              <label className="flex-1 flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200 cursor-pointer hover:border-slate-300 min-h-[44px]">
-                <input
-                  type="radio"
-                  name="ledgerOption"
-                  checked={!resetLedger}
-                  onChange={() => setResetLedger(false)}
-                  className="accent-emerald-600"
-                />
-                <span className="text-slate-700 text-xs font-medium">Keep existing spends</span>
-              </label>
-
-              <label className="flex-1 flex items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200 cursor-pointer hover:border-slate-300 min-h-[44px]">
-                <input
-                  type="radio"
-                  name="ledgerOption"
-                  checked={resetLedger}
-                  onChange={() => setResetLedger(true)}
-                  className="accent-emerald-600"
-                />
-                <span className="text-emerald-700 text-xs font-bold">Start fresh (₹0 spent)</span>
-              </label>
+          {/* Real-time Math Blueprint */}
+          <div className="p-3.5 sm:p-4 rounded-xl bg-slate-50 border border-slate-200 font-mono text-xs space-y-1.5">
+            <div className="flex justify-between items-center text-slate-600">
+              <span>Discretionary Pool:</span>
+              <strong className="text-slate-900">{formatINR(discretionaryPool)}</strong>
+            </div>
+            <div className="flex justify-between items-center text-slate-600">
+              <span>Current Real Day:</span>
+              <strong className="text-slate-900">Day {realDay} of month</strong>
+            </div>
+            <div className="flex justify-between items-center text-slate-600">
+              <span>Calculated Safe Spend:</span>
+              <strong className="text-emerald-700">
+                {formatINR(Math.round(discretionaryPool / 30))}/day
+              </strong>
             </div>
           </div>
 
-          {/* Deficit Alert if expenses exceed pool */}
+          {/* Reset ledger checkbox */}
+          <div className="flex items-start gap-2.5 p-3 rounded-xl border border-slate-200 bg-white">
+            <input
+              id="resetLedger"
+              type="checkbox"
+              checked={resetLedger}
+              onChange={(e) => setResetLedger(e.target.checked)}
+              className="mt-0.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 h-4 w-4"
+            />
+            <label htmlFor="resetLedger" className="text-xs text-slate-700 leading-tight cursor-pointer">
+              <strong className="block font-semibold">Start Fresh (Clear current month spent transactions)</strong>
+              <span className="text-slate-500 text-[11px]">
+                Check this if you are starting a new salary cycle today.
+              </span>
+            </label>
+          </div>
+
           {isPoolDeficit && (
-            <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2">
-              <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-              <p className="text-[11px] leading-relaxed">
-                Recorded expenses ({formatINR(analysis.discretionarySpentSoFar)}) exceed your new discretionary pool ({formatINR(discretionaryPool)}). Select <strong>&ldquo;Start fresh&rdquo;</strong> to track clean from today.
-              </p>
+            <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <span>
+                Your spent amount ({formatINR(analysis.discretionarySpentSoFar)}) exceeds this discretionary pool. Check &ldquo;Start Fresh&rdquo; above to reset spends.
+              </span>
             </div>
           )}
 
-          {/* Actions - Thumb Friendly Bottom Row */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3 border-t border-slate-100">
+          {/* Submit Actions */}
+          <div className="pt-2 flex flex-col sm:flex-row gap-2">
             <button
-              type="button"
-              onClick={() => {
-                loadSyntheticDemo();
-                onClose();
-              }}
-              className="text-xs text-slate-500 hover:text-slate-900 flex items-center justify-center gap-1.5 transition-colors font-medium py-2.5 min-h-[40px]"
+              type="submit"
+              className="w-full py-3.5 sm:py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm flex items-center justify-center gap-1.5 transition-all min-h-[48px] active:scale-98"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Reset to Demo Data</span>
+              {savedAlert ? (
+                <>
+                  <Check className="w-4 h-4" />
+                  <span>Saved! Autopilot Active</span>
+                </>
+              ) : (
+                <span>Save Salary Cycle Settings</span>
+              )}
             </button>
-
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={onClose}
-                className="flex-1 sm:flex-initial px-4 py-3 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 sm:bg-transparent min-h-[44px]"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="flex-1 sm:flex-initial px-6 py-3 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-1.5 shadow-sm transition-all min-h-[44px]"
-              >
-                {savedAlert ? (
-                  <>
-                    <Check className="w-3.5 h-3.5" />
-                    <span>Saved!</span>
-                  </>
-                ) : (
-                  <span>Apply Settings</span>
-                )}
-              </button>
-            </div>
           </div>
         </form>
+
+        {/* Footer */}
+        <div className="px-5 sm:px-6 py-3 border-t border-slate-200 bg-slate-50/70 flex items-center justify-between text-xs text-slate-500">
+          <button
+            type="button"
+            onClick={() => {
+              loadSyntheticDemo();
+              setSalary(String(75000));
+              setFixed(String(32000));
+              setSalaryCreditDay(1);
+            }}
+            className="flex items-center gap-1 text-slate-500 hover:text-slate-800 font-medium"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Reset to Demo Profile</span>
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-slate-500 hover:text-slate-900"
+          >
+            Cancel
+          </button>
+        </div>
       </div>
     </div>
   );
