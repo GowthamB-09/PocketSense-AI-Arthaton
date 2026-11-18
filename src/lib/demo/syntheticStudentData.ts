@@ -2,6 +2,28 @@ import { FinancialMemoryProfile, GoalJar, SpendingTrap, Transaction } from "@/ty
 
 export const INITIAL_GOAL_JARS: GoalJar[] = [
   {
+    id: "goal_nifty50",
+    title: "Nifty 50 Index Fund SIP",
+    targetAmount: 250000,
+    currentAmount: 42500,
+    deadline: "2027-12-31",
+    emoji: "📈",
+    category: "Wealth",
+    color: "#10B981", // Emerald
+    totalSavedFromNudges: 18500,
+  },
+  {
+    id: "goal_emergency_fd",
+    title: "Emergency FD Shield (6.5%)",
+    targetAmount: 100000,
+    currentAmount: 65000,
+    deadline: "2027-06-30",
+    emoji: "🛡️",
+    category: "Emergency",
+    color: "#0284C7", // Cyan/Blue
+    totalSavedFromNudges: 9500,
+  },
+  {
     id: "goal_japan_trip",
     title: "Japan Spring Trip",
     targetAmount: 150000,
@@ -9,7 +31,7 @@ export const INITIAL_GOAL_JARS: GoalJar[] = [
     deadline: "2027-04-10",
     emoji: "🇯🇵",
     category: "Travel",
-    color: "#10B981", // Emerald
+    color: "#8B5CF6", // Violet
     totalSavedFromNudges: 12500,
   },
   {
@@ -20,19 +42,8 @@ export const INITIAL_GOAL_JARS: GoalJar[] = [
     deadline: "2027-02-15",
     emoji: "💻",
     category: "Tech",
-    color: "#8B5CF6", // Violet
+    color: "#F59E0B", // Amber
     totalSavedFromNudges: 8400,
-  },
-  {
-    id: "goal_emergency_fund",
-    title: "6-Month Runway Buffer",
-    targetAmount: 200000,
-    currentAmount: 95000,
-    deadline: "2027-06-30",
-    emoji: "🛡️",
-    category: "Emergency",
-    color: "#06B6D4", // Cyan
-    totalSavedFromNudges: 6200,
   },
 ];
 

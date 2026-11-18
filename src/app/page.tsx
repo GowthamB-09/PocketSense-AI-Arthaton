@@ -7,8 +7,6 @@ import { DailySafeCard } from "@/components/DailySafeCard";
 import { RunOutDayPredictor } from "@/components/RunOutDayPredictor";
 import { OpportunityCostBanner } from "@/components/OpportunityCostBanner";
 import { GoalJarsSection } from "@/components/GoalJarsSection";
-import { TransactionHistory } from "@/components/TransactionHistory";
-import { SpendingTrendChart } from "@/components/SpendingTrendChart";
 import { BeforeIScanModal } from "@/components/BeforeIScanModal";
 import { SmsParserDrawer } from "@/components/SmsParserDrawer";
 import { FinancialMemoryViewer } from "@/components/FinancialMemoryViewer";
@@ -16,18 +14,21 @@ import { SettingsModal } from "@/components/SettingsModal";
 import { SolutionSpaceSwitcher, SolutionSpace } from "@/components/SolutionSpaceSwitcher";
 import { BeforeIScanSpace } from "@/components/BeforeIScanSpace";
 import { PassbookSpace } from "@/components/PassbookSpace";
-import { MoneyBrainSpace } from "@/components/MoneyBrainSpace";
 import { formatINR } from "@/lib/utils";
 import {
   TrendingUp,
   Wallet,
   ShieldCheck,
   CreditCard,
+  AlertTriangle,
+  Zap,
+  ArrowRight,
+  ShieldAlert,
 } from "lucide-react";
 
 function DashboardContent() {
   const { profile, analysis } = useFinancialMemory();
-  const [activeSpace, setActiveSpace] = useState<SolutionSpace>("money-brain");
+  const [activeSpace, setActiveSpace] = useState<SolutionSpace>("daily-safe");
   const [isBeforeIScanOpen, setIsBeforeIScanOpen] = useState(false);
   const [isSmsParserOpen, setIsSmsParserOpen] = useState(false);
   const [isMemoryViewerOpen, setIsMemoryViewerOpen] = useState(false);
@@ -37,7 +38,7 @@ function DashboardContent() {
     <div className="min-h-screen fintech-mesh-bg text-slate-900 flex flex-col selection:bg-emerald-100 selection:text-emerald-900">
       {/* Navigation Bar */}
       <Navbar
-        onOpenDailySafe={() => setActiveSpace("money-brain")}
+        onOpenDailySafe={() => setActiveSpace("daily-safe")}
         onOpenBeforeIScan={() => setActiveSpace("before-i-scan")}
         onOpenSmsParser={() => setActiveSpace("passbook")}
         onOpenMemoryViewer={() => setIsMemoryViewerOpen(true)}
@@ -52,17 +53,40 @@ function DashboardContent() {
 
       {/* Main Solution Space Viewport */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 pb-24 sm:pb-8">
-        {/* SPACE 0: MONEY BRAIN (MULTI-ACCOUNT RECONCILIATION & ONE TRUE NUMBER) */}
-        {activeSpace === "money-brain" && (
-          <MoneyBrainSpace
-            onSwitchToScan={() => setActiveSpace("before-i-scan")}
-            onSwitchToGoals={() => setActiveSpace("goal-jars")}
-          />
-        )}
-
-        {/* SPACE 1: DAILY SAFE & SALARY RUNWAY */}
+        {/* SPACE 1: DAILY SAFE CORE (LIMIT & RUNWAY) */}
         {activeSpace === "daily-safe" && (
           <div className="space-y-6 animate-fade-in">
+            {/* Silent Portfolio Risk Guard Quick Status Banner */}
+            <div className="fintech-card rounded-2xl p-4 sm:p-4.5 bg-white border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-start sm:items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center shrink-0">
+                  <ShieldAlert className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-slate-900">
+                      Silent Risk Guard: Multi-Card Bill Trap Detected
+                    </span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 font-semibold">
+                      Auto-Paused AutoPay Sweep
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Your ICICI + HDFC credit card bills hit <strong>₹18,500 (65% of monthly salary)</strong>. Friday AutoPay sweep is paused so your bank balance stays safe until payday.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setActiveSpace("goal-jars")}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 shrink-0 transition-colors self-start sm:self-auto"
+              >
+                <span>View Risk Details</span>
+                <ArrowRight className="w-3 h-3 text-slate-500" />
+              </button>
+            </div>
+
             {/* Transparent 4-Card Monthly Balance Sheet */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-3.5">
               {/* Card 1: Monthly Salary */}
@@ -157,12 +181,12 @@ function DashboardContent() {
           </div>
         )}
 
-        {/* SPACE 2: BEFORE-I-SCAN AI GUARD */}
+        {/* SPACE 2: BEFORE-I-SCAN (AI PAY GUARD) */}
         {activeSpace === "before-i-scan" && (
           <BeforeIScanSpace onSwitchToGoals={() => setActiveSpace("goal-jars")} />
         )}
 
-        {/* SPACE 3: GOAL JARS & OPPORTUNITY COST */}
+        {/* SPACE 3: GOAL JARS (UPI AUTOPAY & WEALTH) */}
         {activeSpace === "goal-jars" && (
           <div className="space-y-6 animate-fade-in">
             <OpportunityCostBanner />
@@ -170,7 +194,7 @@ function DashboardContent() {
           </div>
         )}
 
-        {/* SPACE 4: PASSBOOK & SMS STATEMENT INGESTION */}
+        {/* SPACE 4: SMS & INSIGHTS (ZERO-TOUCH AUTOPILOT) */}
         {activeSpace === "passbook" && (
           <PassbookSpace onOpenSmsDrawer={() => setIsSmsParserOpen(true)} />
         )}
