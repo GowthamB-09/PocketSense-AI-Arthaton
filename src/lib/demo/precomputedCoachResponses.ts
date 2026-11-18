@@ -1,5 +1,6 @@
 import { ImpulseVerdict, FinancialMemoryProfile } from "@/types";
 import { formatINR } from "../utils";
+import { translateFinanceJargon } from "../ai/coachResponses";
 
 export interface PrecomputedResponse {
   queryKeywords: string[];
@@ -13,164 +14,182 @@ export interface PrecomputedResponse {
   smartHacks: string[];
   recalledMemories: string[];
   opportunityCostGoalTitle: string;
+  simplerOneLiner?: string;
 }
 
 export const PRECOMPUTED_PROMPT_CATALOG: PrecomputedResponse[] = [
   {
-    queryKeywords: ["dinner", "3500", "beer", "craft", "brewery", "friends", "colleagues", "drinks", "party"],
-    verdict: "DENIED",
-    extractedAmount: 3500,
-    merchant: "Weekend Bistro & Craft Beer Split",
-    budgetImpactDays: 6.4,
-    dailySafeReduction: 218,
-    headline: "🚨 Hold off: ₹3,500 burns over 6 days of your discretionary runway.",
-    coachResponse: `You have ₹8,800 remaining in your discretionary pool for the next 16 days (that is ₹550/day).
+    queryKeywords: ["dinner", "3500", "beer", "craft", "brewery", "friends", "colleagues", "drinks", "party", "1500"],
+    verdict: "CAUTION",
+    extractedAmount: 1500,
+    merchant: "Weekend Bistro & Dinner",
+    budgetImpactDays: 2.1,
+    dailySafeReduction: 88,
+    headline: "Wait—do this instead: cap tonight at ₹550 and pocket ₹950.",
+    coachResponse: `**Wait—do this instead: cap tonight at ₹550.**
 
-Dropping ₹3,500 on dinner and drinks tonight immediately slashes your daily safe headroom from ₹550/day down to ₹331/day.
+• You have **₹30,592** left in your safe pool for 17 days.
+• Spending ₹1,500 delays your New iPhone jar by 11 days.
+• A ₹550 local hangout gives you the exact same fun.
 
-Furthermore, that ₹3,500 is 2.3% of your **Japan Spring Trip** goal jar! Cap your spend tonight at ₹1,500, redirect the ₹2,000 difference into your Japan Jar, and protect your month-end cash flow.`,
+👉 **Next Step:** Spend **₹550** tonight and sweep the **₹950** difference directly into your **New iPhone** jar!`,
     smartHacks: [
-      "Have a quick bite at home before heading out to avoid ordering oversized mains.",
-      "Settle your own round rather than participating in an open group card split.",
-      "Click 'Skip & Save' below to redirect this amount into your Japan Trip Jar."
+      "Order local favorites or share bites to stay under ₹550.",
+      "Sweep the ₹950 difference into your Safe Growth Vault."
     ],
     recalledMemories: [
-      "Current Daily Safe-to-Spend: ₹550/day",
-      "Days remaining in month: 16 days",
-      "Active Goal: Japan Spring Trip (₹68,000 / ₹1,50,000)",
-      "Identified Trap: 'Weekend Social Splurge' (burns ~₹14,000/mo)",
-      "Discretionary Runway: ₹8,800 remaining"
+      "Remaining Safe Pool: ₹30,592 (17 days to payday)",
+      "Active Goal: New iPhone (₹42,000 / ₹80,000)",
+      "Pacing: Healthy & Weekend-Ready"
     ],
-    opportunityCostGoalTitle: "Japan Spring Trip",
+    opportunityCostGoalTitle: "New iPhone",
+    simplerOneLiner: "Spend ₹550 instead of ₹1,500 tonight—you have equal fun and save ₹950 for your iPhone.",
   },
   {
-    queryKeywords: ["headphones", "14990", "15000", "gadget", "sony", "bose", "apple", "tech"],
-    verdict: "DENIED",
-    extractedAmount: 14990,
-    merchant: "Premium ANC Headphones",
-    budgetImpactDays: 27.2,
-    dailySafeReduction: 550,
-    headline: "🛑 Critical Squeeze: ₹14,990 completely drains your remaining monthly pool!",
-    coachResponse: `This single purchase completely wipes out your entire remaining discretionary runway (₹8,800) and forces you to dip ₹6,190 into your emergency reserves before next payday.
+    queryKeywords: ["headphones", "14990", "15000", "gadget", "sony", "bose", "apple", "tech", "sneakers", "4500"],
+    verdict: "CAUTION",
+    extractedAmount: 4500,
+    merchant: "Branded Sneakers & Gear",
+    budgetImpactDays: 4.8,
+    dailySafeReduction: 264,
+    headline: "Wait—do this instead: wait 48 hours and check festival discounts.",
+    coachResponse: `**Wait—do this instead: hold off for 48 hours.**
 
-You already have an active **M3 Max MacBook Pro Goal Jar** with ₹54,000 accumulated. Instead of an unbudgeted impulse, move this to your wishlist, enforce a 72-hour cooling period, and fund your planned setup first.`,
+• You have **₹30,592** safe cash remaining before next payday.
+• A ₹4,500 impulse spend wipes out 2.5 days of safe headroom.
+• Your New iPhone jar is 53% funded—keep the momentum going.
+
+👉 **Next Step:** Put ₹2,000 into your **6.8% Safe Liquid FD Vault** today to keep your money safe from impulse buys!`,
     smartHacks: [
-      "Enforce the 72-Hour Rule: Bookmark the product and review on payday.",
-      "Check if your company provides an annual learning or remote-work equipment stipend.",
-      "Divert ₹3,000 into your MacBook jar instead to feel immediate progress."
+      "Bookmark the shoes and revisit on payday.",
+      "Check upcoming festive sale coupons before paying full retail."
     ],
     recalledMemories: [
-      "Discretionary Runway: ₹8,800 remaining",
-      "Daily Safe-to-Spend: ₹550/day",
-      "Active Goal: M3 Max MacBook Pro (₹54,000 / ₹1,20,000)",
-      "High-Ticket Alert: Exceeds 100% of remaining runway"
+      "Remaining Safe Pool: ₹30,592",
+      "Active Goal: New iPhone (₹42,000 / ₹80,000)",
+      "Safe Growth Vault: Safe Liquid FD (~6.8% p.a.)"
     ],
-    opportunityCostGoalTitle: "M3 Max MacBook Pro",
+    opportunityCostGoalTitle: "New iPhone",
+    simplerOneLiner: "Hold off on the ₹4,500 shoes for 48 hours so you don't slow down your ₹80,000 iPhone goal.",
   },
   {
-    queryKeywords: ["coffee", "420", "blue tokai", "third wave", "starbucks", "cafe"],
+    queryKeywords: ["coffee", "420", "blue tokai", "third wave", "starbucks", "cafe", "350"],
     verdict: "APPROVED",
-    extractedAmount: 420,
+    extractedAmount: 350,
     merchant: "Blue Tokai Coffee Roasters",
-    budgetImpactDays: 0.8,
-    dailySafeReduction: 26,
-    headline: "✅ Approved: ₹420 fits comfortably within your ₹550/day runway.",
-    coachResponse: `Enjoy your coffee. At ₹420, this single order fits within today's safe spending limit of ₹550 without derailing your fixed savings or rent commitments.
+    budgetImpactDays: 0.4,
+    dailySafeReduction: 20,
+    headline: "Yes—₹350 fits comfortably within your safe pool.",
+    coachResponse: `**Yes—enjoy your coffee with zero guilt.**
 
-Just keep your monthly pattern in mind: you've logged 16 cafe visits this month totaling ₹6,400. As long as you maintain today's remaining ₹130 headroom, you remain in the green zone.`,
+• Your safe pool has **₹30,592** remaining for 17 days.
+• A ₹350 coffee takes less than 1% of your spendable cash.
+• Your essential bills and card dues are already 100% covered.
+
+👉 **Next Step:** Pay with UPI and let your automatic **₹50 spare change round-up** flow into your goal jar!`,
     smartHacks: [
-      "Log the transaction immediately to keep your 5-day discipline streak active.",
-      "Keep weekday morning pour-overs at home so cafe visits remain high-value treats."
+      "Enjoy guilt-free treats that stay well inside your daily cushion.",
+      "Round-up spare change automatically saves ₹50 for your goal."
     ],
     recalledMemories: [
-      "Daily Safe-to-Spend: ₹550/day",
-      "Identified Pattern: Specialty Coffee Habit (16x/mo = ₹6,400)",
-      "Discipline Streak: 5 Days Active"
+      "Safe Pool: ₹30,592 remaining",
+      "Days to Payday: 17 days",
+      "Spare Change Round-Up: Active"
     ],
-    opportunityCostGoalTitle: "Japan Spring Trip",
+    opportunityCostGoalTitle: "New iPhone",
+    simplerOneLiner: "Go ahead and enjoy your coffee—it's small enough that your savings won't even notice.",
   },
   {
     queryKeywords: ["zara", "2990", "clothes", "jacket", "shirt", "shopping", "myntra", "h&m"],
     verdict: "CAUTION",
     extractedAmount: 2990,
-    merchant: "Zara Weekend Apparel",
-    budgetImpactDays: 5.4,
-    dailySafeReduction: 186,
-    headline: "⚠️ Caution: ₹2,990 consumes over 5 days of your daily buffer.",
-    coachResponse: `While not an outright crisis, spending ₹2,990 takes a noticeable bite out of your remaining ₹8,800 cushion. It reduces your daily headroom for the next 16 days from ₹550/day down to ₹363/day.
+    merchant: "Zara Apparel",
+    budgetImpactDays: 3.2,
+    dailySafeReduction: 175,
+    headline: "Wait—do this instead: leave it in your cart for 24 hours.",
+    coachResponse: `**Wait—do this instead: leave it in your cart for 24 hours.**
 
-Ask yourself if this piece fills an immediate wardrobe need or if it is casual lifestyle creep. Can you sleep on it for 48 hours?`,
+• You have **₹30,592** safe cash left for 17 days.
+• Spending ₹2,990 burns almost 2 full days of safe spending.
+• Most clothes carted on impulse are forgotten within a day.
+
+👉 **Next Step:** Sleep on it tonight. If you still want it tomorrow, take ₹1,500 from your discretionary pool!`,
     smartHacks: [
-      "Leave items in your cart for 48 hours to evaluate genuine utility.",
-      "If you buy it, offset the cost by dining at home for the next 4 days."
+      "The 24-hour test stops 80% of regretful fashion buys.",
+      "Check if you already own a similar staple piece."
     ],
     recalledMemories: [
-      "Daily Safe-to-Spend: ₹550/day",
-      "Discretionary Runway: ₹8,800 remaining",
-      "Opportunity Cost: Equal to 2.5% of your MacBook Pro goal"
+      "Safe Pool: ₹30,592",
+      "Days to Payday: 17 days",
+      "Goal Jar: New iPhone (₹42,000 / ₹80,000)"
     ],
-    opportunityCostGoalTitle: "M3 Max MacBook Pro",
+    opportunityCostGoalTitle: "New iPhone",
+    simplerOneLiner: "Wait 24 hours before buying clothes—if you still want it tomorrow, buy it guilt-free.",
   },
   {
     queryKeywords: ["staycation", "resort", "8500", "weekend trip", "getaway", "hotel"],
     verdict: "DENIED",
     extractedAmount: 8500,
     merchant: "Weekend Luxury Resort Staycation",
-    budgetImpactDays: 15.4,
-    dailySafeReduction: 531,
-    headline: "🚨 Hold off: ₹8,500 consumes 96% of your remaining monthly buffer.",
-    coachResponse: `Spending ₹8,500 on an impromptu weekend trip leaves you with virtually ₹300 for the entire rest of the month.
+    budgetImpactDays: 9.4,
+    dailySafeReduction: 500,
+    headline: "No—₹8,500 burns over 28% of your entire safe pool.",
+    coachResponse: `**No—hold off until after your next payday.**
 
-If you are burnt out from work, plan a low-cost day retreat or schedule a staycation right after salary day when your discretionary pool is replenished. Don't sacrifice your Japan Spring Trip for a 2-day getaway.`,
+• You have **₹30,592** left for the next 17 days.
+• Dropping ₹8,500 now squeezes your final week before salary.
+• An unbudgeted ₹8,500 trip delays your **New iPhone** by 4 weeks.
+
+👉 **Next Step:** Plan the staycation for the first weekend of next month right after your **₹75,000 salary** arrives!`,
     smartHacks: [
-      "Schedule staycations for the first weekend of next month after salary credit.",
-      "Divert ₹4,000 toward your Japan Trip Jar right now to keep your long-term travel vision intact."
+      "Book trips right after payday when your safe pool is fresh.",
+      "Keep your emergency cushion locked away from weekend splurges."
     ],
     recalledMemories: [
-      "Daily Safe-to-Spend: ₹550/day",
-      "Discretionary Pool: ₹8,800 remaining",
-      "Target Goal: Japan Spring Trip (₹68,000 / ₹1,50,000)"
+      "Safe Pool: ₹30,592",
+      "Monthly Salary: ₹75,000",
+      "Goal: New iPhone (₹42,000 / ₹80,000)"
     ],
-    opportunityCostGoalTitle: "Japan Spring Trip",
+    opportunityCostGoalTitle: "New iPhone",
+    simplerOneLiner: "Wait until next month's salary to book the staycation so you don't run short on cash this month.",
   },
 ];
 
 export function getPrecomputedCoachResponse(
   prompt: string,
   profile: FinancialMemoryProfile,
-  dailySafe: number = 550,
-  daysLeft: number = 16
+  dailySafe: number = 1799,
+  daysLeft: number = 17
 ): ImpulseVerdict {
   const lower = prompt.toLowerCase();
+  const pool = (profile.monthlySalary || 75000) - (profile.fixedEssentials || 31500);
+  const safePool = pool > 0 ? pool : 30592;
 
   for (const item of PRECOMPUTED_PROMPT_CATALOG) {
     const matchCount = item.queryKeywords.filter((kw) => lower.includes(kw)).length;
     if (
       matchCount >= 2 ||
-      (matchCount >= 1 && (lower.includes("dinner") || lower.includes("beer") || lower.includes("coffee") || lower.includes("zara") || lower.includes("headphones") || lower.includes("staycation")))
+      (matchCount >= 1 && (lower.includes("dinner") || lower.includes("beer") || lower.includes("coffee") || lower.includes("zara") || lower.includes("headphones") || lower.includes("staycation") || lower.includes("sneakers")))
     ) {
       return {
         verdict: item.verdict,
         headline: item.headline,
-        coachResponse: item.coachResponse,
+        coachResponse: translateFinanceJargon(item.coachResponse),
         budgetImpactDays: item.budgetImpactDays,
         dailySafeReduction: item.dailySafeReduction,
         opportunityCostGoal: {
-          goalId: "goal_japan_trip",
+          goalId: "goal_iphone",
           goalTitle: item.opportunityCostGoalTitle,
-          delayDays: Math.ceil(item.extractedAmount / Math.max(dailySafe, 100)),
-          equivalentMilestone: `${Math.round((item.extractedAmount / 150000) * 100)}% of your ${item.opportunityCostGoalTitle} target`,
+          delayDays: Math.ceil(item.extractedAmount / Math.max(Math.round(safePool / daysLeft), 100)),
+          equivalentMilestone: `${Math.round((item.extractedAmount / 80000) * 100)}% of your ${item.opportunityCostGoalTitle} target`,
         },
-        smartHacks: item.smartHacks,
-        recalledMemories: [
-          ...item.recalledMemories,
-          "⚡ Instant Pre-Computed Response (Zero Latency)"
-        ],
+        smartHacks: item.smartHacks.map(h => translateFinanceJargon(h)),
+        recalledMemories: item.recalledMemories.map(m => translateFinanceJargon(m)),
       };
     }
   }
 
-  // Fallback for custom amounts
+  // Fallback for custom queries
   let amount = 1500;
   const numMatch = lower.match(/(?:(?:rs\.?|inr|₹)\s*([\d,]+))|(?:\b(\d{3,6})\b)/i);
   if (numMatch) {
@@ -178,46 +197,52 @@ export function getPrecomputedCoachResponse(
   }
 
   const primaryGoal = profile?.goals?.[0] || {
-    id: "goal_japan_trip",
-    title: "Japan Spring Trip",
-    targetAmount: 150000,
-    currentAmount: 68000,
+    id: "goal_iphone",
+    title: "New iPhone",
+    targetAmount: 80000,
+    currentAmount: 42000,
   };
 
-  const daysImpact = Math.round((amount / Math.max(dailySafe, 1)) * 10) / 10;
-  const newSafe = Math.max(0, Math.round(((dailySafe * daysLeft) - amount) / daysLeft));
-  const diff = dailySafe - newSafe;
+  const dailyCushion = Math.round(safePool / daysLeft);
+  const daysImpact = Math.round((amount / Math.max(dailyCushion, 1)) * 10) / 10;
+  const newSafe = Math.max(0, Math.round((safePool - amount) / daysLeft));
+  const diff = dailyCushion - newSafe;
 
   const verdict: "APPROVED" | "CAUTION" | "DENIED" =
-    amount > dailySafe * 2.5 ? "DENIED" : amount > dailySafe ? "CAUTION" : "APPROVED";
+    amount > safePool * 0.4 ? "DENIED" : amount > dailyCushion * 1.5 ? "CAUTION" : "APPROVED";
+
+  const directAnswer = verdict === "APPROVED"
+    ? `Yes—₹${amount} fits comfortably within your safe pool.`
+    : verdict === "CAUTION"
+    ? `Wait—do this instead: cap spend at ₹${Math.round(amount * 0.4)}.`
+    : `No—₹${amount} burns too much of your safe pool.`;
 
   return {
     verdict,
-    headline:
-      verdict === "DENIED"
-        ? `🚨 Hold off: Spending ₹${amount} consumes ${daysImpact} days of your runway.`
-        : verdict === "CAUTION"
-        ? `⚠️ Caution: ₹${amount} absorbs ${daysImpact} days of your daily safe limit.`
-        : `✅ Approved: ₹${amount} is well within your ₹${dailySafe}/day safe limit.`,
-    coachResponse: `You have ₹${Math.round(dailySafe * daysLeft)} left in your discretionary runway for the next ${daysLeft} days (₹${dailySafe}/day).\n\nSpending ₹${amount} right now adjusts your daily limit to ₹${newSafe}/day.\n\nThat ₹${amount} equals ${Math.round((amount / primaryGoal.targetAmount) * 100)}% of your **${primaryGoal.title}** jar. Keep your long-term wealth goals front and center.`,
+    headline: directAnswer,
+    coachResponse: `**${directAnswer}**
+
+• You have **${formatINR(safePool)}** safe cash left for the next ${daysLeft} days.
+• Spending ₹${amount} absorbs ${daysImpact} days of your safe headroom.
+• Your **${primaryGoal.title}** goal jar has ${formatINR(primaryGoal.currentAmount)} safely saved.
+
+👉 **Next Step:** ${verdict === "APPROVED" ? `Proceed with your purchase—your safe pool remains healthy!` : `Cap spend or pause for 24 hours to keep your ${primaryGoal.title} on track!`}`,
     budgetImpactDays: daysImpact,
     dailySafeReduction: diff,
     opportunityCostGoal: {
       goalId: primaryGoal.id,
       goalTitle: primaryGoal.title,
-      delayDays: Math.ceil(amount / Math.max(dailySafe, 100)),
+      delayDays: Math.ceil(amount / Math.max(dailyCushion, 100)),
       equivalentMilestone: `${Math.round((amount / primaryGoal.targetAmount) * 100)}% of your ${primaryGoal.title} target`,
     },
     smartHacks: [
-      "Pause for 15 minutes before scanning that QR.",
-      "Check whether this purchase directly compounds your personal or financial goals.",
-      "Click 'Skip & Save' to transfer this directly to your goal jar."
+      "Keep non-essential spends under your daily safe cushion.",
+      "Check your goal jar progress before making high-ticket purchases."
     ],
     recalledMemories: [
-      `Daily Safe Limit: ₹${dailySafe}/day`,
-      `Days Remaining: ${daysLeft} days`,
-      `Primary Goal: ${primaryGoal.title}`,
-      "⚡ Instant Pre-Computed Response"
+      `Safe Pool: ${formatINR(safePool)}`,
+      `Days to Payday: ${daysLeft} days`,
+      `Active Goal: ${primaryGoal.title}`
     ],
   };
 }

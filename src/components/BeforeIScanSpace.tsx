@@ -29,8 +29,12 @@ import {
   Flame,
   ArrowRightLeft,
   Check,
+  Lightbulb,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import confetti from "canvas-confetti";
+import { AiMoneyCoachCard } from "@/components/AiMoneyCoachCard";
 
 interface BeforeIScanSpaceProps {
   onSwitchToGoals?: () => void;
@@ -47,6 +51,7 @@ interface SmartSwapData {
   swapCost: number;
   savedDifference: number;
   swapButtonText: string;
+  simplerText?: string;
 }
 
 export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
@@ -57,6 +62,7 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [smartSwapResult, setSmartSwapResult] = useState<SmartSwapData | null>(null);
   const [swapSuccessMessage, setSwapSuccessMessage] = useState<string | null>(null);
+  const [showSimplerSwap, setShowSimplerSwap] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const safePoolAmount = analysis.remainingMonthlyPool > 0 ? analysis.remainingMonthlyPool : 30592;
@@ -116,6 +122,7 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
         swapCost,
         savedDifference: diff,
         swapButtonText: `Take the Swap & Sweep ${formatINR(diff)} to Goal Jar`,
+        simplerText: "Spend ₹550 instead of ₹1,500 tonight—you have equal fun and save ₹950 for your iPhone.",
       };
     }
 
@@ -134,6 +141,7 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
         swapCost,
         savedDifference: diff,
         swapButtonText: `Take the Swap & Sweep ${formatINR(diff)} to Goal Jar`,
+        simplerText: "Clean your favorite kicks for ₹650 instead of spending ₹4,500—same fresh look, ₹3,850 saved.",
       };
     }
 
@@ -152,6 +160,7 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
         swapCost,
         savedDifference: diff,
         swapButtonText: `Take the Swap & Sweep ${formatINR(diff)} to Goal Jar`,
+        simplerText: "Catch the matinee for ₹700 instead of ₹2,200—same movie fun, ₹1,500 saved for your goal.",
       };
     }
 
@@ -172,6 +181,7 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
       swapCost,
       savedDifference: diff,
       swapButtonText: `Take the Swap & Sweep ${formatINR(diff)} to Goal Jar`,
+      simplerText: `Spend ${formatINR(swapCost)} instead of ${formatINR(origCost)}—have fun while saving ${formatINR(diff)} for your ${activeGoal.title}.`,
     };
   };
 
@@ -492,6 +502,39 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
                     <span>Proceed with full {formatINR(smartSwapResult.originalCost)}</span>
                   </button>
                 </div>
+
+                {/* "Explain Even Simpler (1 Sentence)" Quick-Toggle Button */}
+                <div className="pt-2 border-t border-emerald-100">
+                  <button
+                    type="button"
+                    onClick={() => setShowSimplerSwap(!showSimplerSwap)}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 hover:text-emerald-800 transition-colors"
+                  >
+                    <Lightbulb className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                    <span>
+                      {showSimplerSwap ? "Hide Simple Explanation" : "Explain Even Simpler (1 Sentence)"}
+                    </span>
+                    {showSimplerSwap ? (
+                      <ChevronUp className="w-3 h-3 text-slate-400" />
+                    ) : (
+                      <ChevronDown className="w-3 h-3 text-slate-400" />
+                    )}
+                  </button>
+
+                  {showSimplerSwap && (
+                    <div className="mt-2 p-3 rounded-xl bg-amber-50/70 border border-amber-200 text-xs text-amber-950 font-sans leading-relaxed animate-fade-in flex items-start gap-2 shadow-2xs">
+                      <span className="font-bold shrink-0">💡 Super Simple:</span>
+                      <span>
+                        {smartSwapResult.simplerText ||
+                          `Spend ${formatINR(smartSwapResult.swapCost)} instead of ${formatINR(
+                            smartSwapResult.originalCost
+                          )}—have fun while saving ${formatINR(
+                            smartSwapResult.savedDifference
+                          )} for your ${activeGoal.title}.`}
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -558,6 +601,12 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
           </div>
         )}
       </div>
+
+      {/* AI Money Coach - Ask About Any Spend */}
+      <AiMoneyCoachCard
+        title="Ask Money Coach About Any Spend"
+        subtitle="Zero textbook jargon • 5-second answers • Uses your real ₹ numbers"
+      />
     </div>
   );
 };

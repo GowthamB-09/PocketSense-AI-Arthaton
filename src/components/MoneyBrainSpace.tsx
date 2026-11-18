@@ -25,6 +25,7 @@ import {
   Percent,
 } from "lucide-react";
 import confetti from "canvas-confetti";
+import { AiMoneyCoachCard } from "@/components/AiMoneyCoachCard";
 
 interface MoneyBrainSpaceProps {
   onSwitchToScan?: () => void;
@@ -807,72 +808,10 @@ export const MoneyBrainSpace: React.FC<MoneyBrainSpaceProps> = ({
         </div>
 
         {/* 1-Tap "Ask ClearRupee AI" Bar */}
-        <div className="pt-3 border-t border-slate-100 space-y-3">
-          <div className="flex items-center justify-between text-xs font-mono">
-            <span className="font-bold text-slate-900 flex items-center gap-1.5">
-              <HelpCircle className="w-4 h-4 text-emerald-600" />
-              <span>Ask ClearRupee AI (Answers using your real ₹ numbers)</span>
-            </span>
-            <span className="text-[10px] text-slate-400">1-Tap Answers</span>
-          </div>
-
-          {/* 3 Preset Question Buttons */}
-          <div className="flex flex-wrap gap-2">
-            {[
-              "Can I afford this ₹4,000 weekend dinner with my current ₹14,200 cash?",
-              "Should I clear my ₹16,200 ICICI credit card bill or put it in Nifty 50?",
-              "What happens to my daily limit if I invest ₹5,000 today?",
-            ].map((q, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => handleAskAdvisor(q)}
-                className="px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 border border-slate-200 text-slate-700 text-xs font-medium transition-all active:scale-98 text-left"
-              >
-                {q}
-              </button>
-            ))}
-          </div>
-
-          {/* Custom Input */}
-          <form onSubmit={handleCustomAdvisorSubmit} className="relative flex items-center">
-            <input
-              type="text"
-              value={advisorQuery}
-              onChange={(e) => setAdvisorQuery(e.target.value)}
-              placeholder="Ask ClearRupee AI anything about your accounts, card bills, or SIPs..."
-              className="w-full px-4 py-3 pr-24 text-base sm:text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors min-h-[44px]"
-            />
-            <button
-              type="submit"
-              disabled={isAskingAdvisor || !advisorQuery.trim()}
-              className="absolute right-1.5 top-1.5 bottom-1.5 px-4 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm active:scale-95"
-            >
-              {isAskingAdvisor ? (
-                <>
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  <span>Thinking...</span>
-                </>
-              ) : (
-                <>
-                  <span>Ask AI</span>
-                  <Send className="w-3 h-3" />
-                </>
-              )}
-            </button>
-          </form>
-
-          {/* AI Response Panel */}
-          {advisorAnswer && (
-            <div className="p-4 rounded-xl bg-slate-50/90 border border-slate-200 text-xs text-slate-800 leading-relaxed whitespace-pre-wrap font-sans space-y-2 animate-fade-in">
-              <div className="flex items-center gap-2 text-emerald-800 font-bold uppercase tracking-wider text-[10px] font-mono">
-                <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                <span>ClearRupee AI Reasoning (Using Real ₹ Numbers):</span>
-              </div>
-              <div>{advisorAnswer}</div>
-            </div>
-          )}
-        </div>
+        <AiMoneyCoachCard
+          title="Ask ClearRupee AI"
+          subtitle="Zero finance jargon • 5-second answers • Uses your real ₹ numbers"
+        />
       </div>
     </div>
   );

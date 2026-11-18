@@ -14,6 +14,7 @@ import { SettingsModal } from "@/components/SettingsModal";
 import { SolutionSpaceSwitcher, SolutionSpace } from "@/components/SolutionSpaceSwitcher";
 import { BeforeIScanSpace } from "@/components/BeforeIScanSpace";
 import { PassbookSpace } from "@/components/PassbookSpace";
+import { AiMoneyCoachCard } from "@/components/AiMoneyCoachCard";
 import { formatINR } from "@/lib/utils";
 import {
   TrendingUp,
@@ -178,6 +179,9 @@ function DashboardContent() {
                 <RunOutDayPredictor />
               </div>
             </div>
+
+            {/* AI Money Coach - 5-Second Beginner Q&A */}
+            <AiMoneyCoachCard />
           </div>
         )}
 

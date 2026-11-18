@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { geminiModel, isGeminiConfigured } from "@/lib/ai/gemini";
-import { generateHeuristicCoachAdvice } from "@/lib/ai/heuristics";
-import { getPrecomputedCoachResponse } from "@/lib/demo/precomputedCoachResponses";
+import { generateBeginnerCoachAdvice, translateFinanceJargon } from "@/lib/ai/coachResponses";
 import { SYNTHETIC_DEMO_PROFILE } from "@/lib/demo/syntheticStudentData";
 import { FinancialMemoryProfile } from "@/types";
 import { streamText } from "ai";
@@ -35,91 +34,99 @@ export async function POST(req: Request) {
     if (!profile.goals || profile.goals.length === 0) {
       profile.goals = SYNTHETIC_DEMO_PROFILE.goals;
     }
-    const safeAmount = dailySafe || 550;
-    const remainingDays = daysLeft || 16;
+    const safePool = (profile.monthlySalary || 75000) - (profile.fixedEssentials || 31500);
+    const remainingDays = daysLeft || 17;
+    const safeAmount = dailySafe || Math.round(safePool / remainingDays);
+    const primaryGoal = profile?.goals?.[0] || { title: "New iPhone", targetAmount: 80000, currentAmount: 42000 };
 
-    const precomputedVerdict = getPrecomputedCoachResponse(prompt, profile, safeAmount, remainingDays);
-    if (extractedAmount === 0 && precomputedVerdict.opportunityCostGoal) {
-      extractedAmount = precomputedVerdict.dailySafeReduction > 0 ? precomputedVerdict.dailySafeReduction * remainingDays : 1500;
-    }
+    // Get clean, zero-jargon beginner advice
+    const coachAdvice = generateBeginnerCoachAdvice(prompt, {
+      salary: profile.monthlySalary || 75000,
+      safePool: safePool > 0 ? safePool : 30592,
+      daysLeft: remainingDays,
+      cardDues: 17908,
+      primaryGoalTitle: primaryGoal.title,
+      primaryGoalSaved: primaryGoal.currentAmount,
+      primaryGoalTarget: primaryGoal.targetAmount,
+    });
 
-    // If Gemini is configured and Demo Mode is disabled
-    if (!demoMode && isGeminiConfigured) {
+    // If Gemini is configured, streaming is requested, and Demo Mode is disabled
+    if (stream && !demoMode && isGeminiConfigured) {
       try {
-        const primaryGoal = profile?.goals?.[0] || { title: "Japan Spring Trip", targetAmount: 150000, currentAmount: 68000 };
-        const systemPrompt = `You are an elite, sharp, empathetic Behavioral Money Coach for PocketSense AI, assisting a young working professional (age 24–30).
-You are intercepting an impulse purchase before they swipe their card or scan a QR code.
-
-User Financial Context:
-- Professional: ${profile?.userName || "Rohan"} (${profile?.role || "Product Designer, 26"})
-- Remaining Discretionary Runway: ₹${Math.round(safeAmount * remainingDays)} across ${remainingDays} days.
-- Daily Safe-to-Spend limit: ₹${safeAmount} / day.
-- Crucial Target Wealth Jar: ${primaryGoal.title} (Target: ₹${primaryGoal.targetAmount}, Saved: ₹${primaryGoal.currentAmount}).
-- Common Patterns: Craft beer & weekend dining tabs, daily specialty coffee, quick-commerce carts.
-
-Response Guidelines:
-1. Deliver a crisp, executive, actionable response (under 120 words).
-2. Clearly state your VERDICT: [APPROVED / CAUTION / DENIED].
-3. State the exact numeric trade-off: Show how many days of their daily safe headroom (₹${safeAmount}/day) this purchase burns, or how it delays their "${primaryGoal.title}".
-4. Provide a direct financial hack (e.g., cap spend, enforce 48-hr cooling period, offset by home dining).
-5. If CAUTION or DENIED, encourage clicking 'Skip & Save' to transfer this amount into their "${primaryGoal.title}" Goal Jar.`;
+        const systemPrompt = `You are an elite, super-friendly AI Money Coach for PocketSense AI, texting a young working professional (age 24–30).
+STRICT "FRIEND-TEXTING-YOU" RULES:
+1. NO WALLS OF TEXT. Never output long paragraphs or textbook definitions.
+2. EXACT 3-PART SCANNABLE FORMAT:
+   - Line 1 (Bold): Start with a clear "Yes,", "No,", or "Wait—do this instead:" in simple everyday words.
+   - 2-3 Bullet Points: MAX 12 WORDS EACH. Use simple analogies (FD = "safe bank lockbox", Index Fund = "basket of India's top 50 companies").
+   - Concrete Next Step: Exactly 1 action with ₹ numbers using their PocketSense numbers:
+     • Monthly salary: ₹${profile.monthlySalary || 75000}
+     • Remaining safe pool: ₹${safePool > 0 ? safePool : 30592} (${remainingDays} days left)
+     • Credit card dues: ₹17,908
+     • Active Goal: ${primaryGoal.title} (₹${primaryGoal.currentAmount}/₹${primaryGoal.targetAmount})
+3. COMPLETELY BAN ALL FINANCE JARGON:
+   - Never say "asset allocation" -> say "how you split your money"
+   - Never say "inflation hedge" -> say "keeps your money from losing value as prices rise"
+   - Never say "liquidity" -> say "cash you can pull out anytime in 1 click"
+   - Never say "expense ratio" -> say "tiny yearly fund fee"
+   - Never say "volatility" -> say "market ups and downs"
+   - Never say "compounding" -> say "growing your money on top of past gains"
+   - Never say "diversification" -> say "not putting all your eggs in one basket"
+4. Add a final line: "💡 Explain Even Simpler: <1 simple sentence>"`;
 
         const result = streamText({
           model: geminiModel,
           system: systemPrompt,
-          prompt: `User query: "${prompt}". Extracted amount: ₹${extractedAmount}, Item/Merchant: ${merchant}. Intercept this spend!`,
+          prompt: `User query: "${prompt}". Extracted amount: ₹${extractedAmount}, Item/Merchant: ${merchant}. Keep it super short, conversational, and jargon-free!`,
         });
 
         return result.toDataStreamResponse({
           headers: {
-            "x-pocketsense-verdict": precomputedVerdict.verdict,
+            "x-pocketsense-verdict": coachAdvice.directAnswer.startsWith("Yes") ? "APPROVED" : coachAdvice.directAnswer.startsWith("Wait") ? "CAUTION" : "DENIED",
             "x-pocketsense-amount": String(extractedAmount),
             "x-pocketsense-merchant": merchant,
             "x-pocketsense-source": "gemini-2.5-flash",
           },
         });
       } catch (geminiError) {
-        console.warn("Gemini stream error, falling back to pre-computed response:", geminiError);
+        console.warn("Gemini stream error, falling back to beginner response:", geminiError);
       }
     }
+
+    // Format text stream following the exact 3-part structure
+    const formattedStreamText = `**${coachAdvice.directAnswer}**\n\n${coachAdvice.bulletPoints.map(b => `• ${translateFinanceJargon(b)}`).join("\n")}\n\n👉 **Next Step:** ${translateFinanceJargon(coachAdvice.concreteAction)}\n\n💡 **Explain Even Simpler:** ${translateFinanceJargon(coachAdvice.simplerOneLiner)}`;
 
     // Demo Mode & Fallback
     if (!stream) {
       return NextResponse.json({
         success: true,
-        source: demoMode ? "demo-precomputed-engine" : "fallback-engine",
-        verdict: precomputedVerdict,
-        extractedAmount: precomputedVerdict.budgetImpactDays ? Math.round(precomputedVerdict.budgetImpactDays * safeAmount) : extractedAmount,
+        source: "beginner-money-brain-engine",
+        advice: coachAdvice,
         merchant,
+        formattedText: formattedStreamText,
       });
     }
-
-    const textToStream = `${precomputedVerdict.headline}\n\n${precomputedVerdict.coachResponse}\n\n💡 Smart Action:\n${precomputedVerdict.smartHacks.map((h) => `• ${h}`).join("\n")}`;
 
     const encoder = new TextEncoder();
     const customStream = new ReadableStream({
       async start(controller) {
-        const words = textToStream.split(" ");
+        const words = formattedStreamText.split(" ");
         for (let i = 0; i < words.length; i++) {
           const chunk = (i === 0 ? "" : " ") + words[i];
           controller.enqueue(encoder.encode(`0:${JSON.stringify(chunk)}\n`));
-          await new Promise((r) => setTimeout(r, 12));
+          await new Promise((r) => setTimeout(r, 10));
         }
         controller.close();
       },
     });
 
-    const finalAmount = precomputedVerdict.budgetImpactDays
-      ? Math.round(precomputedVerdict.budgetImpactDays * safeAmount)
-      : extractedAmount || 1500;
-
     return new Response(customStream, {
       headers: {
         "Content-Type": "text/plain; charset=utf-8",
-        "x-pocketsense-verdict": precomputedVerdict.verdict,
-        "x-pocketsense-amount": String(finalAmount),
+        "x-pocketsense-verdict": coachAdvice.directAnswer.startsWith("Yes") ? "APPROVED" : coachAdvice.directAnswer.startsWith("Wait") ? "CAUTION" : "DENIED",
+        "x-pocketsense-amount": String(extractedAmount),
         "x-pocketsense-merchant": merchant,
-        "x-pocketsense-source": demoMode ? "demo-precomputed" : "heuristic-engine",
+        "x-pocketsense-source": "beginner-coach-engine",
       },
     });
   } catch (error: any) {

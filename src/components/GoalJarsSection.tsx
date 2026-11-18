@@ -35,6 +35,7 @@ import {
   MoveRight,
 } from "lucide-react";
 import confetti from "canvas-confetti";
+import { AiMoneyCoachCard } from "@/components/AiMoneyCoachCard";
 
 export const GoalJarsSection: React.FC = () => {
   const { profile, addGoalJar, deleteGoalJar, claimSavings } = useFinancialMemory();
@@ -846,59 +847,16 @@ export const GoalJarsSection: React.FC = () => {
               </span>
             </div>
             <p className="text-xs text-slate-600 leading-relaxed">
-              Zero-discipline compounding. Automatically sweeps idle Friday cash and UPI spare change into index funds without asking for a UPI PIN every month.
+              Zero-discipline savings autopilot. Automatically sweeps idle Friday cash and UPI spare change into safe vaults without asking for a UPI PIN every month.
             </p>
           </div>
         </div>
 
-        {/* 1-Tap "Ask AI About My Goals" Bar with Preset Questions */}
-        <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-          <div className="flex items-center gap-2 text-xs font-semibold text-slate-700">
-            <HelpCircle className="w-4 h-4 text-emerald-600" />
-            <span>1-Tap &quot;Ask AI About My Goals&quot; (Preset Questions):</span>
-          </div>
-
-          <div className="flex flex-wrap gap-2 text-xs">
-            {[
-              {
-                q: "Why shouldn't I keep iPhone savings in a normal bank account?",
-                a: "Normal savings accounts pay ~2.5–3%, which lags 7% annual tech price inflation. High-yield liquid FDs or arbitrage funds earn ~6.8% without stock market risk, keeping your savings out-of-sight from UPI impulse taps.",
-              },
-              {
-                q: "Why does the AI advise buying iPhone in October instead of now?",
-                a: "Apple's new lineup launches every September, causing retailers and e-commerce platforms (Diwali Big Billion Days) to discount previous flagship models by 12–18%. Waiting 6 weeks saves ~₹11,000 on an ₹80,000 phone.",
-              },
-              {
-                q: "How does Digital Gold + Index Fund beat inflation?",
-                a: "Indian equities (Nifty 50) historically yield ~11.5–12% long-term, while 24K Gold hedges against rupee depreciation (~9–11%). Combined, they outpace India's ~5–6% CPI inflation and multiply your idle cash.",
-              },
-            ].map((item, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() =>
-                  setActiveAdvisorAnswer(
-                    activeAdvisorAnswer?.question === item.q ? null : { question: item.q, answer: item.a }
-                  )
-                }
-                className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
-                  activeAdvisorAnswer?.question === item.q
-                    ? "bg-slate-900 text-white shadow-xs"
-                    : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-100"
-                }`}
-              >
-                {item.q}
-              </button>
-            ))}
-          </div>
-
-          {activeAdvisorAnswer && (
-            <div className="p-3 bg-white rounded-lg border border-slate-200 text-xs text-slate-700 mt-2 animate-fade-in leading-relaxed">
-              <strong className="text-slate-900 block mb-1">Q: {activeAdvisorAnswer.question}</strong>
-              {activeAdvisorAnswer.answer}
-            </div>
-          )}
-        </div>
+        {/* PocketSense AI Money Coach - 5-Second Beginner Insights */}
+        <AiMoneyCoachCard
+          title="Ask AI About My Goals &amp; Money"
+          subtitle="Zero finance jargon • 5-second answers • Uses your real ₹ numbers"
+        />
       </div>
 
       {/* + ADD CUSTOM GOAL QUICK MODAL WITH AUTO AI FORECAST */}

@@ -297,27 +297,45 @@ export function generateHeuristicCoachAdvice(
 
   if (amount > dailySafe * 2.5) {
     verdict = "DENIED";
-    headline = `🚨 Hold off: Spending ₹${amount} consumes ${daysBurned} days of your discretionary runway.`;
-    responseText = `You currently have ₹${Math.round(dailySafe * daysLeft)} left in your discretionary pool for the next ${daysLeft} days (₹${dailySafe}/day).\n\nSpending ₹${amount} on ${merchant} right now forces your daily safe limit down to ₹${newDailySafe}/day.\n\nThat ₹${amount} is ${Math.round((amount / primaryGoal.targetAmount) * 100)}% of your **${primaryGoal.title}** goal jar. Skip this unbudgeted impulse, redirect it to your goal jar, and protect your month-end cash flow.`;
+    headline = `No—₹${amount} burns too much of your safe pool.`;
+    responseText = `**No—hold off until after payday.**
+
+• You have **₹${Math.round(dailySafe * daysLeft)}** safe cash left for the next ${daysLeft} days.
+• Spending ₹${amount} absorbs ${daysBurned} days of your safe headroom.
+• Your **${primaryGoal.title}** goal jar has ₹${profile.goals[0]?.currentAmount || 42000} safely saved.
+
+👉 **Next Step:** Put this purchase on hold and protect your **${primaryGoal.title}** goal jar!`;
 
     smartHacks.push("Enforce a 48-hour cooling-off period before completing this purchase.");
     smartHacks.push("Ask yourself if this expenditure compounds your long-term wealth or is temporary lifestyle creep.");
     smartHacks.push("Use the 'Skip & Save' button to immediately fund your Goal Jar.");
-    recalledMemories.push("Trigger Matched: High-ticket impulse (>2.5x daily discretionary headroom)");
+    recalledMemories.push("Trigger Matched: High-ticket impulse spend");
   } else if (amount > dailySafe) {
     verdict = "CAUTION";
-    headline = `⚠️ Caution: ₹${amount} absorbs ${daysBurned} days of your daily buffer.`;
-    responseText = `This spend is manageable, but requires attention. At ₹${amount}, ${merchant} exceeds your single-day safe limit of ₹${dailySafe}/day.\n\nIf you proceed, your daily limit for the remaining ${daysLeft} days tightens to ₹${newDailySafe}/day.`;
+    headline = `Wait—do this instead: cap spend at ₹${Math.round(dailySafe * 0.7)}.`;
+    responseText = `**Wait—do this instead: cap your spend at ₹${Math.round(dailySafe * 0.7)}.**
 
-    smartHacks.push(`Cap your share strictly at ₹${Math.round(dailySafe * 0.8)}.`);
-    smartHacks.push("Offset by preparing meals at home for the next 2 days.");
+• You have **₹${Math.round(dailySafe * daysLeft)}** safe cash left for ${daysLeft} days.
+• Spending ₹${amount} tightens your daily safe buffer to ₹${newDailySafe}/day.
+• A smaller spend keeps your weekend fun without guilt.
+
+👉 **Next Step:** Cap tonight at **₹${Math.round(dailySafe * 0.7)}** and sweep the saved difference into your goal jar!`;
+
+    smartHacks.push(`Cap your share strictly at ₹${Math.round(dailySafe * 0.7)}.`);
+    smartHacks.push("Enjoy the moment without overspending your daily cushion.");
     recalledMemories.push("Runway Notice: Tightens daily headroom");
   } else {
     verdict = "APPROVED";
-    headline = `✅ Approved: ₹${amount} fits comfortably within your ₹${dailySafe}/day runway.`;
-    responseText = `Green light. At ₹${amount}, ${merchant} is completely sustainable within today's ₹${dailySafe} budget. You retain ₹${newDailySafe} in safe buffer for the remainder of the day without touching your ${primaryGoal.title} savings.`;
+    headline = `Yes—₹${amount} fits comfortably within your safe pool.`;
+    responseText = `**Yes—enjoy your spend with zero guilt.**
 
-    smartHacks.push("Log the transaction immediately to keep your discipline streak active.");
+• At ₹${amount}, this spend is fully covered by today's safe cushion.
+• Your essential bills and card dues are already 100% protected.
+• Your **${primaryGoal.title}** goal remains completely on track.
+
+👉 **Next Step:** Pay with UPI and let your spare change round-up build your savings automatically!`;
+
+    smartHacks.push("Log the transaction immediately to keep your streak active.");
   }
 
   return {
