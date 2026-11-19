@@ -217,18 +217,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <Sliders className="w-4 h-4" />
             </button>
-
-            {/* Primary Action Button (Desktop only) */}
-            <button
-              onClick={onOpenBeforeIScan}
-              className="hidden lg:flex items-center gap-1.5 px-3.5 py-1.5 min-h-[38px] rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all active:scale-95"
-            >
-              <Zap className="w-3.5 h-3.5 fill-white text-white" />
-              <span>Check Spend</span>
-              <kbd className="inline-flex items-center px-1 rounded text-[10px] font-mono bg-emerald-700 text-emerald-100">
-                ⌘K
-              </kbd>
-            </button>
           </div>
         </div>
       </header>
