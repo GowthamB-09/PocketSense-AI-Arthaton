@@ -212,24 +212,33 @@ export function FinancialMemoryProvider({ children }: { children: React.ReactNod
       totalSavedFromNudges: 0,
       lastUpdated: new Date().toISOString(),
     };
-    setProfile((prev) => ({
-      ...prev,
-      goals: [...prev.goals, newJar],
-    }));
+    setProfile((prev) => {
+      const existing = Array.isArray(prev.goals) ? prev.goals : [];
+      const updatedGoals = [...existing, newJar];
+      const updatedProfile = { ...prev, goals: updatedGoals };
+      saveProfile(updatedProfile);
+      return updatedProfile;
+    });
   };
 
   const updateGoalJar = (updatedGoal: GoalJar) => {
-    setProfile((prev) => ({
-      ...prev,
-      goals: prev.goals.map((g) => (g.id === updatedGoal.id ? updatedGoal : g)),
-    }));
+    setProfile((prev) => {
+      const existing = Array.isArray(prev.goals) ? prev.goals : [];
+      const updatedGoals = existing.map((g) => (g.id === updatedGoal.id ? updatedGoal : g));
+      const updatedProfile = { ...prev, goals: updatedGoals };
+      saveProfile(updatedProfile);
+      return updatedProfile;
+    });
   };
 
   const deleteGoalJar = (id: string) => {
-    setProfile((prev) => ({
-      ...prev,
-      goals: prev.goals.filter((g) => g.id !== id),
-    }));
+    setProfile((prev) => {
+      const existing = Array.isArray(prev.goals) ? prev.goals : [];
+      const updatedGoals = existing.filter((g) => g.id !== id);
+      const updatedProfile = { ...prev, goals: updatedGoals };
+      saveProfile(updatedProfile);
+      return updatedProfile;
+    });
   };
 
   const getAiPromptContext = (): string => {

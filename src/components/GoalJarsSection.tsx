@@ -55,14 +55,10 @@ export const GoalJarsSection: React.FC = () => {
     refNo: string;
   } | null>(null);
   const [isSweeping, setIsSweeping] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Fallback to initial goal jars if user profile lacks them
-  const displayGoals: GoalJar[] =
-    profile.goals &&
-    profile.goals.length > 0 &&
-    profile.goals.some((g) => g.title.toLowerCase().includes("iphone"))
-      ? profile.goals
-      : INITIAL_GOAL_JARS;
+  // Active goal jars directly from user's live profile
+  const displayGoals: GoalJar[] = Array.isArray(profile.goals) ? profile.goals : INITIAL_GOAL_JARS;
 
   // 1. AI Price-Trend & "Best Time to Buy" Forecaster Engine
   const getGoalAiTrendData = (title: string, category: string, deadline?: string) => {
@@ -236,16 +232,23 @@ export const GoalJarsSection: React.FC = () => {
     }, 400);
   };
 
+  const handleDeleteGoal = (id: string, title: string) => {
+    deleteGoalJar(id);
+    setToastMessage(`Removed "${title}" from your Goal Jars`);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+
   const handleCreateCustomGoal = (e: React.FormEvent) => {
     e.preventDefault();
     const target = parseFloat(newTarget);
     if (!newTitle.trim() || isNaN(target) || target <= 0) return;
 
+    const goalTitle = newTitle.trim();
     addGoalJar({
-      title: newTitle.trim(),
+      title: goalTitle,
       targetAmount: target,
       currentAmount: 0,
-      emoji: newCategory === "Tech" ? "📱" : newCategory === "Wealth" ? "🪙" : "🎯",
+      emoji: newCategory === "Tech" ? "📱" : newCategory === "Wealth" ? "🪙" : newCategory === "Travel" ? "✈️" : newCategory === "Lifestyle" ? "🎧" : "🎯",
       category: newCategory,
       color: "#059669",
       deadline: newTimeline === "short-term" ? "2027-10-15" : "2028-12-31",
@@ -254,6 +257,8 @@ export const GoalJarsSection: React.FC = () => {
     setNewTitle("");
     setNewTarget("");
     setShowAddModal(false);
+    setToastMessage(`Added "${goalTitle}" with AI Price-Trend Forecaster!`);
+    setTimeout(() => setToastMessage(null), 3500);
 
     confetti({
       particleCount: 40,
@@ -312,45 +317,96 @@ export const GoalJarsSection: React.FC = () => {
         </button>
       </div>
 
+      {/* Live Toast Feedback for Goal Jars */}
+      {toastMessage && (
+        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-medium text-emerald-950 flex items-center justify-between gap-3 animate-fade-in shadow-xs">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>{toastMessage}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setToastMessage(null)}
+            className="text-slate-400 hover:text-slate-600 text-xs font-mono"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* ─────────────────────────────────────────────────────────────────────────────
-          2. THE THREE GOAL JAR CARDS ("New iPhone", "24K Gold", "Headphones")
+          2. GOAL JAR CARDS / CLEAN EMPTY STATE
       ───────────────────────────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {displayGoals.map((jar) => {
-          const percent = Math.min(100, Math.round((jar.currentAmount / jar.targetAmount) * 100));
-          const VaultIcon = getVaultIcon(jar.title, jar.category);
-          const trendData = getGoalAiTrendData(jar.title, jar.category, jar.deadline);
-
-          return (
-            <div
-              key={jar.id}
-              className="fintech-card rounded-2xl p-5 flex flex-col justify-between group bg-white border-2 border-slate-200 shadow-sm hover:border-slate-300 transition-all space-y-4"
+      {displayGoals.length === 0 ? (
+        <div className="fintech-card rounded-2xl p-8 sm:p-10 bg-white border border-slate-200 text-center space-y-3">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200 mx-auto flex items-center justify-center shadow-xs">
+            <Target className="w-6 h-6" />
+          </div>
+          <h3 className="text-base font-bold text-slate-900">No Active Goal Jars</h3>
+          <p className="text-xs text-slate-500 max-w-md mx-auto">
+            You have no active goals. Add a custom goal to forecast optimal buying times and lock cash in high-yield vaults.
+          </p>
+          <div className="flex items-center justify-center gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setShowAddModal(true)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all active:scale-95"
             >
-              <div className="space-y-3.5">
-                {/* Top Row: Icon, Title & Delete */}
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-emerald-700 shadow-xs">
-                      <VaultIcon className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-bold text-slate-900 tracking-tight">
-                        {jar.title} — {formatINR(jar.targetAmount)}
-                      </h3>
-                      <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider font-semibold">
-                        Category: {jar.category}
-                      </span>
-                    </div>
-                  </div>
+              <Sparkles className="w-3.5 h-3.5 fill-white" />
+              <span>+ Add Custom Goal</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                INITIAL_GOAL_JARS.forEach((g) => addGoalJar(g));
+                setToastMessage("Restored demo Goal Jars");
+                setTimeout(() => setToastMessage(null), 3000);
+              }}
+              className="px-4 py-2.5 rounded-xl text-xs font-semibold bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition-colors"
+            >
+              Restore Demo Goals
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {displayGoals.map((jar) => {
+            const percent = Math.min(100, Math.round((jar.currentAmount / jar.targetAmount) * 100));
+            const VaultIcon = getVaultIcon(jar.title, jar.category);
+            const trendData = getGoalAiTrendData(jar.title, jar.category, jar.deadline);
 
-                  <button
-                    onClick={() => deleteGoalJar(jar.id)}
-                    className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-rose-600 rounded-lg transition-opacity"
-                    title="Delete goal"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+            return (
+              <div
+                key={jar.id}
+                className="fintech-card rounded-2xl p-5 flex flex-col justify-between group bg-white border-2 border-slate-200 shadow-sm hover:border-slate-300 transition-all space-y-4"
+              >
+                <div className="space-y-3.5">
+                  {/* Top Row: Icon, Title & Delete */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-emerald-700 shadow-xs">
+                        <VaultIcon className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-bold text-slate-900 tracking-tight">
+                          {jar.title} — {formatINR(jar.targetAmount)}
+                        </h3>
+                        <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider font-semibold">
+                          Category: {jar.category}
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteGoal(jar.id, jar.title)}
+                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors border border-transparent hover:border-rose-200"
+                      title={`Delete ${jar.title} goal`}
+                      aria-label={`Delete ${jar.title} goal`}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
 
                 {/* Balance & Progress Bar */}
                 <div className="space-y-1.5">
@@ -437,6 +493,7 @@ export const GoalJarsSection: React.FC = () => {
           );
         })}
       </div>
+      )}
 
       {/* ─────────────────────────────────────────────────────────────────────────────
           3. ANTI-TEMPTATION & OUT-OF-SIGHT SAFE GROWTH VAULTS BANNER
@@ -703,17 +760,33 @@ export const GoalJarsSection: React.FC = () => {
           7. + ADD CUSTOM GOAL QUICK MODAL WITH AUTO AI FORECAST
       ───────────────────────────────────────────────────────────────────────────── */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex sm:items-center sm:justify-center items-end p-0 sm:p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white border-t sm:border border-slate-200 rounded-t-3xl sm:rounded-2xl w-full sm:max-w-md p-6 shadow-2xl space-y-4 animate-slide-up-mobile sm:animate-fade-in">
+        <div
+          onClick={() => setShowAddModal(false)}
+          className="fixed inset-0 z-50 flex sm:items-center sm:justify-center items-end p-0 sm:p-4 bg-black/40 backdrop-blur-sm animate-fade-in"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white border-t sm:border border-slate-200 rounded-t-3xl sm:rounded-2xl w-full sm:max-w-md p-6 shadow-2xl space-y-4 animate-slide-up-mobile sm:animate-fade-in relative"
+          >
             <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto -mt-2 mb-2 sm:hidden" />
-            <div>
-              <h3 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-emerald-600" />
-                <span>Add Goal with AI Price Forecaster</span>
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Type any item — AI generates a price trend forecast &amp; assigns an Out-of-Sight Safe Vault.
-              </p>
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-emerald-600" />
+                  <span>Add Goal with AI Price Forecaster</span>
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Type any item — AI generates a price trend forecast &amp; assigns an Out-of-Sight Safe Vault.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAddModal(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                aria-label="Close"
+              >
+                ✕
+              </button>
             </div>
 
             <form onSubmit={handleCreateCustomGoal} className="space-y-3.5">
@@ -737,7 +810,7 @@ export const GoalJarsSection: React.FC = () => {
                   <input
                     type="number"
                     required
-                    min="1000"
+                    min="100"
                     placeholder="e.g. 85000"
                     value={newTarget}
                     onChange={(e) => setNewTarget(e.target.value)}

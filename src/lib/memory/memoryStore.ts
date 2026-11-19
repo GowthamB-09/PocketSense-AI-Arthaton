@@ -206,9 +206,8 @@ export function getStoredProfile(): FinancialMemoryProfile {
     const saved = localStorage.getItem(STORAGE_KEY_PROFILE);
     if (saved) {
       const parsed: FinancialMemoryProfile = JSON.parse(saved);
-      // Auto-heal: verify 3 target goal jars exist
-      const hasTargetGoals = parsed.goals && parsed.goals.some((g) => g.title.toLowerCase().includes("iphone"));
-      if (!hasTargetGoals) {
+      // Ensure goals array is valid; only initialize with demo goals if never set
+      if (!Array.isArray(parsed.goals)) {
         parsed.goals = INITIAL_GOAL_JARS;
         localStorage.setItem(STORAGE_KEY_PROFILE, JSON.stringify(parsed));
       }
