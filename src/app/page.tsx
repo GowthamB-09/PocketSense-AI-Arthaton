@@ -13,7 +13,6 @@ import { SettingsModal } from "@/components/SettingsModal";
 import { SolutionSpaceSwitcher, SolutionSpace } from "@/components/SolutionSpaceSwitcher";
 import { BeforeIScanSpace } from "@/components/BeforeIScanSpace";
 import { PassbookSpace } from "@/components/PassbookSpace";
-import { AiMoneyCoachCard } from "@/components/AiMoneyCoachCard";
 import { formatINR } from "@/lib/utils";
 import {
   TrendingUp,
@@ -179,8 +178,31 @@ function DashboardContent() {
               </div>
             </div>
 
-            {/* AI Money Coach - 5-Second Beginner Q&A */}
-            <AiMoneyCoachCard />
+            {/* Quick-Link CTA: Need a second opinion on a purchase? */}
+            <div className="fintech-card rounded-2xl p-4 bg-gradient-to-r from-emerald-50/70 via-slate-50 to-white border border-emerald-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                  <Zap className="w-4 h-4 fill-white" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900 tracking-tight">
+                    Need a second opinion on a purchase?
+                  </h4>
+                  <p className="text-[11px] text-slate-500">
+                    Get instant impulse protection, Smart Swaps, and AI coaching before you spend
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setActiveSpace("before-i-scan")}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-all active:scale-95 shrink-0 self-start sm:self-auto min-h-[38px]"
+              >
+                <span>Ask AI Pay Guard</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         )}
 

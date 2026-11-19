@@ -602,9 +602,9 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
         )}
       </div>
 
-      {/* AI Money Coach - Ask About Any Spend */}
+      {/* PocketSense AI Money Coach - Exclusive to Before I Scan */}
       <AiMoneyCoachCard
-        title="Ask Money Coach About Any Spend"
+        title="PocketSense AI Money Coach"
         subtitle="Zero textbook jargon • 5-second answers • Uses your real ₹ numbers"
       />
     </div>

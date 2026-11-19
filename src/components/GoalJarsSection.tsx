@@ -30,7 +30,6 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import confetti from "canvas-confetti";
-import { AiMoneyCoachCard } from "@/components/AiMoneyCoachCard";
 
 export const GoalJarsSection: React.FC = () => {
   const { profile, addGoalJar, deleteGoalJar, claimSavings } = useFinancialMemory();
@@ -749,15 +748,7 @@ export const GoalJarsSection: React.FC = () => {
       </div>
 
       {/* ─────────────────────────────────────────────────────────────────────────────
-          6. AI MONEY COACH Q&A (FRIEND-TEXTING RESPONSES)
-      ───────────────────────────────────────────────────────────────────────────── */}
-      <AiMoneyCoachCard
-        title="Ask AI About My Goals &amp; Money"
-        subtitle="Zero finance jargon • 5-second answers • Uses your real ₹ numbers"
-      />
-
-      {/* ─────────────────────────────────────────────────────────────────────────────
-          7. + ADD CUSTOM GOAL QUICK MODAL WITH AUTO AI FORECAST
+          6. + ADD CUSTOM GOAL QUICK MODAL WITH AUTO AI FORECAST
       ───────────────────────────────────────────────────────────────────────────── */}
       {showAddModal && (
         <div

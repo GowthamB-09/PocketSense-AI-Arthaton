@@ -25,7 +25,6 @@ import {
   Percent,
 } from "lucide-react";
 import confetti from "canvas-confetti";
-import { AiMoneyCoachCard } from "@/components/AiMoneyCoachCard";
 
 interface MoneyBrainSpaceProps {
   onSwitchToScan?: () => void;
@@ -806,11 +805,22 @@ export const MoneyBrainSpace: React.FC<MoneyBrainSpaceProps> = ({
           </div>
         </div>
 
-        {/* 1-Tap "Ask ClearRupee AI" Bar */}
-        <AiMoneyCoachCard
-          title="Ask ClearRupee AI"
-          subtitle="Zero finance jargon • 5-second answers • Uses your real ₹ numbers"
-        />
+        {/* Quick-Link CTA to AI Pay Guard */}
+        {onSwitchToScan && (
+          <div className="pt-2">
+            <button
+              type="button"
+              onClick={onSwitchToScan}
+              className="w-full py-3 px-4 rounded-xl text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 transition-all flex items-center justify-between shadow-2xs active:scale-98"
+            >
+              <span className="flex items-center gap-2">
+                <Zap className="w-4 h-4 text-emerald-600 fill-emerald-600" />
+                <span>Need a second opinion on a purchase? Ask AI Pay Guard</span>
+              </span>
+              <ArrowRight className="w-4 h-4 text-emerald-700" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
