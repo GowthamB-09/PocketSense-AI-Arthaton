@@ -5,36 +5,29 @@ import { useFinancialMemory } from "@/lib/memory/memoryContext";
 import { Transaction } from "@/types";
 import { formatINR } from "@/lib/utils";
 import {
+  PRESET_COACH_QUESTIONS,
+  CoachAnswer,
+  generateBeginnerCoachAdvice,
+} from "@/lib/ai/coachResponses";
+import {
   Zap,
   Sparkles,
-  ShieldCheck,
   AlertTriangle,
-  ShieldAlert,
   CheckCircle2,
   CornerDownLeft,
   ArrowRight,
-  TrendingUp,
   History,
-  Target,
-  Clock,
-  RotateCcw,
-  Smartphone,
-  Beer,
-  Headphones,
   ShoppingBag,
-  Wallet,
-  Calendar,
   UtensilsCrossed,
   Film,
   Flame,
   ArrowRightLeft,
-  Check,
   Lightbulb,
   ChevronDown,
   ChevronUp,
+  MessageSquare,
 } from "lucide-react";
 import confetti from "canvas-confetti";
-import { AiMoneyCoachCard } from "@/components/AiMoneyCoachCard";
 
 interface BeforeIScanSpaceProps {
   onSwitchToGoals?: () => void;
@@ -60,9 +53,12 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
   const { profile, analysis, claimSavings, addBatchTransactions } = useFinancialMemory();
   const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<"swaps" | "coach">("swaps");
   const [smartSwapResult, setSmartSwapResult] = useState<SmartSwapData | null>(null);
+  const [coachAnswerResult, setCoachAnswerResult] = useState<CoachAnswer | null>(null);
   const [swapSuccessMessage, setSwapSuccessMessage] = useState<string | null>(null);
   const [showSimplerSwap, setShowSimplerSwap] = useState(false);
+  const [showSimplerCoach, setShowSimplerCoach] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const safePoolAmount = analysis.remainingMonthlyPool > 0 ? analysis.remainingMonthlyPool : 30592;
@@ -73,7 +69,7 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
     ? profile.goals[0]
     : { id: "goal_iphone", title: "New iPhone", targetAmount: 80000, currentAmount: 36000 };
 
-  // 3 Exact Preset Scenario Buttons requested by User
+  // 3 Preset Spend Swap Scenario Buttons
   const presetScenarios = [
     {
       id: "preset_food",
@@ -185,6 +181,7 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
     };
   };
 
+  // Evaluate query
   const handleEvaluate = (textToSubmit?: string, overrideAmount?: number) => {
     const query = (textToSubmit || prompt).trim();
     if (!query && !overrideAmount) return;
@@ -192,9 +189,15 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
     setIsLoading(true);
     setSwapSuccessMessage(null);
 
-    // Extract numerical price
+    // Check if query is a coach/conversational question without a direct spend
+    const isGeneralCoachQuestion =
+      !overrideAmount &&
+      /^(can i afford|sip vs|why|how|should i|what is|tell me|explain)/i.test(query) &&
+      !/(buy|order|spend|purchase|shopping|sneaker|ticket)/i.test(query);
+
+    // Extract numerical price if any
     let parsedAmount = overrideAmount || 0;
-    if (!parsedAmount) {
+    if (!parsedAmount && !isGeneralCoachQuestion) {
       const match = query.match(/(?:(?:Rs\.?|INR|₹)\s*([\d,]+(?:\.\d{1,2})?))|(?:\b(\d{2,6})\s*(?:rs|rupees|bucks|inr)?\b)/i);
       if (match) {
         parsedAmount = parseFloat((match[1] || match[2]).replace(/,/g, ""));
@@ -203,11 +206,30 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
         if (!isNaN(pureNum) && pureNum > 0) parsedAmount = pureNum;
       }
     }
-    if (!parsedAmount) parsedAmount = 1500;
 
     setTimeout(() => {
-      const result = generateSmartSwap(query, parsedAmount);
-      setSmartSwapResult(result);
+      if (isGeneralCoachQuestion || (!parsedAmount && query.length > 5)) {
+        // Evaluate as Beginner Coach response
+        const advice = generateBeginnerCoachAdvice(query, {
+          salary: profile.monthlySalary || 75000,
+          safePool: safePoolAmount,
+          daysLeft: daysToPayday,
+          cardDues: 17908,
+          primaryGoalTitle: activeGoal.title,
+          primaryGoalSaved: activeGoal.currentAmount || 36000,
+          primaryGoalTarget: activeGoal.targetAmount || 80000,
+        });
+        setCoachAnswerResult(advice);
+        setSmartSwapResult(null);
+        setActiveTab("coach");
+      } else {
+        // Evaluate as Smart Swap purchase check
+        const effectiveAmount = parsedAmount || 1500;
+        const result = generateSmartSwap(query, effectiveAmount);
+        setSmartSwapResult(result);
+        setCoachAnswerResult(null);
+        setActiveTab("swaps");
+      }
       setIsLoading(false);
     }, 250);
   };
@@ -292,7 +314,7 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
                 </span>
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
-                Check any purchase before swiping — AI suggests a cheaper, feel-good alternative and sweeps the difference to your Goal Jar.
+                Check any purchase or ask money questions — zero jargon, 5-second answers, and swaps that protect your Goal Jars.
               </p>
             </div>
           </div>
@@ -313,7 +335,7 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
           </div>
         </div>
 
-        {/* 1. SINGLE-INPUT IMPULSE CHECK BAR */}
+        {/* 1. SINGLE UNIFIED IMPULSE CHECK & QUESTION BAR */}
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -327,7 +349,7 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
               type="text"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="What do you want to buy? (e.g. Weekend Dinner — ₹1,500 or New Sneakers — ₹4,500)..."
+              placeholder="What do you want to buy or ask? (e.g. Weekend Dinner — ₹1,500, New Sneakers, or SIP vs FD)..."
               className="w-full px-4 py-3.5 pr-28 text-base sm:text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 shadow-inner font-sans transition-all min-h-[48px]"
             />
             <button
@@ -342,7 +364,7 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
                 </>
               ) : (
                 <>
-                  <span>Check &amp; Swap</span>
+                  <span>Ask Guard</span>
                   <CornerDownLeft className="w-3.5 h-3.5 hidden sm:inline" />
                 </>
               )}
@@ -350,67 +372,120 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
           </div>
         </form>
 
-        {/* 3 ONE-TAP PRESET SCENARIO BUTTONS FOR EFFORTLESS TESTING */}
-        <div>
-          <span className="text-xs font-bold text-slate-700 block mb-2.5 uppercase tracking-wide flex items-center gap-1.5">
-            <Flame className="w-3.5 h-3.5 text-amber-500" />
-            <span>Test 1-Tap Preset Scenarios:</span>
-          </span>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {presetScenarios.map((item) => {
-              const Icon = item.icon;
-              return (
+        {/* 2. TABBED PRESET SELECTOR (SPEND SWAPS vs MONEY COACH Q&A) */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 border-b border-slate-100 pb-2">
+            <button
+              type="button"
+              onClick={() => setActiveTab("swaps")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                activeTab === "swaps"
+                  ? "bg-slate-900 text-white shadow-xs"
+                  : "bg-slate-50 text-slate-600 hover:bg-slate-100"
+              }`}
+            >
+              <Flame className="w-3.5 h-3.5 text-amber-500" />
+              <span>Smart Spend Swaps</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("coach")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                activeTab === "coach"
+                  ? "bg-slate-900 text-white shadow-xs"
+                  : "bg-slate-50 text-slate-600 hover:bg-slate-100"
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Money Coach Q&amp;A</span>
+            </button>
+          </div>
+
+          {/* TAB 1: 3 ONE-TAP PRESET SPEND SCENARIOS */}
+          {activeTab === "swaps" && (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 animate-fade-in">
+              {presetScenarios.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => {
+                      setPrompt(item.query);
+                      handleEvaluate(item.query, item.amount);
+                    }}
+                    className="p-3.5 rounded-xl bg-slate-50 hover:bg-emerald-50/50 border border-slate-200 hover:border-emerald-300 text-left transition-all group active:scale-98 flex items-center justify-between gap-3 shadow-2xs"
+                  >
+                    <div className="flex items-center gap-2.5 truncate">
+                      <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0 text-slate-700 group-hover:text-emerald-700 shadow-2xs">
+                        <Icon className="w-4 h-4" />
+                      </div>
+                      <div className="truncate">
+                        <span className="font-bold text-slate-900 text-xs block truncate group-hover:text-emerald-900">
+                          {item.label}
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-mono">
+                          {item.tag}
+                        </span>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-600 shrink-0" />
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {/* TAB 2: BEGINNER MONEY COACH PRESET CHIPS */}
+          {activeTab === "coach" && (
+            <div className="flex flex-wrap gap-2 animate-fade-in">
+              {PRESET_COACH_QUESTIONS.map((item) => (
                 <button
                   key={item.id}
                   type="button"
                   onClick={() => {
-                    setPrompt(item.query);
-                    handleEvaluate(item.query, item.amount);
+                    setPrompt(item.question);
+                    setCoachAnswerResult(item);
+                    setSmartSwapResult(null);
+                    setShowSimplerCoach(false);
                   }}
-                  className="p-3.5 rounded-xl bg-slate-50 hover:bg-emerald-50/50 border border-slate-200 hover:border-emerald-300 text-left transition-all group active:scale-98 flex items-center justify-between gap-3 shadow-2xs"
+                  className={`px-3 py-2 rounded-xl text-xs font-medium transition-all text-left flex items-center gap-1.5 active:scale-98 ${
+                    coachAnswerResult?.id === item.id
+                      ? "bg-emerald-600 text-white shadow-xs font-semibold"
+                      : "bg-slate-50 hover:bg-emerald-50/60 text-slate-700 border border-slate-200 hover:border-emerald-300"
+                  }`}
                 >
-                  <div className="flex items-center gap-2.5 truncate">
-                    <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0 text-slate-700 group-hover:text-emerald-700 shadow-2xs">
-                      <Icon className="w-4 h-4" />
-                    </div>
-                    <div className="truncate">
-                      <span className="font-bold text-slate-900 text-xs block truncate group-hover:text-emerald-900">
-                        {item.label}
-                      </span>
-                      <span className="text-[10px] text-slate-400 font-mono">
-                        {item.tag}
-                      </span>
-                    </div>
-                  </div>
-                  <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-600 shrink-0" />
+                  <MessageSquare className="w-3.5 h-3.5 opacity-60" />
+                  <span>{item.question}</span>
                 </button>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* 2. GOAL-AWARE IMPACT & "SMART SWAP" AI SUGGESTION CARD */}
-        {smartSwapResult && (
-          <div className="mt-4 pt-6 border-t border-slate-200 space-y-4 animate-fade-in">
-            {/* Success Banner if Swap accepted */}
-            {swapSuccessMessage && (
-              <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-950 flex items-center justify-between gap-3 animate-fade-in shadow-xs">
-                <div className="flex items-center gap-2.5">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-                  <span className="text-xs font-semibold">{swapSuccessMessage}</span>
-                </div>
-                {onSwitchToGoals && (
-                  <button
-                    type="button"
-                    onClick={onSwitchToGoals}
-                    className="text-xs text-emerald-800 underline font-bold shrink-0 hover:text-emerald-950"
-                  >
-                    View Goal Jar →
-                  </button>
-                )}
-              </div>
+        {/* 3. ACTIVE AI CARD (EITHER SMART SWAP OR MONEY COACH) */}
+        {/* Success Banner if Swap accepted */}
+        {swapSuccessMessage && (
+          <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-950 flex items-center justify-between gap-3 animate-fade-in shadow-xs">
+            <div className="flex items-center gap-2.5">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+              <span className="text-xs font-semibold">{swapSuccessMessage}</span>
+            </div>
+            {onSwitchToGoals && (
+              <button
+                type="button"
+                onClick={onSwitchToGoals}
+                className="text-xs text-emerald-800 underline font-bold shrink-0 hover:text-emerald-950"
+              >
+                View Goal Jar →
+              </button>
             )}
+          </div>
+        )}
 
+        {/* VIEW A: SMART SWAP RECOMMENDATION CARD */}
+        {smartSwapResult && (
+          <div className="pt-2 animate-fade-in">
             <div className="fintech-card rounded-2xl p-5 bg-gradient-to-br from-white to-emerald-50/30 border-2 border-emerald-500/40 shadow-sm space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-emerald-100">
                 <div className="flex items-center gap-2">
@@ -539,6 +614,108 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
             </div>
           </div>
         )}
+
+        {/* VIEW B: BEGINNER MONEY COACH ANSWER CARD */}
+        {coachAnswerResult && (
+          <div className="pt-2 animate-fade-in">
+            <div className="fintech-card rounded-2xl p-5 bg-gradient-to-br from-white to-slate-50/60 border-2 border-slate-300/80 shadow-sm space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold">
+                    <Sparkles className="w-4 h-4 fill-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                      <span>PocketSense Money Coach</span>
+                      <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold">
+                        Friend-Texting
+                      </span>
+                    </h3>
+                    <span className="text-[11px] text-slate-500">
+                      5-second direct advice • Zero finance textbook jargon
+                    </span>
+                  </div>
+                </div>
+
+                <span className="text-xs font-mono font-bold text-slate-700 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200">
+                  Pool: {formatINR(safePoolAmount)}
+                </span>
+              </div>
+
+              {/* 3-Part Friend-Texting Structure */}
+              <div className="space-y-3">
+                {/* 1. 1-Line Direct Answer */}
+                <div className="p-3.5 rounded-xl bg-slate-900 text-white flex items-start gap-3 shadow-xs">
+                  <Sparkles className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 block font-semibold">
+                      Direct Answer:
+                    </span>
+                    <p className="text-sm font-bold text-white leading-snug mt-0.5">
+                      {coachAnswerResult.directAnswer}
+                    </p>
+                  </div>
+                </div>
+
+                {/* 2. 2-3 Ultra-Short Bullet Points */}
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                  <span className="text-[11px] font-bold text-slate-700 block uppercase tracking-wide">
+                    Why this makes sense:
+                  </span>
+                  <ul className="space-y-1.5 text-xs text-slate-700">
+                    {coachAnswerResult.bulletPoints.map((pt, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 mt-1.5" />
+                        <span>{pt}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* 3. 1 Concrete Next Step */}
+                <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-mono uppercase text-emerald-800 font-bold block">
+                      Concrete Next Step:
+                    </span>
+                    <p className="text-xs font-semibold text-emerald-950">
+                      {coachAnswerResult.concreteAction}
+                    </p>
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-bold shadow-xs shrink-0 self-start sm:self-auto">
+                    <span>{coachAnswerResult.actionPill}</span>
+                  </div>
+                </div>
+
+                {/* Explain Even Simpler Toggle */}
+                <div className="pt-2 border-t border-slate-200">
+                  <button
+                    type="button"
+                    onClick={() => setShowSimplerCoach(!showSimplerCoach)}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 hover:text-emerald-800 transition-colors"
+                  >
+                    <Lightbulb className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                    <span>
+                      {showSimplerCoach ? "Hide Simple Explanation" : "Explain Even Simpler (1 Sentence)"}
+                    </span>
+                    {showSimplerCoach ? (
+                      <ChevronUp className="w-3 h-3 text-slate-400" />
+                    ) : (
+                      <ChevronDown className="w-3 h-3 text-slate-400" />
+                    )}
+                  </button>
+
+                  {showSimplerCoach && (
+                    <div className="mt-2 p-3 rounded-xl bg-amber-50/70 border border-amber-200 text-xs text-amber-950 font-sans leading-relaxed animate-fade-in flex items-start gap-2 shadow-2xs">
+                      <span className="font-bold shrink-0">💡 Super Simple:</span>
+                      <span>{coachAnswerResult.simplerOneLiner}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Intercepted Impulse & Smart Swap Ledger */}
@@ -601,12 +778,6 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
           </div>
         )}
       </div>
-
-      {/* PocketSense AI Money Coach - Exclusive to Before I Scan */}
-      <AiMoneyCoachCard
-        title="PocketSense AI Money Coach"
-        subtitle="Zero textbook jargon • 5-second answers • Uses your real ₹ numbers"
-      />
     </div>
   );
 };
