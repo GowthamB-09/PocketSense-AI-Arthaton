@@ -50,6 +50,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const upcomingCardDues = profile.creditCardDues ?? 17908;
   const totalSafePool = Math.max(0, totalLinkedBankCash - upcomingCardDues);
   const isSafePoolEmpty = totalSafePool <= 0;
+  const isBelowCardDues = totalSafePool <= upcomingCardDues;
 
   const handleLoadDemo = () => {
     loadSyntheticDemo();
@@ -66,6 +67,15 @@ export const Navbar: React.FC<NavbarProps> = ({
   const handleSimulateMultiBankSpend = () => {
     // 400ms button debounce/cooldown so rapid double-clicks don't stack unintended transactions
     if (isSimulating) return;
+
+    // 1. Guardrail: Stop Simulate Spend When Total Safe Pool <= Upcoming Card Dues
+    if (isBelowCardDues) {
+      setSyncAlert(
+        `Simulation paused: Your Safe Pool has reached your ₹${upcomingCardDues.toLocaleString('en-IN')} credit card bill threshold.`
+      );
+      setTimeout(() => setSyncAlert(null), 4500);
+      return;
+    }
 
     // Check if Safe Pool is empty (<= 0)
     if (totalSafePool <= 0) {
@@ -187,6 +197,10 @@ export const Navbar: React.FC<NavbarProps> = ({
 
     if (newSafePool <= 0) {
       setSyncAlert("Safe Pool reached ₹0! Click ‘Reset Demo’ to test again.");
+    } else if (newSafePool <= newCardDues) {
+      setSyncAlert(
+        `Simulation paused: Your Safe Pool has reached your ₹${newCardDues.toLocaleString('en-IN')} credit card bill threshold.`
+      );
     } else if (justSnappedOn) {
       setSyncAlert(
         `⚠️ ${pick.merchant} pushed card dues to ${formatINR(newCardDues)} (${Math.round((newCardDues / salary) * 100)}% of salary). Silent Risk Guard snapped ON — Friday AutoPay sweep paused!`
@@ -263,34 +277,61 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Right Actions */}
           <div className="flex items-center gap-1.5 sm:gap-2.5">
-            {/* 1-Click "Simulate Incoming Multi-Bank Spend" Button */}
-            <button
-              onClick={handleSimulateMultiBankSpend}
-              disabled={isSimulating || isSafePoolEmpty}
-              className={`flex items-center gap-1.5 px-3 py-1.5 min-h-[38px] rounded-xl text-xs font-bold shadow-sm transition-all ${
-                isSafePoolEmpty
-                  ? "bg-slate-200 text-slate-500 border border-slate-300 cursor-not-allowed opacity-90"
-                  : "bg-slate-900 hover:bg-black text-white active:scale-95"
-              } ${isSimulating ? "opacity-70 cursor-not-allowed" : ""}`}
-              title={
-                isSafePoolEmpty
-                  ? "Safe Pool reached ₹0! Click ‘Reset Demo’ to test again."
-                  : "Simulate incoming multi-bank spend (HDFC, SBI, ICICI Card) with spare change round-up"
-              }
+            {/* 1-Click "Simulate Incoming Multi-Bank Spend" Button with Bill Buffer Limit Guardrail */}
+            <div
+              className="relative inline-flex"
+              onClick={() => {
+                if (isBelowCardDues) {
+                  setSyncAlert(
+                    `Simulation paused: Your Safe Pool has reached your ₹${upcomingCardDues.toLocaleString('en-IN')} credit card bill threshold.`
+                  );
+                  setTimeout(() => setSyncAlert(null), 4500);
+                } else if (isSafePoolEmpty) {
+                  setSyncAlert("Safe Pool reached ₹0! Click ‘Reset Demo’ to test again.");
+                  setTimeout(() => setSyncAlert(null), 4000);
+                }
+              }}
             >
-              <Zap className={`w-3.5 h-3.5 ${isSafePoolEmpty ? "text-slate-400" : "text-emerald-400"}`} />
-              {isSafePoolEmpty ? (
-                <>
-                  <span className="hidden sm:inline">Safe Pool Empty (₹0 Left)</span>
-                  <span className="sm:hidden font-mono text-[11px]">Empty (₹0)</span>
-                </>
-              ) : (
-                <>
-                  <span className="hidden sm:inline">Simulate Incoming Multi-Bank Spend</span>
-                  <span className="sm:hidden font-mono text-[11px]">Simulate Spend</span>
-                </>
-              )}
-            </button>
+              <button
+                type="button"
+                onClick={handleSimulateMultiBankSpend}
+                disabled={isSimulating || isBelowCardDues || isSafePoolEmpty}
+                className={`flex items-center gap-1.5 px-3 py-1.5 min-h-[38px] rounded-xl text-xs font-bold shadow-sm transition-all ${
+                  isBelowCardDues
+                    ? "bg-amber-50 text-amber-800 border border-amber-300 cursor-not-allowed opacity-90"
+                    : isSafePoolEmpty
+                    ? "bg-slate-200 text-slate-500 border border-slate-300 cursor-not-allowed opacity-90"
+                    : "bg-slate-900 hover:bg-black text-white active:scale-95"
+                } ${isSimulating ? "opacity-70 cursor-not-allowed" : ""}`}
+                title={
+                  isBelowCardDues
+                    ? `Simulation paused: Your Safe Pool has reached your ₹${upcomingCardDues.toLocaleString('en-IN')} credit card bill threshold.`
+                    : isSafePoolEmpty
+                    ? "Safe Pool reached ₹0! Click ‘Reset Demo’ to test again."
+                    : "Simulate incoming multi-bank spend (HDFC, SBI, ICICI Card) with spare change round-up"
+                }
+              >
+                {isBelowCardDues ? (
+                  <>
+                    <ShieldAlert className="w-3.5 h-3.5 text-amber-600" />
+                    <span className="hidden sm:inline">Bill Buffer Limit</span>
+                    <span className="sm:hidden font-mono text-[11px]">Buffer Limit</span>
+                  </>
+                ) : isSafePoolEmpty ? (
+                  <>
+                    <Zap className="w-3.5 h-3.5 text-slate-400" />
+                    <span className="hidden sm:inline">Safe Pool Empty (₹0 Left)</span>
+                    <span className="sm:hidden font-mono text-[11px]">Empty (₹0)</span>
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="hidden sm:inline">Simulate Incoming Multi-Bank Spend</span>
+                    <span className="sm:hidden font-mono text-[11px]">Simulate Spend</span>
+                  </>
+                )}
+              </button>
+            </div>
 
             {/* Salary Cycle Indicator */}
             <div className="hidden md:flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-mono text-slate-700 bg-slate-50 border border-slate-200 shadow-xs">

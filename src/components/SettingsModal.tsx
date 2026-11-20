@@ -28,8 +28,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const now = new Date();
   const realDay = now.getDate();
 
-  const [salary, setSalary] = useState(String(profile.monthlySalary || 75000));
-  const [fixed, setFixed] = useState(String(profile.fixedEssentials || 32000));
+  const [salary, setSalary] = useState(String(profile.monthlySalary || 75000).slice(0, 9));
+  const [fixed, setFixed] = useState(String(profile.fixedEssentials || 32000).slice(0, 9));
   
   // Salary credit day (default 1)
   const [salaryCreditDay, setSalaryCreditDay] = useState<number>(profile.salaryCreditDay || 1);
@@ -38,10 +38,30 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [resetLedger, setResetLedger] = useState<boolean>(false);
   const [savedAlert, setSavedAlert] = useState(false);
 
+  // Sync state whenever modal is opened
+  React.useEffect(() => {
+    if (isOpen) {
+      setSalary(String(Math.min(999999999, profile.monthlySalary || 75000)).slice(0, 9));
+      setFixed(String(Math.min(999999999, profile.fixedEssentials || 32000)).slice(0, 9));
+      setSalaryCreditDay(profile.salaryCreditDay || 1);
+    }
+  }, [isOpen, profile.monthlySalary, profile.fixedEssentials, profile.salaryCreditDay]);
+
   if (!isOpen) return null;
 
-  const numSalary = parseFloat(salary) || 0;
-  const numFixed = parseFloat(fixed) || 0;
+  // Cap Salary & Fixed Bills Inputs at Maximum 9 Digits (<= 999,999,999)
+  const handleSalaryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawDigits = e.target.value.replace(/\D/g, "").slice(0, 9);
+    setSalary(rawDigits);
+  };
+
+  const handleFixedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawDigits = e.target.value.replace(/\D/g, "").slice(0, 9);
+    setFixed(rawDigits);
+  };
+
+  const numSalary = Math.min(999999999, parseInt(salary, 10) || 0);
+  const numFixed = Math.min(999999999, parseInt(fixed, 10) || 0);
   const discretionaryPool = Math.max(0, numSalary - numFixed);
   const isPoolDeficit = !resetLedger && discretionaryPool < analysis.discretionarySpentSoFar && analysis.discretionarySpentSoFar > 0;
 
@@ -95,38 +115,52 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
         {/* Form Body */}
         <form onSubmit={handleSave} className="p-5 sm:p-6 overflow-y-auto space-y-4">
-          {/* Salary & Fixed Inputs */}
+          {/* Salary & Fixed Inputs - Capped at Maximum 9 Digits */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Take-Home Salary (₹)
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-semibold text-slate-700">
+                  Take-Home Salary (₹)
+                </label>
+                <span className="text-[10px] font-mono text-slate-400">
+                  {salary.length}/9 digits
+                </span>
+              </div>
               <input
-                type="number"
-                min="5000"
-                step="500"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={9}
                 required
                 value={salary}
-                onChange={(e) => setSalary(e.target.value)}
+                onChange={handleSalaryChange}
+                placeholder="75000"
                 className="w-full px-3.5 py-2.5 sm:py-2 text-base sm:text-xs font-mono bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors min-h-[44px]"
               />
-              <span className="text-[10px] text-slate-500 block mt-1">Monthly in-hand credit</span>
+              <span className="text-[10px] text-slate-500 block mt-1">Monthly in-hand credit (max ₹99,99,99,999)</span>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Fixed Bills &amp; EMIs (₹)
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-xs font-semibold text-slate-700">
+                  Fixed Bills &amp; EMIs (₹)
+                </label>
+                <span className="text-[10px] font-mono text-slate-400">
+                  {fixed.length}/9 digits
+                </span>
+              </div>
               <input
-                type="number"
-                min="0"
-                step="500"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={9}
                 required
                 value={fixed}
-                onChange={(e) => setFixed(e.target.value)}
+                onChange={handleFixedChange}
+                placeholder="32000"
                 className="w-full px-3.5 py-2.5 sm:py-2 text-base sm:text-xs font-mono bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors min-h-[44px]"
               />
-              <span className="text-[10px] text-slate-500 block mt-1">Rent, SIPs, utilities</span>
+              <span className="text-[10px] text-slate-500 block mt-1">Rent, SIPs, utilities (max ₹99,99,99,999)</span>
             </div>
           </div>
 
