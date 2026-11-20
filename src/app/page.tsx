@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { FinancialMemoryProvider, useFinancialMemory } from "@/lib/memory/memoryContext";
 import { Navbar } from "@/components/Navbar";
 import { SmartCashFlowCalendar } from "@/components/SmartCashFlowCalendar";
+import { NetSafeCashPoolBreakdown } from "@/components/NetSafeCashPoolBreakdown";
 import { GoalJarsSection } from "@/components/GoalJarsSection";
 import { BeforeIScanModal } from "@/components/BeforeIScanModal";
 import { SmsParserDrawer } from "@/components/SmsParserDrawer";
@@ -136,6 +137,12 @@ function DashboardContent() {
               onOpenBeforeIScan={() => setActiveSpace("before-i-scan")}
               onOpenSettings={() => setIsSettingsOpen(true)}
               onOpenRiskDetails={() => setIsRiskModalOpen(true)}
+            />
+
+            {/* Net Safe Cash Pool Formula Breakdown Strip */}
+            <NetSafeCashPoolBreakdown
+              onOpenRiskDetails={() => setIsRiskModalOpen(true)}
+              onOpenSettings={() => setIsSettingsOpen(true)}
             />
 
             {/* Quick-Link CTA: Need a second opinion on a purchase? */}
