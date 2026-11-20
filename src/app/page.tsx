@@ -11,6 +11,7 @@ import { SmsParserDrawer } from "@/components/SmsParserDrawer";
 import { FinancialMemoryViewer } from "@/components/FinancialMemoryViewer";
 import { SettingsModal } from "@/components/SettingsModal";
 import { RiskDetailsModal } from "@/components/RiskDetailsModal";
+import { SalaryAllocationBar } from "@/components/SalaryAllocationBar";
 import { SolutionSpaceSwitcher, SolutionSpace } from "@/components/SolutionSpaceSwitcher";
 import { BeforeIScanSpace } from "@/components/BeforeIScanSpace";
 import { PassbookSpace } from "@/components/PassbookSpace";
@@ -39,34 +40,6 @@ function DashboardContent() {
   const cardDues = profile.creditCardDues ?? 17908;
   const salary = profile.monthlySalary || 75000;
   const pctOfSalary = Math.round((cardDues / salary) * 100);
-
-  // Dynamic Monthly Salary Allocation Metrics
-  const takeHomeSalary = profile.monthlySalary || 75000;
-  const fixedBills = profile.fixedEssentials || 32000;
-  const spentThisMonth = analysis.discretionarySpentSoFar || 0;
-  const rawSafePool = typeof analysis.remainingMonthlyPool === "number"
-    ? analysis.remainingMonthlyPool
-    : Math.max(0, takeHomeSalary - fixedBills - spentThisMonth);
-  const totalSafePool = Math.max(0, rawSafePool);
-
-  const isOverspent = rawSafePool <= 0 && spentThisMonth > 0;
-  const overspentAmount = Math.max(0, (fixedBills + spentThisMonth) - takeHomeSalary);
-
-  const fixedPercent = Math.round((fixedBills / takeHomeSalary) * 100);
-  const spentPercent = Math.round((spentThisMonth / takeHomeSalary) * 100);
-  const safePercent = isOverspent ? 0 : Math.max(0, 100 - fixedPercent - spentPercent);
-
-  // Segment widths clamped so total width always fits 100% and totalSafePool clamps at 0%
-  let clampedFixedPercent = (fixedBills / takeHomeSalary) * 100;
-  let clampedSpentPercent = (spentThisMonth / takeHomeSalary) * 100;
-  let clampedSafePercent = Math.max(0, 100 - clampedFixedPercent - clampedSpentPercent);
-
-  if (clampedFixedPercent + clampedSpentPercent > 100) {
-    const scale = 100 / (clampedFixedPercent + clampedSpentPercent);
-    clampedFixedPercent = clampedFixedPercent * scale;
-    clampedSpentPercent = clampedSpentPercent * scale;
-    clampedSafePercent = 0; // Clamped at 0% if overspent
-  }
 
   return (
     <div className="min-h-screen fintech-mesh-bg text-slate-900 flex flex-col selection:bg-emerald-100 selection:text-emerald-900">
@@ -153,169 +126,8 @@ function DashboardContent() {
               </div>
             )}
 
-            {/* Transparent 4-Card Monthly Balance Sheet */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-3.5">
-              {/* Card 1: Monthly Salary */}
-              <div className="fintech-card rounded-2xl p-4 sm:p-4.5 bg-white border border-slate-200 shadow-sm flex flex-col justify-between overflow-hidden">
-                <div className="flex items-center justify-between text-slate-500 mb-2">
-                  <span className="text-xs font-semibold text-slate-600 truncate mr-1">Take-Home Salary</span>
-                  <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700 shrink-0">
-                    <Wallet className="w-3.5 h-3.5" />
-                  </div>
-                </div>
-                <div className="mt-0.5">
-                  <div className="text-lg sm:text-xl font-bold font-mono text-slate-900 truncate">
-                    {formatINR(profile.monthlySalary)}
-                  </div>
-                  <div className="text-[11px] text-slate-500 mt-0.5 flex items-center justify-between">
-                    <span>Monthly Income</span>
-                    <span className="text-[10px] font-mono text-slate-400">Total</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 2: Fixed Essentials */}
-              <div className="fintech-card rounded-2xl p-4 sm:p-4.5 bg-white border border-slate-200 shadow-sm flex flex-col justify-between overflow-hidden">
-                <div className="flex items-center justify-between text-slate-500 mb-2">
-                  <span className="text-xs font-semibold text-slate-600 truncate mr-1">Fixed Bills &amp; SIPs</span>
-                  <div className="p-1.5 rounded-lg bg-blue-50 text-blue-700 shrink-0">
-                    <ShieldCheck className="w-3.5 h-3.5" />
-                  </div>
-                </div>
-                <div className="mt-0.5">
-                  <div className="text-lg sm:text-xl font-bold font-mono text-slate-900 truncate">
-                    {formatINR(profile.fixedEssentials)}
-                  </div>
-                  <div className="text-[11px] text-slate-500 mt-0.5 flex items-center justify-between">
-                    <span>Rent &amp; Essentials</span>
-                    <span className="text-[10px] font-mono text-blue-600 font-semibold">Fixed</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 3: Spent This Month */}
-              <div className="fintech-card rounded-2xl p-4 sm:p-4.5 bg-white border border-slate-200 shadow-sm flex flex-col justify-between overflow-hidden">
-                <div className="flex items-center justify-between text-slate-500 mb-2">
-                  <span className="text-xs font-semibold text-slate-600 truncate mr-1">Spent This Month</span>
-                  <div className="p-1.5 rounded-lg bg-slate-50 text-slate-700 border border-slate-200 shrink-0">
-                    <CreditCard className="w-3.5 h-3.5" />
-                  </div>
-                </div>
-                <div className="mt-0.5">
-                  <div className="text-lg sm:text-xl font-bold font-mono text-slate-900 truncate">
-                    {formatINR(analysis.discretionarySpentSoFar)}
-                  </div>
-                  <div className="text-[11px] text-slate-500 mt-0.5 flex items-center justify-between">
-                    <span>Extra Spend</span>
-                    <span className="text-[10px] font-mono text-slate-400">Month</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 4: Total Safe-to-Spend Pool */}
-              <div className="fintech-card rounded-2xl p-4 sm:p-4.5 bg-white border border-slate-200 shadow-sm flex flex-col justify-between overflow-hidden">
-                <div className="flex items-center justify-between text-slate-500 mb-2">
-                  <span className="text-xs font-semibold text-slate-600 truncate mr-1">Total Safe Pool</span>
-                  <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
-                    <TrendingUp className="w-3.5 h-3.5" />
-                  </div>
-                </div>
-                <div className="mt-0.5">
-                  <div className="text-lg sm:text-xl font-bold font-mono text-emerald-700 truncate">
-                    {formatINR(totalSafePool)}
-                  </div>
-                  <div className="text-[11px] text-slate-500 mt-0.5 flex items-center justify-between">
-                    <span>{analysis.daysRemaining || 17}d to payday</span>
-                    <span className="text-[10px] font-mono text-emerald-700 font-semibold">
-                      {safePercent}% Left
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Live Reactive Salary Allocation Progress Bar */}
-            <div className="fintech-card rounded-2xl p-4 sm:p-4.5 bg-white border border-slate-200 shadow-sm space-y-3">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-slate-900 tracking-tight font-mono uppercase">
-                    Monthly Salary Allocation Pacing
-                  </span>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 font-semibold">
-                    100% Salary
-                  </span>
-                </div>
-                <div className="text-xs font-mono">
-                  {isOverspent ? (
-                    <span className="text-rose-700 font-bold flex items-center gap-1">
-                      <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
-                      Overspent by {formatINR(overspentAmount)}
-                    </span>
-                  ) : (
-                    <span className="text-emerald-700 font-bold">
-                      {safePercent}% Available for Extra Spend
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Segmented Bar with smooth transitions */}
-              <div className="relative h-4 w-full bg-slate-100 rounded-full overflow-hidden flex border border-slate-200 shadow-inner">
-                {/* Fixed Bills Segment */}
-                <div
-                  className="h-full bg-blue-500 transition-all duration-500 ease-out"
-                  style={{ width: `${clampedFixedPercent}%` }}
-                  title={`Fixed Bills & SIPs: ₹${fixedBills.toLocaleString("en-IN")} (${fixedPercent}%)`}
-                />
-
-                {/* Spent This Month Segment */}
-                <div
-                  className={`h-full ${
-                    isOverspent ? "bg-rose-500" : "bg-slate-700"
-                  } transition-all duration-500 ease-out`}
-                  style={{ width: `${clampedSpentPercent}%` }}
-                  title={`Spent This Month: ₹${spentThisMonth.toLocaleString("en-IN")} (${spentPercent}%)`}
-                />
-
-                {/* Total Safe Pool Segment (Highlighted in emerald green as remaining spendable balance) */}
-                <div
-                  className="h-full bg-emerald-500 transition-all duration-500 ease-out"
-                  style={{ width: `${clampedSafePercent}%` }}
-                  title={`Total Safe Pool: ₹${totalSafePool.toLocaleString("en-IN")} (${safePercent}%)`}
-                />
-              </div>
-
-              {/* Legend with exact wording from prompt */}
-              <div className="flex flex-wrap items-center justify-between gap-y-2 gap-x-3 text-xs font-mono pt-0.5">
-                {/* Fixed Bills Legend */}
-                <div className="flex items-center gap-1.5 text-slate-600">
-                  <span className="w-2.5 h-2.5 rounded-full bg-blue-500 shrink-0" />
-                  <span>
-                    Fixed Bills &amp; SIPs — <strong>₹{fixedBills.toLocaleString("en-IN")}</strong> ({fixedPercent}%)
-                  </span>
-                </div>
-
-                {/* Spent This Month Legend */}
-                <div className="flex items-center gap-1.5 text-slate-600">
-                  <span
-                    className={`w-2.5 h-2.5 rounded-full ${
-                      isOverspent ? "bg-rose-500" : "bg-slate-700"
-                    } shrink-0`}
-                  />
-                  <span>
-                    Spent This Month — <strong>₹{spentThisMonth.toLocaleString("en-IN")}</strong> ({spentPercent}%)
-                  </span>
-                </div>
-
-                {/* Total Safe Pool Legend (Highlighted in emerald green as remaining spendable balance) */}
-                <div className="flex items-center gap-1.5 text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 font-semibold">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                  <span>
-                    Total Safe Pool — <strong>₹{totalSafePool.toLocaleString("en-IN")}</strong> ({safePercent}%)
-                  </span>
-                </div>
-              </div>
-            </div>
+            {/* Salary Allocation & Safe Pool Breakdown Bar Card */}
+            <SalaryAllocationBar onOpenSettings={() => setIsSettingsOpen(true)} />
 
             {/* Hero Row: Daily Budget & Days Left */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
