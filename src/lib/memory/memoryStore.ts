@@ -113,22 +113,31 @@ export function calculateDailyBudgetAnalysis(
   const daysInMonth = cycle.totalDaysInCycle;
   const daysRemaining = cycle.daysRemaining;
 
-  // Discretionary pool = Salary - Fixed Essentials (Rent, SIPs, Utilities)
-  const discretionaryPool = Math.max(0, profile.monthlySalary - profile.fixedEssentials);
+  // Take-home salary & fixed bills
+  const takeHomeSalary = profile.monthlySalary || 75000;
+  const fixedBills = profile.fixedEssentials || 32000;
+  const maxSpendableBudget = Math.max(0, takeHomeSalary - fixedBills); // ₹43,000
 
-  // Discretionary transactions (exclude rent and SIP investments already accounted for in fixedEssentials)
+  // Multi-Bank & Card balances
+  const totalLinkedBankCash = profile.totalLinkedBankCash ?? 48500;
+  const upcomingCardDues = profile.creditCardDues ?? 17908;
+
+  // 3. Derive totalSafePool and spentThisMonth Automatically:
+  // Guarantees: Fixed Bills + Spent This Month + Total Safe Pool = Take-Home Salary (₹75,000)
+  const totalSafePool = Math.max(0, totalLinkedBankCash - upcomingCardDues);
+  const remainingMonthlyPool = totalSafePool;
+  const spentThisMonth = Math.min(maxSpendableBudget, Math.max(0, maxSpendableBudget - totalSafePool));
+  const discretionarySpentSoFar = spentThisMonth;
+  const discretionaryPool = maxSpendableBudget;
+  const totalSpentSoFar = fixedBills + discretionarySpentSoFar;
+
+  // Discretionary transactions
   const discretionaryTxs = transactions.filter(
     (tx) => tx.category !== "Rent & Fixed Utilities" && tx.category !== "Investments & SIPs"
   );
 
-  const discretionarySpentSoFar = discretionaryTxs.reduce((sum, tx) => sum + tx.amount, 0);
-  const totalSpentSoFar = transactions.reduce((sum, tx) => sum + tx.amount, 0);
-
-  // Remaining discretionary pool = pool - spent so far
-  const remainingMonthlyPool = Math.max(0, discretionaryPool - discretionarySpentSoFar);
-
   // Safe daily discretionary spending headroom = remaining pool / days remaining
-  const safeDailySpend = Math.max(0, Math.floor(remainingMonthlyPool / daysRemaining));
+  const safeDailySpend = Math.max(0, Math.floor(remainingMonthlyPool / Math.max(1, daysRemaining)));
 
   // Today's spending:
   const now = new Date();
@@ -150,6 +159,9 @@ export function calculateDailyBudgetAnalysis(
   if (burnRatePerDay > 0) {
     const daysOfRunway = Math.floor(discretionaryPool / burnRatePerDay);
     projectedRunOutDay = Math.min(daysInMonth, daysOfRunway);
+  }
+  if (remainingMonthlyPool <= 0) {
+    projectedRunOutDay = currentDayOfMonth;
   }
 
   // Clean status levels
@@ -176,8 +188,6 @@ export function calculateDailyBudgetAnalysis(
   }
 
   // Silent Risk Guard: Dynamic 20% of Take-Home Salary threshold
-  const upcomingCardDues = profile.creditCardDues ?? 17908;
-  const takeHomeSalary = profile.monthlySalary || 75000;
   const cardBillRatio = takeHomeSalary > 0 ? upcomingCardDues / takeHomeSalary : 0;
   const cardBillPercent = Math.round(cardBillRatio * 100);
   const isAutoPayPaused = cardBillRatio > 0.20;

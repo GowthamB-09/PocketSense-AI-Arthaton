@@ -46,7 +46,10 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [syncAlert, setSyncAlert] = useState<string | null>(null);
   const [isSimulating, setIsSimulating] = useState(false);
 
-  const isDepleted = analysis.remainingMonthlyPool <= 0;
+  const totalLinkedBankCash = profile.totalLinkedBankCash ?? 48500;
+  const upcomingCardDues = profile.creditCardDues ?? 17908;
+  const totalSafePool = Math.max(0, totalLinkedBankCash - upcomingCardDues);
+  const isSafePoolEmpty = totalSafePool <= 0;
 
   const handleLoadDemo = () => {
     loadSyntheticDemo();
@@ -64,8 +67,8 @@ export const Navbar: React.FC<NavbarProps> = ({
     // 400ms button debounce/cooldown so rapid double-clicks don't stack unintended transactions
     if (isSimulating) return;
 
-    // Check if Safe Pool reached ₹0
-    if (analysis.remainingMonthlyPool <= 0) {
+    // Check if Safe Pool is empty (<= 0)
+    if (totalSafePool <= 0) {
       setSyncAlert("Safe Pool reached ₹0! Click ‘Reset Demo’ to test again.");
       setTimeout(() => setSyncAlert(null), 4000);
       return;
@@ -161,13 +164,11 @@ export const Navbar: React.FC<NavbarProps> = ({
 
     addBatchTransactions([newTx]);
 
-    const estimatedRemaining = Math.max(0, analysis.remainingMonthlyPool - pick.amount);
-
-    // Multi-Account & Credit Card Dues Tracking
-    const currentCardDues = profile.creditCardDues ?? 17908;
-    const currentBankCash = profile.totalLinkedBankCash ?? 48500;
-    let newCardDues = currentCardDues;
-    let newBankCash = currentBankCash;
+    // 2. Update Underlying Bank Cash or Card Dues on Simulated Spend:
+    // • If it is a Bank / UPI spend: reduce totalLinkedBankCash (Math.max(0, prev - amount))
+    // • If it is a Credit Card spend: increase upcomingCardDues (prev + amount)
+    let newCardDues = upcomingCardDues;
+    let newBankCash = totalLinkedBankCash;
 
     if (pick.isCreditCard) {
       newCardDues += pick.amount;
@@ -176,13 +177,17 @@ export const Navbar: React.FC<NavbarProps> = ({
     }
 
     const salary = profile.monthlySalary || 75000;
-    const threshold = salary * 0.2; // 20% of salary = ₹15,000
-    const shouldPause = newCardDues > threshold;
+    const threshold = salary * 0.20; // 20% of salary = ₹15,000
+    const shouldPause = (newCardDues / salary) > 0.20;
     const justSnappedOn = !isAutoPayPaused && shouldPause;
 
     updateCreditCardDues(newCardDues, newBankCash);
 
-    if (justSnappedOn) {
+    const newSafePool = Math.max(0, newBankCash - newCardDues);
+
+    if (newSafePool <= 0) {
+      setSyncAlert("Safe Pool reached ₹0! Click ‘Reset Demo’ to test again.");
+    } else if (justSnappedOn) {
       setSyncAlert(
         `⚠️ ${pick.merchant} pushed card dues to ${formatINR(newCardDues)} (${Math.round((newCardDues / salary) * 100)}% of salary). Silent Risk Guard snapped ON — Friday AutoPay sweep paused!`
       );
@@ -199,7 +204,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       }
 
       setSyncAlert(
-        `✓ Ingested ${formatINR(pick.amount)} (${pick.bank} • ${pick.merchant}) • Total Safe Pool: ${formatINR(estimatedRemaining)} • +₹${spareChange} spare change rounded up into Goal Jar!`
+        `✓ Ingested ${formatINR(pick.amount)} (${pick.bank} • ${pick.merchant}) • Total Safe Pool: ${formatINR(newSafePool)} • +₹${spareChange} spare change rounded up into Goal Jar!`
       );
     }
 
@@ -261,23 +266,23 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* 1-Click "Simulate Incoming Multi-Bank Spend" Button */}
             <button
               onClick={handleSimulateMultiBankSpend}
-              disabled={isSimulating}
-              className={`flex items-center gap-1.5 px-3 py-1.5 min-h-[38px] rounded-xl text-xs font-bold shadow-sm transition-all active:scale-95 ${
-                isDepleted
-                  ? "bg-rose-900/90 text-rose-100 hover:bg-rose-900 border border-rose-700/60"
-                  : "bg-slate-900 hover:bg-black text-white"
+              disabled={isSimulating || isSafePoolEmpty}
+              className={`flex items-center gap-1.5 px-3 py-1.5 min-h-[38px] rounded-xl text-xs font-bold shadow-sm transition-all ${
+                isSafePoolEmpty
+                  ? "bg-slate-200 text-slate-500 border border-slate-300 cursor-not-allowed opacity-90"
+                  : "bg-slate-900 hover:bg-black text-white active:scale-95"
               } ${isSimulating ? "opacity-70 cursor-not-allowed" : ""}`}
               title={
-                isDepleted
+                isSafePoolEmpty
                   ? "Safe Pool reached ₹0! Click ‘Reset Demo’ to test again."
                   : "Simulate incoming multi-bank spend (HDFC, SBI, ICICI Card) with spare change round-up"
               }
             >
-              <Zap className={`w-3.5 h-3.5 ${isDepleted ? "text-rose-400" : "text-emerald-400"}`} />
-              {isDepleted ? (
+              <Zap className={`w-3.5 h-3.5 ${isSafePoolEmpty ? "text-slate-400" : "text-emerald-400"}`} />
+              {isSafePoolEmpty ? (
                 <>
-                  <span className="hidden sm:inline">Safe Pool Depleted (₹0 Left)</span>
-                  <span className="sm:hidden font-mono text-[11px]">Depleted (₹0)</span>
+                  <span className="hidden sm:inline">Safe Pool Empty (₹0 Left)</span>
+                  <span className="sm:hidden font-mono text-[11px]">Empty (₹0)</span>
                 </>
               ) : (
                 <>

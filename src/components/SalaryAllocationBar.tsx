@@ -15,9 +15,14 @@ export const SalaryAllocationBar: React.FC<SalaryAllocationBarProps> = ({ onOpen
 
   const takeHomeSalary = Math.max(1, profile.monthlySalary || 75000);
   const fixedBills = profile.fixedEssentials || 32000;
-  const spentThisMonth = analysis.discretionarySpentSoFar || 0;
-  const rawSafePool = typeof analysis.remainingMonthlyPool === "number" ? analysis.remainingMonthlyPool : 30592;
-  const totalSafePool = Math.max(0, rawSafePool);
+  const totalLinkedBankCash = profile.totalLinkedBankCash ?? 48500;
+  const upcomingCardDues = profile.creditCardDues ?? 17908;
+
+  // 3. Derive totalSafePool and spentThisMonth Automatically:
+  // Guarantees: Fixed Bills (₹32,000) + Spent This Month + Total Safe Pool = Take-Home Salary (₹75,000)
+  const totalSafePool = Math.max(0, totalLinkedBankCash - upcomingCardDues);
+  const maxSpendableBudget = Math.max(0, takeHomeSalary - fixedBills);
+  const spentThisMonth = Math.min(maxSpendableBudget, Math.max(0, maxSpendableBudget - totalSafePool));
 
   // Proportional segment widths (clamping safe pool at 0 if overspent)
   const fixedRatio = Math.min(1, Math.max(0, fixedBills / takeHomeSalary));
@@ -33,7 +38,7 @@ export const SalaryAllocationBar: React.FC<SalaryAllocationBarProps> = ({ onOpen
   const spentPercent = Math.round((spentThisMonth / takeHomeSalary) * 100);
   const safePercent = Math.max(0, Math.round((totalSafePool / takeHomeSalary) * 100));
 
-  const isOverspent = rawSafePool <= 0;
+  const isOverspent = totalSafePool <= 0;
 
   return (
     <div className="fintech-card rounded-2xl p-5 sm:p-6 bg-white border border-slate-200 shadow-sm space-y-5 transition-all">

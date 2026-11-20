@@ -39,13 +39,13 @@ export const DailySafeCard: React.FC<DailySafeCardProps> = ({
     projectedRunOutDay,
   } = analysis;
 
-  // Total Safe-to-Spend Pool Until Payday
-  // Default to computed remaining monthly pool (show 0 when depleted)
-  const safePoolAmount = typeof remainingMonthlyPool === "number" ? remainingMonthlyPool : 30592;
-
   // Breakdown across multi-bank and cards
   const estimatedBankCash = profile.totalLinkedBankCash ?? 48500;
   const estimatedCardBills = profile.creditCardDues ?? 17908;
+
+  // Total Safe-to-Spend Pool Until Payday automatically derived
+  const totalSafePool = Math.max(0, estimatedBankCash - estimatedCardBills);
+  const safePoolAmount = totalSafePool;
 
   const daysToPayday = daysRemaining || 17;
 
