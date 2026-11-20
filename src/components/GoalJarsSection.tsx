@@ -63,8 +63,28 @@ export const GoalJarsSection: React.FC = () => {
   const getGoalAiTrendData = (title: string, category: string, deadline?: string) => {
     const t = title.toLowerCase();
 
-    // Goal 1: New iPhone
-    if (t.includes("iphone") || t.includes("apple") || t.includes("phone")) {
+    // Goal 1: Noise-Cancelling Headphones (Audio Flagships)
+    // Placed before iPhone to prevent 'headphone' from matching 'phone'
+    if (t.includes("headphone") || t.includes("audio") || t.includes("sony") || t.includes("bose") || t.includes("earphone") || t.includes("airpod")) {
+      return {
+        trendStatus: "Seasonal Sale Watch 📉",
+        trendBoxHeader: "Seasonal Sale Watch 📉 — Wait for the next electronics sale to save ~₹3,300 (15% off)",
+        boxBg: "bg-purple-50/90 border-purple-200 text-purple-950",
+        pillBg: "bg-purple-100 text-purple-800 border-purple-300",
+        bestTimeToBuy: "Next Electronics Sale (Save ~15%)",
+        insight:
+          "Audio flagships routinely discount during seasonal electronics promotions and bank credit card sales. Wait for the upcoming sale to save ~₹3,300 (15% off).",
+        vaultName: "Instant Safe ~6.8% / yr",
+        vaultTag: "Short-Term (<1Y) • Base Cash safe • Hidden from UPI temptation",
+        vaultRate: "~6.8% / yr",
+        vaultEarned: 1240,
+        smartSwapsEarned: 6800,
+        counterLabel: "+₹1,240 Extra Earned While Waiting",
+      };
+    }
+
+    // Goal 2: New iPhone
+    if (t.includes("iphone") || t.includes("apple") || (/\bphone\b/i.test(t) && !t.includes("headphone"))) {
       return {
         trendStatus: "Price Dropping Soon 📉",
         trendBoxHeader: "Price Dropping Soon 📉 — Wait until October to save ~₹11,000",
@@ -82,7 +102,7 @@ export const GoalJarsSection: React.FC = () => {
       };
     }
 
-    // Goal 2: 24K Gold
+    // Goal 3: 24K Gold
     if (t.includes("gold") || t.includes("jewel") || category === "Wealth") {
       return {
         trendStatus: "Price Rising 📈",
@@ -98,25 +118,6 @@ export const GoalJarsSection: React.FC = () => {
         vaultEarned: 3820,
         smartSwapsEarned: 22000,
         counterLabel: "+₹3,820 Extra Earned While Waiting",
-      };
-    }
-
-    // Goal 3: Noise-Cancelling Headphones
-    if (t.includes("headphone") || t.includes("audio") || t.includes("sony") || t.includes("bose")) {
-      return {
-        trendStatus: "Holding Steady ➡️",
-        trendBoxHeader: "Holding Steady ➡️ — Buy anytime",
-        boxBg: "bg-blue-50/90 border-blue-200 text-blue-950",
-        pillBg: "bg-blue-100 text-blue-800 border-blue-300",
-        bestTimeToBuy: "Buy anytime once funded",
-        insight:
-          "No major hardware refresh or import duty change expected. Best Time to Buy: Buy anytime once funded.",
-        vaultName: "Instant Safe ~6.8% / yr",
-        vaultTag: "Short-Term (<1Y) • Base Cash safe • Hidden from UPI temptation",
-        vaultRate: "~6.8% / yr",
-        vaultEarned: 1240,
-        smartSwapsEarned: 6800,
-        counterLabel: "+₹1,240 Extra Earned While Waiting",
       };
     }
 
@@ -543,13 +544,39 @@ export const GoalJarsSection: React.FC = () => {
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="text-base font-bold text-slate-900 tracking-tight">
-                  AutoPay Auto-Save: {isMandateActive ? "ACTIVE" : "PAUSED"}
+                <h3
+                  className={`text-sm sm:text-base font-bold tracking-tight px-2.5 py-1 rounded-lg border inline-flex items-center gap-2 transition-colors ${
+                    isAutoPayPaused
+                      ? "bg-amber-100 text-amber-900 border-amber-300"
+                      : isMandateActive
+                      ? "bg-emerald-50 text-emerald-900 border-emerald-300"
+                      : "bg-slate-100 text-slate-700 border-slate-300"
+                  }`}
+                >
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      isAutoPayPaused
+                        ? "bg-amber-500 animate-pulse"
+                        : isMandateActive
+                        ? "bg-emerald-500 animate-pulse"
+                        : "bg-slate-400"
+                    }`}
+                  />
+                  <span>
+                    AutoPay Auto-Save: {isAutoPayPaused ? "PAUSED" : isMandateActive ? "ACTIVE" : "PAUSED"}
+                  </span>
                 </h3>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  NPCI Certified
-                </span>
+                {isAutoPayPaused ? (
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-300 font-semibold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                    Silent Risk Guard Active
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    NPCI Certified
+                  </span>
+                )}
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-medium">
                   Max {formatINR(mandateCap)}/mo
                 </span>
@@ -563,20 +590,25 @@ export const GoalJarsSection: React.FC = () => {
           {/* Interactive Mandate Toggle */}
           <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
             <span className="text-xs font-semibold text-slate-600">
-              {isMandateActive ? "Autopilot ON" : "Autopilot OFF"}
+              {isAutoPayPaused ? "Paused by Risk Guard" : isMandateActive ? "Autopilot ON" : "Autopilot OFF"}
             </span>
             <button
               type="button"
+              disabled={isAutoPayPaused}
               onClick={() => setIsMandateActive(!isMandateActive)}
-              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                isMandateActive ? "bg-emerald-600" : "bg-slate-300"
+              className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                isAutoPayPaused
+                  ? "bg-amber-300 cursor-not-allowed opacity-80"
+                  : isMandateActive
+                  ? "bg-emerald-600 cursor-pointer"
+                  : "bg-slate-300 cursor-pointer"
               }`}
               role="switch"
-              aria-checked={isMandateActive}
+              aria-checked={isMandateActive && !isAutoPayPaused}
             >
               <span
                 className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                  isMandateActive ? "translate-x-5" : "translate-x-0"
+                  isAutoPayPaused || isMandateActive ? "translate-x-5" : "translate-x-0"
                 }`}
               />
             </button>
