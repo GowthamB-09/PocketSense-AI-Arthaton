@@ -12,6 +12,7 @@ import {
   AlertTriangle,
   Sparkles,
 } from "lucide-react";
+import { GooglePlacesStatusBadge } from "@/components/GooglePlacesStatusBadge";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -180,6 +181,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </strong>
             </div>
           </div>
+
+          {/* Google Places API (New) Developer Status */}
+          <GooglePlacesStatusBadge variant="settings" />
 
           {/* Reset ledger checkbox */}
           <div className="flex items-start gap-2.5 p-3 rounded-xl border border-slate-200 bg-white">

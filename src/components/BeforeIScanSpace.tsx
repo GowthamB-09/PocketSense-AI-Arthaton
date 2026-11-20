@@ -29,6 +29,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 import confetti from "canvas-confetti";
+import { GooglePlacesStatusBadge } from "@/components/GooglePlacesStatusBadge";
 
 interface BeforeIScanSpaceProps {
   onSwitchToGoals?: () => void;
@@ -303,9 +304,12 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
               <Zap className="w-6 h-6 fill-emerald-600" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-900 tracking-tight">
-                AI Pay Guard
-              </h2>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-lg font-bold text-slate-900 tracking-tight">
+                  AI Pay Guard
+                </h2>
+                <GooglePlacesStatusBadge />
+              </div>
               <p className="text-xs text-slate-500 mt-0.5">
                 Check any spend or ask questions before you pay.
               </p>
