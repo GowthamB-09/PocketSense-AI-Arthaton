@@ -296,9 +296,6 @@ export const SmartCashFlowCalendar: React.FC<SmartCashFlowCalendarProps> = ({
                 Live Shield Active
               </span>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              AutoPay Bill Dates • Personal Gifts &amp; Ring-Fenced Event Shield
-            </p>
           </div>
         </div>
 
@@ -670,9 +667,6 @@ export const SmartCashFlowCalendar: React.FC<SmartCashFlowCalendarProps> = ({
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs font-black text-slate-900 tracking-tight">
                 {formatINR(totalRingFencedAmount)} Ring-Fenced for {ringFencedEvents.length} Upcoming Event{ringFencedEvents.length === 1 ? "" : "s"}
-              </span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold">
-                Impulse-Shield ON
               </span>
             </div>
             <p className="text-[11px] text-slate-600 mt-0.5">
