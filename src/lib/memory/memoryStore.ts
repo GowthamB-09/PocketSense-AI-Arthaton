@@ -197,6 +197,8 @@ export function calculateDailyBudgetAnalysis(
     salaryCreditDay: salaryDay,
     isRealDate,
     nextPaydayLabel: cycle.nextPaydayLabel,
+    isAutoPayPaused: typeof profile.isAutoPayPaused === "boolean" ? profile.isAutoPayPaused : true,
+    creditCardDues: profile.creditCardDues ?? 17908,
   };
 }
 

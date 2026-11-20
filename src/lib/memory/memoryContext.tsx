@@ -32,6 +32,8 @@ interface FinancialMemoryContextType {
   addBatchTransactions: (txs: Transaction[]) => void;
   deleteTransaction: (id: string) => void;
   claimSavings: (goalId: string, amount: number, promptText?: string) => void;
+  isAutoPayPaused: boolean;
+  toggleAutoPayPause: (val?: boolean) => void;
   recordSmartSwap: (params: {
     goalId: string;
     originalCost: number;
@@ -40,6 +42,7 @@ interface FinancialMemoryContextType {
     originalItem: string;
     swapTitle: string;
     query?: string;
+    isPaused?: boolean;
   }) => { oldAmountSaved: number; netAdjustment: number; newTotalSwept: number };
   updateSalary: (
     monthlySalary: number,
@@ -192,6 +195,15 @@ export function FinancialMemoryProvider({ children }: { children: React.ReactNod
     });
   };
 
+  const isAutoPayPaused = analysis.isAutoPayPaused;
+
+  const toggleAutoPayPause = (val?: boolean) => {
+    setProfile((prev) => ({
+      ...prev,
+      isAutoPayPaused: typeof val === "boolean" ? val : !prev.isAutoPayPaused,
+    }));
+  };
+
   const recordSmartSwap = ({
     goalId,
     originalCost,
@@ -200,6 +212,7 @@ export function FinancialMemoryProvider({ children }: { children: React.ReactNod
     originalItem,
     swapTitle,
     query,
+    isPaused,
   }: {
     goalId: string;
     originalCost: number;
@@ -208,9 +221,11 @@ export function FinancialMemoryProvider({ children }: { children: React.ReactNod
     originalItem: string;
     swapTitle: string;
     query?: string;
+    isPaused?: boolean;
   }) => {
+    const paused = typeof isPaused === "boolean" ? isPaused : isAutoPayPaused;
     let oldAmountSaved = 0;
-    let netAdjustment = savedDifference;
+    let netAdjustment = paused ? 0 : savedDifference;
     let newTotal = 0;
 
     // 1. Deduct swapCost from Safe Pool & add to Spent This Month via real transaction
@@ -242,7 +257,8 @@ export function FinancialMemoryProvider({ children }: { children: React.ReactNod
       return [swapTx, ...filtered];
     });
 
-    // 2. Recompute Goal Jar & Total Swept: reverse old full-skip & apply new swap savings
+    // 2. Recompute Goal Jar & Total Swept:
+    // If paused, do not sweep money out of Safe Pool into Goal Jar; keep savedDifference inside Safe Pool as buffer.
     setProfile((prev) => {
       const existingDecisions = prev.pastImpulseDecisions || [];
       const matchingIdx = existingDecisions.findIndex((dec) =>
@@ -253,11 +269,12 @@ export function FinancialMemoryProvider({ children }: { children: React.ReactNod
       if (matchingIdx !== -1) {
         const prevDec = existingDecisions[matchingIdx];
         oldAmountSaved = prevDec.amountSaved || prevDec.amount;
-        netAdjustment = savedDifference - oldAmountSaved;
+        // If previous decision was swept to goals, reverse it
+        netAdjustment = paused ? -oldAmountSaved : savedDifference - oldAmountSaved;
         remainingDecisions.splice(matchingIdx, 1);
       } else {
         oldAmountSaved = 0;
-        netAdjustment = savedDifference;
+        netAdjustment = paused ? 0 : savedDifference;
       }
 
       const newDecision = {
@@ -269,7 +286,8 @@ export function FinancialMemoryProvider({ children }: { children: React.ReactNod
         verdict: "BLOCKED" as const,
         actionTaken: "skipped_and_saved" as const,
         amountSaved: savedDifference,
-        targetGoalJarId: goalId,
+        targetGoalJarId: paused ? undefined : goalId,
+        isSafePoolBuffer: paused,
       };
 
       const updatedDecisions = deduplicateImpulseDecisions([newDecision, ...remainingDecisions]);
@@ -417,6 +435,8 @@ ${profile.vulnerabilityZones.map((z) => `- ${z}`).join("\n")}
         deleteTransaction,
         claimSavings,
         recordSmartSwap,
+        isAutoPayPaused,
+        toggleAutoPayPause,
         updateSalary,
         addGoalJar,
         updateGoalJar,

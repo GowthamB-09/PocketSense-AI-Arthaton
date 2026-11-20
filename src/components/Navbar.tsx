@@ -31,7 +31,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenSmsParser,
   onOpenSettings,
 }) => {
-  const { analysis, profile, loadSyntheticDemo, addBatchTransactions, claimSavings } = useFinancialMemory();
+  const { analysis, profile, loadSyntheticDemo, addBatchTransactions, claimSavings, isAutoPayPaused } = useFinancialMemory();
   const [loadedAlert, setLoadedAlert] = useState(false);
   const [syncAlert, setSyncAlert] = useState<string | null>(null);
 
@@ -104,16 +104,24 @@ export const Navbar: React.FC<NavbarProps> = ({
 
     addBatchTransactions([newTx]);
 
-    // Automatically deposit spare change into primary goal jar
-    if (profile.goals && profile.goals.length > 0) {
-      claimSavings(profile.goals[0].id, spareChange, `Spare change round-up from ${pick.merchant}`);
-    }
-
     const estimatedRemaining = Math.max(0, analysis.remainingMonthlyPool - pick.amount);
 
-    setSyncAlert(
-      `✓ Ingested ${formatINR(pick.amount)} (${pick.bank} • ${pick.merchant}) • Total Safe Pool: ${formatINR(estimatedRemaining)} • +₹${spareChange} spare change rounded up into Goal Jar!`
-    );
+    if (isAutoPayPaused) {
+      // 1. Block Automatic Round-Up Sweeps When Paused (+₹0 swept to Goal Jar)
+      // 2. Show a Clear Risk Guard Message
+      setSyncAlert(
+        `Spend tracked, but spare-change round-up (${formatINR(spareChange)}) was skipped because Silent Risk Guard paused Goal Jar sweeps until your card/EMI bills are cleared.`
+      );
+    } else {
+      // Automatically deposit spare change into primary goal jar
+      if (profile.goals && profile.goals.length > 0) {
+        claimSavings(profile.goals[0].id, spareChange, `Spare change round-up from ${pick.merchant}`);
+      }
+
+      setSyncAlert(
+        `✓ Ingested ${formatINR(pick.amount)} (${pick.bank} • ${pick.merchant}) • Total Safe Pool: ${formatINR(estimatedRemaining)} • +₹${spareChange} spare change rounded up into Goal Jar!`
+      );
+    }
 
     confetti({
       particleCount: 45,

@@ -64,12 +64,13 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { profile, analysis, recordSmartSwap } = useFinancialMemory();
+  const { profile, analysis, recordSmartSwap, isAutoPayPaused } = useFinancialMemory();
   const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [smartSwapResult, setSmartSwapResult] = useState<SmartSwapData | null>(null);
   const [swapSuccessMessage, setSwapSuccessMessage] = useState<string | null>(null);
   const [showSimplerSwap, setShowSimplerSwap] = useState(false);
+  const [showBufferTooltip, setShowBufferTooltip] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const safePoolAmount = analysis.remainingMonthlyPool > 0 ? analysis.remainingMonthlyPool : 30592;
@@ -197,7 +198,9 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
 
     // 4. Dynamic Savings & Sweep Math: strictly bound to savedDifference
     const savedDifference = Math.max(0, origCost - swapCost);
-    const swapButtonText = `Take the Swap & Sweep ${formatINR(savedDifference)} to Goal Jar`;
+    const swapButtonText = isAutoPayPaused
+      ? `Take the Swap • Keep ${formatINR(savedDifference)} in Safe Pool`
+      : `Take the Swap & Sweep ${formatINR(savedDifference)} to Goal Jar`;
 
     return {
       originalItem: text || (isFood ? "Food Order" : isSneakers ? "Branded Sneakers" : isEntertainment ? "Entertainment" : "Extra Spend Item"),
@@ -234,7 +237,9 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
       savedDifference: newSaved,
       swapDescription: newDesc,
       simplerText: newSimpler,
-      swapButtonText: `Take the Swap & Sweep ${formatINR(newSaved)} to Goal Jar`,
+      swapButtonText: isAutoPayPaused
+        ? `Take the Swap • Keep ${formatINR(newSaved)} in Safe Pool`
+        : `Take the Swap & Sweep ${formatINR(newSaved)} to Goal Jar`,
       primaryPlace: place,
     });
   };
@@ -284,7 +289,9 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
                   savedDifference: saved,
                   swapDescription: `Skip the ${formatINR(parsedAmount)} splurge—grab a meal at ${topPlace.displayName} (${topPlace.rating}★ on Google, ~${formatINR(topPlace.estimatedCost)} for one) instead. Same great food, +${formatINR(saved)} swept straight into your ${activeGoal.title} jar.`,
                   simplerText: `Dine at ${topPlace.displayName} (${topPlace.rating}★) for ~${formatINR(topPlace.estimatedCost)} instead of ${formatINR(parsedAmount)}—have equal fun while saving ${formatINR(saved)} for your ${activeGoal.title}.`,
-                  swapButtonText: `Take the Swap & Sweep ${formatINR(saved)} to Goal Jar`,
+                  swapButtonText: isAutoPayPaused
+                    ? `Take the Swap • Keep ${formatINR(saved)} in Safe Pool`
+                    : `Take the Swap & Sweep ${formatINR(saved)} to Goal Jar`,
                   primaryPlace: topPlace,
                   runnerUpPlaces: runners,
                   isLivePlaces: isLive,
@@ -313,10 +320,15 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
       originalItem,
       swapTitle,
       query: prompt.trim() || originalItem,
+      isPaused: isAutoPayPaused,
     });
 
     const newPool = Math.max(0, safePoolAmount - swapCost);
-    if (oldAmountSaved > 0) {
+    if (isAutoPayPaused) {
+      setSwapSuccessMessage(
+        `🎉 Smart Swap Accepted! Spent only ${formatINR(swapCost)} • Kept +${formatINR(savedDifference)} in your Safe Pool as an emergency cash buffer (Goal Jar sweeps paused for card bills) • Safe Pool: ${formatINR(newPool)}.`
+      );
+    } else if (oldAmountSaved > 0) {
       setSwapSuccessMessage(
         `🎉 Smart Swap Accepted! Spent only ${formatINR(swapCost)} • Replaced previous full-skip (${formatINR(oldAmountSaved)}) with +${formatINR(savedDifference)} swept into your ${activeGoal.title} Goal Jar (Net adjustment: ${netAdjustment >= 0 ? "+" : ""}${formatINR(netAdjustment)}) • Safe Pool: ${formatINR(newPool)}.`
       );
@@ -450,9 +462,52 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
                   <ArrowRightLeft className="w-3.5 h-3.5 text-emerald-600" />
                   <span>Smart Swap Recommendation</span>
                 </span>
-                <span className="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">
-                  Save +{formatINR(smartSwapResult.savedDifference)}
-                </span>
+                
+                {/* Top Badge Shift + One-Tap Info Tooltip (ⓘ) */}
+                {isAutoPayPaused ? (
+                  <div className="relative inline-flex items-center gap-1.5">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300 shadow-2xs">
+                      <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                      <span>+{formatINR(smartSwapResult.savedDifference)} Safe Pool Buffer</span>
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowBufferTooltip(!showBufferTooltip)}
+                      className="w-4 h-4 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 flex items-center justify-center text-[10px] font-bold transition-colors cursor-pointer border border-slate-200"
+                      title="Click to see why this stays in Safe Pool"
+                      aria-label="Safe Pool buffer info"
+                    >
+                      ⓘ
+                    </button>
+
+                    {showBufferTooltip && (
+                      <div className="absolute right-0 top-full mt-1.5 z-40 w-60 p-2.5 bg-slate-900 text-white rounded-xl shadow-xl text-[10px] leading-relaxed font-sans animate-fade-in border border-slate-700">
+                        <div className="flex items-start justify-between gap-1 mb-1">
+                          <span className="font-bold text-emerald-400 flex items-center gap-1">
+                            <ShieldCheck className="w-3 h-3" />
+                            <span>Safe Pool Buffer Active</span>
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setShowBufferTooltip(false)}
+                            className="text-slate-400 hover:text-white text-xs px-1"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                        <p className="text-slate-200">
+                          Goal Jar sweeps are paused due to upcoming credit card bills, so your {formatINR(smartSwapResult.savedDifference)} savings stays in your Safe Pool as a cash buffer.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200 shadow-2xs">
+                    <Target className="w-3 h-3 text-indigo-600" />
+                    <span>Save +{formatINR(smartSwapResult.savedDifference)}</span>
+                  </span>
+                )}
               </div>
 
               {/* Goal Delay Reality Check */}
@@ -594,13 +649,17 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
                   </div>
                   <div className="p-2 rounded-lg bg-emerald-50/80 border border-emerald-200 space-y-0.5">
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-semibold text-emerald-800">Swept to Goal Jar</span>
+                      <span className="text-[11px] font-semibold text-emerald-800">
+                        {isAutoPayPaused ? "Safe Pool Buffer" : "Swept to Goal Jar"}
+                      </span>
                       <span className="text-[11px] font-mono font-bold text-emerald-700">
                         +{formatINR(smartSwapResult.savedDifference)}
                       </span>
                     </div>
                     <p className="text-[10px] text-emerald-700/90 leading-snug">
-                      Immediately locked into your {activeGoal.title} Goal Jar so you can&apos;t accidentally spend it later.
+                      {isAutoPayPaused
+                        ? "Kept in your Safe Pool as an emergency cash buffer while Silent Risk Guard pauses Goal sweeps for card bills."
+                        : `Immediately locked into your ${activeGoal.title} Goal Jar so you can't accidentally spend it later.`}
                     </p>
                   </div>
                 </div>
@@ -612,8 +671,17 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
                 onClick={handleAcceptSmartSwap}
                 className="w-full py-2.5 px-3 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm flex items-center justify-center gap-1.5 transition-all active:scale-95"
               >
-                <Zap className="w-3.5 h-3.5 fill-white text-white" />
-                <span>{smartSwapResult.swapButtonText}</span>
+                {isAutoPayPaused ? (
+                  <>
+                    <ShieldCheck className="w-3.5 h-3.5 fill-white/20 text-white" />
+                    <span>Take the Swap • Keep {formatINR(smartSwapResult.savedDifference)} in Safe Pool</span>
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-3.5 h-3.5 fill-white text-white" />
+                    <span>{smartSwapResult.swapButtonText}</span>
+                  </>
+                )}
               </button>
 
               {/* "Explain Even Simpler (1 Sentence)" Quick-Toggle Button */}

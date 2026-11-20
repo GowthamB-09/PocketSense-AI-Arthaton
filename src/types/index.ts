@@ -75,7 +75,10 @@ export interface FinancialMemoryProfile {
     actionTaken: "skipped_and_saved" | "spent_anyway" | "negotiated_down";
     amountSaved?: number;
     targetGoalJarId?: string;
+    isSafePoolBuffer?: boolean;
   }>;
+  isAutoPayPaused?: boolean;
+  creditCardDues?: number;
 }
 
 export interface DailyBudgetAnalysis {
@@ -100,6 +103,8 @@ export interface DailyBudgetAnalysis {
   salaryCreditDay: number;
   isRealDate: boolean;
   nextPaydayLabel: string;
+  isAutoPayPaused: boolean;
+  creditCardDues: number;
 }
 
 export interface SmsParseResult {
