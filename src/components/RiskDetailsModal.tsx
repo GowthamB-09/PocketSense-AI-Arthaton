@@ -29,17 +29,18 @@ export const RiskDetailsModal: React.FC<RiskDetailsModalProps> = ({ isOpen, onCl
 
   if (!isOpen) return null;
 
-  const salary = profile.monthlySalary || 75000;
-  const cardDues = profile.creditCardDues ?? 17908;
+  const takeHomeSalary = profile.monthlySalary || 75000;
+  const upcomingCardDues = profile.creditCardDues ?? 17908;
   const bankCash = profile.totalLinkedBankCash ?? 48500;
-  const netSafePool = Math.max(0, bankCash - cardDues);
-  const threshold = Math.round(salary * 0.20); // 20% safety trigger threshold (₹15,000)
-  const pctOfSalary = Math.round((cardDues / salary) * 100);
-  const isTriggered = isAutoPayPaused || cardDues > threshold;
+  const netSafePool = Math.max(0, bankCash - upcomingCardDues);
+  const threshold = Math.round(takeHomeSalary * 0.20); // 20% safety trigger threshold (₹15,000)
+  const cardBillRatio = takeHomeSalary > 0 ? upcomingCardDues / takeHomeSalary : 0;
+  const cardBillPercent = Math.round(cardBillRatio * 100);
+  const isTriggered = cardBillRatio > 0.20;
 
   // Split between primary cards
-  const iciciDue = Math.round(cardDues * 0.56);
-  const hdfcDue = cardDues - iciciDue;
+  const iciciDue = Math.round(upcomingCardDues * 0.56);
+  const hdfcDue = upcomingCardDues - iciciDue;
 
   const handlePayCardBills = () => {
     payCardBills();
@@ -121,10 +122,10 @@ export const RiskDetailsModal: React.FC<RiskDetailsModalProps> = ({ isOpen, onCl
             <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-950 space-y-1">
               <div className="flex items-center gap-2 text-xs font-bold text-amber-900">
                 <ShieldAlert className="w-4 h-4 text-amber-700 shrink-0" />
-                <span>Multi-Card Bill Trap Detected ({pctOfSalary}% of Salary)</span>
+                <span>Multi-Card Bill Trap Detected ({cardBillPercent}% of Salary)</span>
               </div>
               <p className="text-xs text-amber-800/90 leading-relaxed">
-                Your credit card bills jumped to <strong>{formatINR(cardDues)} ({pctOfSalary}% of monthly salary)</strong>. Friday AutoPay sweep is paused so your bank balance stays safe until payday.
+                Your credit card bills jumped to <strong>₹{upcomingCardDues.toLocaleString('en-IN')} ({cardBillPercent}% of monthly salary)</strong>. Friday AutoPay sweep is paused so your bank balance stays safe until payday.
               </p>
             </div>
           ) : (
@@ -134,7 +135,7 @@ export const RiskDetailsModal: React.FC<RiskDetailsModalProps> = ({ isOpen, onCl
                 <span>All Clear • Safe Debt Pacing</span>
               </div>
               <p className="text-xs text-emerald-800/90 leading-relaxed">
-                Credit card dues ({formatINR(cardDues)}) are safely below the 20% limit ({formatINR(threshold)}). Automated Friday Goal Jar sweeps &amp; spare-change round-ups are fully active.
+                Credit card dues (₹{upcomingCardDues.toLocaleString('en-IN')}) are safely at or below the 20% limit ({formatINR(threshold)}). Automated Friday Goal Jar sweeps &amp; spare-change round-ups are fully active.
               </p>
             </div>
           )}
@@ -147,7 +148,7 @@ export const RiskDetailsModal: React.FC<RiskDetailsModalProps> = ({ isOpen, onCl
                 <span>Card Dues vs Salary Exposure</span>
               </span>
               <span className="font-mono text-slate-600 font-bold">
-                {formatINR(cardDues)} / {formatINR(salary)} ({pctOfSalary}%)
+                {formatINR(upcomingCardDues)} / {formatINR(takeHomeSalary)} ({cardBillPercent}%)
               </span>
             </div>
 
@@ -157,7 +158,7 @@ export const RiskDetailsModal: React.FC<RiskDetailsModalProps> = ({ isOpen, onCl
                 className={`h-full transition-all duration-500 ${
                   isTriggered ? "bg-amber-500" : "bg-emerald-500"
                 }`}
-                style={{ width: `${Math.min(100, Math.max(0, (cardDues / salary) * 100))}%` }}
+                style={{ width: `${Math.min(100, Math.max(0, (upcomingCardDues / takeHomeSalary) * 100))}%` }}
               />
               {/* 20% Threshold Marker Line */}
               <div
@@ -197,10 +198,10 @@ export const RiskDetailsModal: React.FC<RiskDetailsModalProps> = ({ isOpen, onCl
                   <span className="text-[10px] uppercase font-semibold">Upcoming Card Dues</span>
                 </div>
                 <span className="text-base font-bold text-blue-700 block">
-                  {cardDues > 0 ? `-${formatINR(cardDues)}` : formatINR(0)}
+                  {upcomingCardDues > 0 ? `-${formatINR(upcomingCardDues)}` : formatINR(0)}
                 </span>
                 <span className="text-[10px] text-slate-400 block mt-0.5">
-                  {cardDues > 0 ? "ICICI + HDFC Bills" : "All Bills Cleared ✓"}
+                  {upcomingCardDues > 0 ? "ICICI + HDFC Bills" : "All Bills Cleared ✓"}
                 </span>
               </div>
 
@@ -261,7 +262,7 @@ export const RiskDetailsModal: React.FC<RiskDetailsModalProps> = ({ isOpen, onCl
 
           {/* Action Section: Pay Card Bills Now */}
           <div className="pt-2">
-            {cardDues > 0 ? (
+            {upcomingCardDues > 0 ? (
               <div className="space-y-2.5">
                 <button
                   type="button"
@@ -269,10 +270,10 @@ export const RiskDetailsModal: React.FC<RiskDetailsModalProps> = ({ isOpen, onCl
                   className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md hover:shadow-lg transition-all active:scale-[0.98]"
                 >
                   <CreditCard className="w-4 h-4" />
-                  <span>Pay Card Bills Now (Deduct {formatINR(cardDues)} from Bank Cash)</span>
+                  <span>Pay Card Bills Now (Deduct {formatINR(upcomingCardDues)} from Bank Cash)</span>
                 </button>
                 <p className="text-[11px] text-slate-500 leading-relaxed text-center">
-                  Deducts {formatINR(cardDues)} from your linked bank cash ({formatINR(bankCash)} → {formatINR(Math.max(0, bankCash - cardDues))}) and resets card dues to ₹0. Your Net Safe Cash Pool ({formatINR(netSafePool)}) remains unchanged. Silent Risk Guard immediately untrigs and Friday AutoPay sweeps resume.
+                  Deducts {formatINR(upcomingCardDues)} from your linked bank cash ({formatINR(bankCash)} → {formatINR(Math.max(0, bankCash - upcomingCardDues))}) and resets card dues to ₹0. Your Net Safe Cash Pool ({formatINR(netSafePool)}) remains unchanged. Silent Risk Guard immediately untrigs and Friday AutoPay sweeps resume.
                 </p>
               </div>
             ) : (

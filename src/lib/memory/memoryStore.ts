@@ -175,6 +175,13 @@ export function calculateDailyBudgetAnalysis(
     comfortMessage = `You have ₹${safeDailySpend}/day safe to spend across the remaining ${daysRemaining} days until your next salary.`;
   }
 
+  // Silent Risk Guard: Dynamic 20% of Take-Home Salary threshold
+  const upcomingCardDues = profile.creditCardDues ?? 17908;
+  const takeHomeSalary = profile.monthlySalary || 75000;
+  const cardBillRatio = takeHomeSalary > 0 ? upcomingCardDues / takeHomeSalary : 0;
+  const cardBillPercent = Math.round(cardBillRatio * 100);
+  const isAutoPayPaused = cardBillRatio > 0.20;
+
   return {
     monthlySalary: profile.monthlySalary,
     fixedEssentials: profile.fixedEssentials,
@@ -197,12 +204,11 @@ export function calculateDailyBudgetAnalysis(
     salaryCreditDay: salaryDay,
     isRealDate,
     nextPaydayLabel: cycle.nextPaydayLabel,
-    isAutoPayPaused:
-      typeof profile.isAutoPayPaused === "boolean"
-        ? profile.isAutoPayPaused
-        : (profile.creditCardDues ?? 17908) > profile.monthlySalary * 0.2,
-    creditCardDues: profile.creditCardDues ?? 17908,
+    isAutoPayPaused,
+    creditCardDues: upcomingCardDues,
     totalLinkedBankCash: profile.totalLinkedBankCash ?? 48500,
+    cardBillRatio,
+    cardBillPercent,
   };
 }
 

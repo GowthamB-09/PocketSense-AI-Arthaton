@@ -19,11 +19,13 @@ import {
 interface DailySafeCardProps {
   onOpenBeforeIScan: () => void;
   onOpenSettings: () => void;
+  onOpenRiskDetails?: () => void;
 }
 
 export const DailySafeCard: React.FC<DailySafeCardProps> = ({
   onOpenBeforeIScan,
   onOpenSettings,
+  onOpenRiskDetails,
 }) => {
   const { analysis, profile } = useFinancialMemory();
 
@@ -152,16 +154,22 @@ export const DailySafeCard: React.FC<DailySafeCardProps> = ({
             <span className="text-[10px] text-slate-400 block mt-0.5">HDFC + SBI Checking</span>
           </div>
 
-          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+          <div
+            onClick={onOpenRiskDetails}
+            className={`p-3.5 rounded-xl bg-slate-50 border border-slate-200 transition-colors ${
+              onOpenRiskDetails ? "cursor-pointer hover:bg-slate-100/80 group" : ""
+            }`}
+            title="Click to view Silent Risk Guard card exposure & pay card bills"
+          >
             <div className="flex items-center gap-1.5 text-slate-500 mb-1">
-              <CreditCard className="w-3.5 h-3.5 text-blue-600" />
+              <CreditCard className="w-3.5 h-3.5 text-blue-600 group-hover:scale-105 transition-transform" />
               <span className="text-[10px] uppercase font-semibold">Upcoming Card Dues</span>
             </div>
             <span className="text-base font-bold text-blue-700">
               {estimatedCardBills > 0 ? `-${formatINR(estimatedCardBills)}` : formatINR(0)}
             </span>
             <span className="text-[10px] text-slate-400 block mt-0.5">
-              {estimatedCardBills > 0 ? "ICICI + HDFC Bills" : "All Bills Cleared ✓"}
+              {estimatedCardBills > 0 ? "ICICI + HDFC Bills →" : "All Bills Cleared ✓"}
             </span>
           </div>
 

@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 
 function DashboardContent() {
-  const { profile, analysis, isAutoPayPaused } = useFinancialMemory();
+  const { profile, analysis } = useFinancialMemory();
   const [activeSpace, setActiveSpace] = useState<SolutionSpace>("daily-safe");
   const [isBeforeIScanOpen, setIsBeforeIScanOpen] = useState(false);
   const [isSmsParserOpen, setIsSmsParserOpen] = useState(false);
@@ -37,9 +37,12 @@ function DashboardContent() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isRiskModalOpen, setIsRiskModalOpen] = useState(false);
 
-  const cardDues = profile.creditCardDues ?? 17908;
-  const salary = profile.monthlySalary || 75000;
-  const pctOfSalary = Math.round((cardDues / salary) * 100);
+  // Dynamic 20% Threshold Calculation
+  const upcomingCardDues = profile.creditCardDues ?? 17908;
+  const takeHomeSalary = profile.monthlySalary || 75000;
+  const cardBillRatio = takeHomeSalary > 0 ? upcomingCardDues / takeHomeSalary : 0;
+  const cardBillPercent = Math.round(cardBillRatio * 100);
+  const isAutoPayPaused = cardBillRatio > 0.20;
 
   return (
     <div className="min-h-screen fintech-mesh-bg text-slate-900 flex flex-col selection:bg-emerald-100 selection:text-emerald-900">
@@ -80,7 +83,7 @@ function DashboardContent() {
                       </span>
                     </div>
                     <p className="text-xs text-slate-500 mt-0.5">
-                      Your credit card bills jumped to <strong>{formatINR(cardDues)} ({pctOfSalary}% of monthly salary)</strong>. Friday AutoPay sweep is paused so your bank balance stays safe until payday.
+                      Your credit card bills jumped to <strong>₹{upcomingCardDues.toLocaleString('en-IN')} ({cardBillPercent}% of monthly salary)</strong>. Friday AutoPay sweep is paused so your bank balance stays safe until payday.
                     </p>
                   </div>
                 </div>
@@ -110,7 +113,7 @@ function DashboardContent() {
                       </span>
                     </div>
                     <p className="text-xs text-emerald-800/80 mt-0.5">
-                      Credit card dues ({formatINR(cardDues)}) are safely under 20% of salary. Weekly Friday Goal Jar sweeps &amp; spare-change round-ups are running smoothly.
+                      Credit card dues (₹{upcomingCardDues.toLocaleString('en-IN')}) are safely at or below 20% of salary ({cardBillPercent}%). Weekly Friday Goal Jar sweeps &amp; spare-change round-ups are running smoothly.
                     </p>
                   </div>
                 </div>
@@ -135,6 +138,7 @@ function DashboardContent() {
                 <DailySafeCard
                   onOpenBeforeIScan={() => setActiveSpace("before-i-scan")}
                   onOpenSettings={() => setIsSettingsOpen(true)}
+                  onOpenRiskDetails={() => setIsRiskModalOpen(true)}
                 />
               </div>
               <div className="lg:col-span-5">

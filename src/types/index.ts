@@ -107,6 +107,8 @@ export interface DailyBudgetAnalysis {
   isAutoPayPaused: boolean;
   creditCardDues: number;
   totalLinkedBankCash: number;
+  cardBillRatio: number;
+  cardBillPercent: number;
 }
 
 export interface SmsParseResult {

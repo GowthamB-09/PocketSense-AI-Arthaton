@@ -197,10 +197,12 @@ export function FinancialMemoryProvider({ children }: { children: React.ReactNod
     });
   };
 
-  const isAutoPayPaused =
-    typeof profile.isAutoPayPaused === "boolean"
-      ? profile.isAutoPayPaused
-      : (profile.creditCardDues ?? 17908) > (profile.monthlySalary || 75000) * 0.2;
+  // Dynamic 20% Threshold Calculation: isAutoPayPaused derived strictly from cardBillRatio > 0.20
+  const upcomingCardDues = profile.creditCardDues ?? 17908;
+  const takeHomeSalary = profile.monthlySalary || 75000;
+  const cardBillRatio = takeHomeSalary > 0 ? upcomingCardDues / takeHomeSalary : 0;
+  const cardBillPercent = Math.round(cardBillRatio * 100);
+  const isAutoPayPaused = cardBillRatio > 0.20;
 
   const toggleAutoPayPause = (val?: boolean) => {
     setProfile((prev) => ({
@@ -219,7 +221,7 @@ export function FinancialMemoryProvider({ children }: { children: React.ReactNod
         ...prev,
         totalLinkedBankCash: newBankCash,
         creditCardDues: 0,
-        isAutoPayPaused: false, // Immediately untriggers Silent Risk Guard and resumes sweeps
+        isAutoPayPaused: false, // 0 / salary = 0 <= 0.20 immediately untrigs
       };
     });
   };
@@ -227,7 +229,7 @@ export function FinancialMemoryProvider({ children }: { children: React.ReactNod
   const updateCreditCardDues = (newDues: number, newBankCash?: number) => {
     setProfile((prev) => {
       const salary = prev.monthlySalary || 75000;
-      const isPaused = newDues > salary * 0.2;
+      const isPaused = (newDues / salary) > 0.20;
       return {
         ...prev,
         creditCardDues: Math.max(0, newDues),
