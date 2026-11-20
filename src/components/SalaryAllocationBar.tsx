@@ -3,14 +3,14 @@
 import React, { useState } from "react";
 import { useFinancialMemory } from "@/lib/memory/memoryContext";
 import { formatINR } from "@/lib/utils";
-import { Wallet, Info, Sparkles, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Wallet } from "lucide-react";
 
 interface SalaryAllocationBarProps {
   onOpenSettings?: () => void;
 }
 
 export const SalaryAllocationBar: React.FC<SalaryAllocationBarProps> = ({ onOpenSettings }) => {
-  const { profile, analysis } = useFinancialMemory();
+  const { profile } = useFinancialMemory();
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
 
   const takeHomeSalary = Math.max(1, profile.monthlySalary || 75000);
@@ -33,7 +33,7 @@ export const SalaryAllocationBar: React.FC<SalaryAllocationBarProps> = ({ onOpen
   const spentWidthPct = spentRatio * 100;
   const safeWidthPct = safeRatio * 100;
 
-  // Formatted percentages for legend
+  // Formatted percentages for tooltip
   const fixedPercent = Math.round((fixedBills / takeHomeSalary) * 100);
   const spentPercent = Math.round((spentThisMonth / takeHomeSalary) * 100);
   const safePercent = Math.max(0, Math.round((totalSafePool / takeHomeSalary) * 100));
@@ -41,7 +41,7 @@ export const SalaryAllocationBar: React.FC<SalaryAllocationBarProps> = ({ onOpen
   const isOverspent = totalSafePool <= 0;
 
   return (
-    <div className="fintech-card rounded-2xl p-5 sm:p-6 bg-white border border-slate-200 shadow-sm space-y-5 transition-all">
+    <div className="fintech-card rounded-2xl p-5 sm:p-6 bg-white border border-slate-200 shadow-sm space-y-4 transition-all">
       {/* 1. Card Header (Total Salary) */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1 border-b border-slate-100">
         <div className="flex items-center gap-3">
@@ -73,8 +73,39 @@ export const SalaryAllocationBar: React.FC<SalaryAllocationBarProps> = ({ onOpen
         </div>
       </div>
 
-      {/* 2. Horizontal 3-Segment Stacked Progress Bar */}
-      <div className="space-y-1.5">
+      {/* 2. Category Labels Directly Above Each Segment of the Bar */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-xs font-semibold px-1 text-slate-700 flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={onOpenSettings}
+            className={`flex items-center gap-1.5 transition-colors text-left ${
+              onOpenSettings ? "cursor-pointer hover:text-indigo-600 focus:outline-hidden" : ""
+            }`}
+            title="Fixed Bills & SIPs (Rent, SIPs & Utilities) - Click to adjust"
+          >
+            <span className="w-2.5 h-2.5 rounded-full bg-[#4F46E5] shrink-0" />
+            <span>Fixed Bills &amp; SIPs</span>
+          </button>
+
+          <div
+            className="flex items-center gap-1.5 text-slate-700"
+            title="Spent This Month (Discretionary Spends)"
+          >
+            <span className="w-2.5 h-2.5 rounded-full bg-[#F59E0B] shrink-0" />
+            <span>Spent This Month</span>
+          </div>
+
+          <div
+            className="flex items-center gap-1.5"
+            title="Total Safe Pool (Remaining Safe Cash)"
+          >
+            <span className="w-2.5 h-2.5 rounded-full bg-[#10B981] shrink-0 animate-pulse" />
+            <span className="text-emerald-700 font-bold">Total Safe Pool</span>
+          </div>
+        </div>
+
+        {/* Horizontal 3-Segment Stacked Progress Bar */}
         <div className="relative">
           <div
             className="w-full h-7 sm:h-8 rounded-full bg-slate-100 border border-slate-200/80 p-0.5 flex overflow-hidden shadow-inner select-none relative"
@@ -94,7 +125,7 @@ export const SalaryAllocationBar: React.FC<SalaryAllocationBarProps> = ({ onOpen
                 className="h-full bg-[#4F46E5] hover:bg-[#4338CA] transition-all duration-500 ease-out flex items-center justify-center relative cursor-pointer group rounded-l-full overflow-hidden"
                 title={`Fixed Bills & SIPs: ${formatINR(fixedBills)} (${fixedPercent}%)`}
               >
-                {fixedWidthPct >= 14 && (
+                {fixedWidthPct >= 12 && (
                   <span className="text-[11px] font-mono font-bold text-white px-2 truncate drop-shadow-xs">
                     {formatINR(fixedBills)}
                   </span>
@@ -112,7 +143,7 @@ export const SalaryAllocationBar: React.FC<SalaryAllocationBarProps> = ({ onOpen
                 className="h-full bg-[#F59E0B] hover:bg-[#D97706] transition-all duration-500 ease-out flex items-center justify-center relative cursor-pointer group overflow-hidden"
                 title={`Spent This Month: ${formatINR(spentThisMonth)} (${spentPercent}%)`}
               >
-                {spentWidthPct >= 14 && (
+                {spentWidthPct >= 12 && (
                   <span className="text-[11px] font-mono font-bold text-white px-2 truncate drop-shadow-xs">
                     {formatINR(spentThisMonth)}
                   </span>
@@ -130,7 +161,7 @@ export const SalaryAllocationBar: React.FC<SalaryAllocationBarProps> = ({ onOpen
                 className="h-full bg-[#10B981] hover:bg-[#059669] transition-all duration-500 ease-out flex items-center justify-center relative cursor-pointer group rounded-r-full overflow-hidden"
                 title={`Total Safe Pool: ${formatINR(totalSafePool)} (${safePercent}%)`}
               >
-                {safeWidthPct >= 14 && (
+                {safeWidthPct >= 12 && (
                   <span className="text-[11px] font-mono font-bold text-white px-2 truncate drop-shadow-xs">
                     {formatINR(totalSafePool)}
                   </span>
@@ -173,82 +204,6 @@ export const SalaryAllocationBar: React.FC<SalaryAllocationBarProps> = ({ onOpen
               )}
             </div>
           )}
-        </div>
-      </div>
-
-      {/* 3. 3-Column Legend & Amount Row Below the Bar */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 pt-1">
-        {/* Column 1: Fixed Bills & SIPs */}
-        <div
-          onClick={onOpenSettings}
-          className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200/80 hover:bg-slate-100/70 transition-colors cursor-pointer group"
-          title="Click to adjust rent and fixed bills"
-        >
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#4F46E5] shrink-0 group-hover:scale-110 transition-transform" />
-            <div className="min-w-0">
-              <span className="text-xs text-slate-700 font-semibold block truncate">
-                Fixed Bills &amp; SIPs
-              </span>
-              <span className="text-[10px] text-slate-400 block truncate">
-                Rent, SIPs &amp; Utilities
-              </span>
-            </div>
-          </div>
-          <div className="font-mono text-right shrink-0 ml-2">
-            <span className="text-xs sm:text-sm font-bold text-slate-900 block">
-              {formatINR(fixedBills)}
-            </span>
-            <span className="text-[10px] text-slate-500 font-medium">
-              ({fixedPercent}%)
-            </span>
-          </div>
-        </div>
-
-        {/* Column 2: Spent This Month */}
-        <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200/80">
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#F59E0B] shrink-0" />
-            <div className="min-w-0">
-              <span className="text-xs text-slate-700 font-semibold block truncate">
-                Spent This Month
-              </span>
-              <span className="text-[10px] text-slate-400 block truncate">
-                Discretionary Spends
-              </span>
-            </div>
-          </div>
-          <div className="font-mono text-right shrink-0 ml-2">
-            <span className="text-xs sm:text-sm font-bold text-slate-900 block">
-              {formatINR(spentThisMonth)}
-            </span>
-            <span className="text-[10px] text-slate-500 font-medium">
-              ({spentPercent}%)
-            </span>
-          </div>
-        </div>
-
-        {/* Column 3: Total Safe Pool (Highlighted in Emerald Green) */}
-        <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-50/80 border border-emerald-200 shadow-2xs">
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#10B981] shrink-0 animate-pulse" />
-            <div className="min-w-0">
-              <span className="text-xs text-emerald-900 font-bold block truncate">
-                Total Safe Pool
-              </span>
-              <span className="text-[10px] text-emerald-700 font-medium block truncate">
-                Remaining Safe Cash
-              </span>
-            </div>
-          </div>
-          <div className="font-mono text-right shrink-0 ml-2">
-            <span className="text-xs sm:text-sm font-black text-emerald-700 block">
-              {formatINR(totalSafePool)}
-            </span>
-            <span className="text-[10px] text-emerald-700 font-bold">
-              ({safePercent}%)
-            </span>
-          </div>
         </div>
       </div>
     </div>
