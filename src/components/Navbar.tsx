@@ -48,7 +48,10 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const totalLinkedBankCash = profile.totalLinkedBankCash ?? 48500;
   const upcomingCardDues = profile.creditCardDues ?? 17908;
-  const totalSafePool = Math.max(0, totalLinkedBankCash - upcomingCardDues);
+  const ringFencedEventsAmount = (profile.calendarEvents || [])
+    .filter((e) => e.isPreLocked && !e.isPaid && e.category !== "autopay")
+    .reduce((sum, e) => sum + (e.budget || 0), 0);
+  const totalSafePool = Math.max(0, totalLinkedBankCash - upcomingCardDues - ringFencedEventsAmount);
   const isSafePoolEmpty = totalSafePool <= 0;
   const isBelowCardDues = totalSafePool <= upcomingCardDues;
 
@@ -193,7 +196,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
     updateCreditCardDues(newCardDues, newBankCash);
 
-    const newSafePool = Math.max(0, newBankCash - newCardDues);
+    const newSafePool = Math.max(0, newBankCash - newCardDues - ringFencedEventsAmount);
 
     if (newSafePool <= 0) {
       setSyncAlert("Safe Pool reached ₹0! Click ‘Reset Demo’ to test again.");

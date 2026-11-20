@@ -18,9 +18,14 @@ export const SalaryAllocationBar: React.FC<SalaryAllocationBarProps> = ({ onOpen
   const totalLinkedBankCash = profile.totalLinkedBankCash ?? 48500;
   const upcomingCardDues = profile.creditCardDues ?? 17908;
 
+  // Ring-Fenced Event Shield (Auto-Pre-Lock):
+  const ringFencedEventsAmount = (profile.calendarEvents || [])
+    .filter((e) => e.isPreLocked && !e.isPaid && e.category !== "autopay")
+    .reduce((sum, e) => sum + (e.budget || 0), 0);
+
   // 3. Derive totalSafePool and spentThisMonth Automatically:
   // Guarantees: Fixed Bills (₹32,000) + Spent This Month + Total Safe Pool = Take-Home Salary (₹75,000)
-  const totalSafePool = Math.max(0, totalLinkedBankCash - upcomingCardDues);
+  const totalSafePool = Math.max(0, totalLinkedBankCash - upcomingCardDues - ringFencedEventsAmount);
   const maxSpendableBudget = Math.max(0, takeHomeSalary - fixedBills);
   const spentThisMonth = Math.min(maxSpendableBudget, Math.max(0, maxSpendableBudget - totalSafePool));
 

@@ -8,6 +8,7 @@ import {
 import {
   INITIAL_GOAL_JARS,
   INITIAL_SPENDING_TRAPS,
+  INITIAL_CALENDAR_EVENTS,
   SYNTHETIC_DEMO_PROFILE,
   SYNTHETIC_TRANSACTIONS,
 } from "../demo/syntheticStudentData";
@@ -122,9 +123,15 @@ export function calculateDailyBudgetAnalysis(
   const totalLinkedBankCash = profile.totalLinkedBankCash ?? 48500;
   const upcomingCardDues = profile.creditCardDues ?? 17908;
 
+  // Ring-Fenced Event Shield (Auto-Pre-Lock):
+  // Sum of all active (unpaid) pre-locked personal calendar events (excluding autopay which is in card dues)
+  const ringFencedEventsAmount = (profile.calendarEvents || [])
+    .filter((e) => e.isPreLocked && !e.isPaid && e.category !== "autopay")
+    .reduce((sum, e) => sum + (e.budget || 0), 0);
+
   // 3. Derive totalSafePool and spentThisMonth Automatically:
-  // Guarantees: Fixed Bills + Spent This Month + Total Safe Pool = Take-Home Salary (₹75,000)
-  const totalSafePool = Math.max(0, totalLinkedBankCash - upcomingCardDues);
+  // NET SAFE CASH POOL (Total Linked Bank Cash − Upcoming Card Dues − Ring-Fenced Calendar Events)
+  const totalSafePool = Math.max(0, totalLinkedBankCash - upcomingCardDues - ringFencedEventsAmount);
   const remainingMonthlyPool = totalSafePool;
   const spentThisMonth = Math.min(maxSpendableBudget, Math.max(0, maxSpendableBudget - totalSafePool));
   const discretionarySpentSoFar = spentThisMonth;
@@ -315,6 +322,11 @@ export function getStoredProfile(): FinancialMemoryProfile {
       // Ensure goals array is valid; only initialize with demo goals if never set
       if (!Array.isArray(parsed.goals)) {
         parsed.goals = INITIAL_GOAL_JARS;
+      }
+
+      // Ensure calendarEvents array is valid
+      if (!Array.isArray(parsed.calendarEvents)) {
+        parsed.calendarEvents = INITIAL_CALENDAR_EVENTS;
       }
 
       // Deduplicate impulse decisions on load & clean up duplicates

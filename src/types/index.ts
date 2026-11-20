@@ -80,6 +80,21 @@ export interface FinancialMemoryProfile {
   isAutoPayPaused?: boolean;
   creditCardDues?: number;
   totalLinkedBankCash?: number;
+  calendarEvents?: CalendarEvent[];
+}
+
+export type CalendarEventCategory = "birthday" | "wedding" | "party" | "autopay";
+
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  date: string; // ISO format "YYYY-MM-DD" e.g. "2026-11-26"
+  budget: number;
+  category: CalendarEventCategory;
+  isPreLocked: boolean; // Pre-Lock from Safe Pool (Ring-Fenced Event Shield)
+  isPaid?: boolean; // Mark Paid / Done
+  notes?: string;
+  collisionWarning?: string;
 }
 
 export interface DailyBudgetAnalysis {

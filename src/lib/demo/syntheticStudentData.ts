@@ -1,4 +1,48 @@
-import { FinancialMemoryProfile, GoalJar, SpendingTrap, Transaction } from "@/types";
+import { FinancialMemoryProfile, GoalJar, SpendingTrap, Transaction, CalendarEvent } from "@/types";
+
+export const INITIAL_CALENDAR_EVENTS: CalendarEvent[] = [
+  {
+    id: "evt_icici_autopay",
+    title: "ICICI Card AutoPay Due",
+    date: "2026-11-24",
+    budget: 9800,
+    category: "autopay",
+    isPreLocked: false,
+    isPaid: false,
+    notes: "Auto-debit from ICICI Salary A/c",
+  },
+  {
+    id: "evt_aarav_bday",
+    title: "Aarav's Birthday Gift",
+    date: "2026-11-26",
+    budget: 2500,
+    category: "birthday",
+    isPreLocked: true, // Ring-Fenced Event Shield (Auto-Pre-Lock ON)
+    isPaid: false,
+    notes: "Friend's birthday gift & dinner celebration",
+    collisionWarning: "Heads up: HDFC Card AutoPay bill is due 1 day after this event—keep reserved.",
+  },
+  {
+    id: "evt_hdfc_autopay",
+    title: "HDFC Card AutoPay Due",
+    date: "2026-11-27",
+    budget: 8108,
+    category: "autopay",
+    isPreLocked: false,
+    isPaid: false,
+    notes: "Auto-debit from HDFC Primary A/c",
+  },
+  {
+    id: "evt_payday",
+    title: "Salary Credited (Payday 🎉)",
+    date: "2026-11-30",
+    budget: 75000,
+    category: "autopay",
+    isPreLocked: false,
+    isPaid: false,
+    notes: "Monthly paycheck credited (₹75,000)",
+  },
+];
 
 export const INITIAL_GOAL_JARS: GoalJar[] = [
   {
@@ -291,6 +335,7 @@ export const SYNTHETIC_DEMO_PROFILE: FinancialMemoryProfile = {
   isAutoPayPaused: true,
   creditCardDues: 17908,
   totalLinkedBankCash: 48500,
+  calendarEvents: INITIAL_CALENDAR_EVENTS,
   vulnerabilityZones: [
     "Friday & Saturday night bistro/craft beer tabs exceeding ₹2,500",
     "Daily ₹420 third-wave coffee habits",

@@ -6,6 +6,7 @@ import {
   FinancialMemoryProfile,
   GoalJar,
   Transaction,
+  CalendarEvent,
 } from "@/types";
 import {
   calculateDailyBudgetAnalysis,
@@ -56,6 +57,11 @@ interface FinancialMemoryContextType {
   addGoalJar: (goal: Omit<GoalJar, "id" | "totalSavedFromNudges">) => void;
   updateGoalJar: (goal: GoalJar) => void;
   deleteGoalJar: (id: string) => void;
+  addCalendarEvent: (event: Omit<CalendarEvent, "id">) => void;
+  updateCalendarEvent: (id: string, updates: Partial<CalendarEvent>) => void;
+  deleteCalendarEvent: (id: string) => void;
+  togglePreLock: (id: string) => void;
+  markEventPaid: (id: string) => void;
   getAiPromptContext: () => string;
 }
 
@@ -417,6 +423,64 @@ export function FinancialMemoryProvider({ children }: { children: React.ReactNod
     });
   };
 
+  const addCalendarEvent = (eventData: Omit<CalendarEvent, "id">) => {
+    const newEvent: CalendarEvent = {
+      ...eventData,
+      id: "evt_" + Date.now(),
+    };
+    setProfile((prev) => {
+      const existing = Array.isArray(prev.calendarEvents) ? prev.calendarEvents : [];
+      const updatedEvents = [...existing, newEvent];
+      const updatedProfile = { ...prev, calendarEvents: updatedEvents };
+      saveProfile(updatedProfile);
+      return updatedProfile;
+    });
+  };
+
+  const updateCalendarEvent = (id: string, updates: Partial<CalendarEvent>) => {
+    setProfile((prev) => {
+      const existing = Array.isArray(prev.calendarEvents) ? prev.calendarEvents : [];
+      const updatedEvents = existing.map((evt) => (evt.id === id ? { ...evt, ...updates } : evt));
+      const updatedProfile = { ...prev, calendarEvents: updatedEvents };
+      saveProfile(updatedProfile);
+      return updatedProfile;
+    });
+  };
+
+  const deleteCalendarEvent = (id: string) => {
+    setProfile((prev) => {
+      const existing = Array.isArray(prev.calendarEvents) ? prev.calendarEvents : [];
+      const updatedEvents = existing.filter((evt) => evt.id !== id);
+      const updatedProfile = { ...prev, calendarEvents: updatedEvents };
+      saveProfile(updatedProfile);
+      return updatedProfile;
+    });
+  };
+
+  const togglePreLock = (id: string) => {
+    setProfile((prev) => {
+      const existing = Array.isArray(prev.calendarEvents) ? prev.calendarEvents : [];
+      const updatedEvents = existing.map((evt) =>
+        evt.id === id ? { ...evt, isPreLocked: !evt.isPreLocked } : evt
+      );
+      const updatedProfile = { ...prev, calendarEvents: updatedEvents };
+      saveProfile(updatedProfile);
+      return updatedProfile;
+    });
+  };
+
+  const markEventPaid = (id: string) => {
+    setProfile((prev) => {
+      const existing = Array.isArray(prev.calendarEvents) ? prev.calendarEvents : [];
+      const updatedEvents = existing.map((evt) =>
+        evt.id === id ? { ...evt, isPaid: true, isPreLocked: false } : evt
+      );
+      const updatedProfile = { ...prev, calendarEvents: updatedEvents };
+      saveProfile(updatedProfile);
+      return updatedProfile;
+    });
+  };
+
   const getAiPromptContext = (): string => {
     const { dailySafeToSpend, remainingMonthlyPool, daysRemaining, projectedRunOutDay, statusLevel } = analysis;
     const goalsSummary = profile.goals
@@ -478,6 +542,11 @@ ${profile.vulnerabilityZones.map((z) => `- ${z}`).join("\n")}
         addGoalJar,
         updateGoalJar,
         deleteGoalJar,
+        addCalendarEvent,
+        updateCalendarEvent,
+        deleteCalendarEvent,
+        togglePreLock,
+        markEventPaid,
         getAiPromptContext,
       }}
     >

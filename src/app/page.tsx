@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { FinancialMemoryProvider, useFinancialMemory } from "@/lib/memory/memoryContext";
 import { Navbar } from "@/components/Navbar";
-import { DailySafeCard } from "@/components/DailySafeCard";
+import { SmartCashFlowCalendar } from "@/components/SmartCashFlowCalendar";
 import { GoalJarsSection } from "@/components/GoalJarsSection";
 import { BeforeIScanModal } from "@/components/BeforeIScanModal";
 import { SmsParserDrawer } from "@/components/SmsParserDrawer";
@@ -131,8 +131,8 @@ function DashboardContent() {
             {/* Salary Allocation & Safe Pool Breakdown Bar Card */}
             <SalaryAllocationBar onOpenSettings={() => setIsSettingsOpen(true)} />
 
-            {/* Main Safe Pool Card */}
-            <DailySafeCard
+            {/* Interactive Smart Cash-Flow & Event Calendar (November 2026) */}
+            <SmartCashFlowCalendar
               onOpenBeforeIScan={() => setActiveSpace("before-i-scan")}
               onOpenSettings={() => setIsSettingsOpen(true)}
               onOpenRiskDetails={() => setIsRiskModalOpen(true)}
