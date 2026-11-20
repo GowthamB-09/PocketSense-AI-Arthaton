@@ -67,11 +67,11 @@ function DashboardContent() {
                       Silent Risk Guard: Multi-Card Bill Trap Detected
                     </span>
                     <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 font-semibold">
-                      Auto-Paused AutoPay Sweep
+                      Paused autopay sweep
                     </span>
                   </div>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Your ICICI + HDFC credit card bills hit <strong>₹18,500 (65% of monthly salary)</strong>. Friday AutoPay sweep is paused so your bank balance stays safe until payday.
+                    Your credit card bills jumped to <strong>₹17,908 (24% of monthly salary)</strong>. Friday AutoPay sweep is paused so your bank balance stays safe until payday.
                   </p>
                 </div>
               </div>
