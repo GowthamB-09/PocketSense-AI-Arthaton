@@ -27,9 +27,21 @@ import {
   ChevronDown,
   ChevronUp,
   MessageSquare,
+  MapPin,
+  ExternalLink,
+  Star,
+  Tv,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { GooglePlacesStatusBadge } from "@/components/GooglePlacesStatusBadge";
+import {
+  PlaceSwapItem,
+  fetchNearbyBudgetPlaces,
+  getUserCoordinates,
+  CURATED_BUDGET_RESTAURANTS,
+  buildGoogleMapsUrl,
+  FALLBACK_MAPS_NEARBY_URL,
+} from "@/lib/maps/placesService";
 
 interface BeforeIScanSpaceProps {
   onSwitchToGoals?: () => void;
@@ -47,6 +59,11 @@ interface SmartSwapData {
   savedDifference: number;
   swapButtonText: string;
   simplerText?: string;
+  isFoodOrHangout?: boolean;
+  isEntertainment?: boolean;
+  primaryPlace?: PlaceSwapItem;
+  runnerUpPlaces?: PlaceSwapItem[];
+  isLivePlaces?: boolean;
 }
 
 export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
@@ -104,9 +121,9 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
     // 1. Ensure origCost is numeric and positive
     const origCost = parsedAmount > 0 ? parsedAmount : 1500;
 
-    const isFood = /food|dinner|drinks|beer|burger|swiggy|zomato/i.test(text);
+    const isFood = /food|dinner|eat out|dining|restaurant|cafe|coffee|drinks|beer|burger|swiggy|zomato|hangout|party|craving|biryani|pizza/i.test(text);
     const isSneakers = /sneaker|shoes|kicks|apparel|shirt|zara/i.test(text);
-    const isEntertainment = /concert|movie|outing|show|theatre|ticket/i.test(text);
+    const isEntertainment = /concert|movie|outing|show|theatre|theater|ticket|pvr|inox|film|watch movie/i.test(text);
     const isWatch = /watch|mechanical|tissot|timepiece|horology/i.test(text) || origCost === 14990;
 
     // 2. Proportional Goal Delay Reality Check based on user's daily savings rate (~₹140/day)
@@ -117,24 +134,46 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
     // 3. Dynamic Swap Calculation: ensure swapCost is always strictly less than origCost
     let swapCost: number;
     let swapTitle: string;
-    let baseSwapDesc: string;
-    let baseSimplerDesc: string;
+    let swapDescription: string;
+    let simplerText: string;
+    let primaryPlace: PlaceSwapItem | undefined;
+    let runnerUpPlaces: PlaceSwapItem[] | undefined;
 
     if (isWatch) {
       swapCost = origCost === 14990 ? 5247 : Math.round(origCost * 0.35);
       swapTitle = "Seiko/Citizen Automatic Alternative";
-      baseSwapDesc = `Swap to a ${formatINR(swapCost)} curated automatic mechanical alternative—same timeless horology, `;
-      baseSimplerDesc = `Spend ${formatINR(swapCost)} instead of ${formatINR(origCost)}—same classic mechanical look and save `;
+      const savedDiff = Math.max(0, origCost - swapCost);
+      swapDescription = `Swap to a ${formatINR(swapCost)} curated automatic mechanical alternative—same timeless horology, ${formatINR(savedDiff)} cheaper.`;
+      simplerText = `Spend ${formatINR(swapCost)} instead of ${formatINR(origCost)}—same classic mechanical look and save ${formatINR(savedDiff)} for your ${activeGoal.title}.`;
     } else if (isFood) {
-      if (origCost === 1500) {
-        swapCost = 550;
+      // Pick top budget restaurants whose average cost for one (~₹250 - ₹400) is strictly lower than originalPrice
+      const candidates = CURATED_BUDGET_RESTAURANTS.map((spot) => {
+        let cost = spot.estimatedCost;
+        if (origCost <= 400) {
+          cost = Math.min(cost, Math.max(100, Math.round(origCost * 0.45)));
+        } else if (cost >= origCost) {
+          cost = Math.max(150, Math.round(origCost * 0.40));
+        }
+        return { ...spot, estimatedCost: cost };
+      });
+      primaryPlace = candidates[0];
+      runnerUpPlaces = candidates.slice(1, 3);
+      swapCost = primaryPlace.estimatedCost;
+      swapTitle = primaryPlace.displayName;
+      const savedDiff = Math.max(0, origCost - swapCost);
+      swapDescription = `Skip the ${formatINR(origCost)} splurge—grab a meal at ${primaryPlace.displayName} (${primaryPlace.rating}★ on Google, ~${formatINR(primaryPlace.estimatedCost)} for one) instead. Same great food, +${formatINR(savedDiff)} swept straight into your ${activeGoal.title} jar.`;
+      simplerText = `Dine at ${primaryPlace.displayName} (${primaryPlace.rating}★) for ~${formatINR(primaryPlace.estimatedCost)} instead of ${formatINR(origCost)}—have equal fun while saving ${formatINR(savedDiff)} for your ${activeGoal.title}.`;
+    } else if (isEntertainment) {
+      // High-Value Digital Swap (Netflix 1-Month Plan)
+      if (origCost > 250) {
+        swapCost = 199;
       } else {
-        const raw = Math.round((origCost * 0.40) / 50) * 50;
-        swapCost = Math.min(Math.max(50, raw), Math.max(50, origCost - 50));
+        swapCost = Math.min(199, Math.max(50, Math.round((origCost * 0.45) / 10) * 10));
       }
-      swapTitle = "Local Spot or Cozy House Hangout";
-      baseSwapDesc = `Swap to a ${formatINR(swapCost)} local spot or house hangout—same great night, `;
-      baseSimplerDesc = `Spend ${formatINR(swapCost)} instead of ${formatINR(origCost)} tonight—you have equal fun and save `;
+      swapTitle = "1-Month Netflix Mobile Plan";
+      const savedDiff = Math.max(0, origCost - swapCost);
+      swapDescription = `Skip the single ${formatINR(origCost)} ticket—grab a 1-month Netflix plan for ${formatINR(swapCost)}, watch 4 new releases this week + unlimited shows all month, and sweep +${formatINR(savedDiff)} to your ${activeGoal.title} jar.`;
+      simplerText = `Spend ${formatINR(swapCost)} for a 1-month Netflix plan instead of one ${formatINR(origCost)} movie ticket, and save ${formatINR(savedDiff)} for your ${activeGoal.title}.`;
     } else if (isSneakers) {
       if (origCost === 4500) {
         swapCost = 650;
@@ -143,31 +182,21 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
         swapCost = Math.min(Math.max(50, raw), Math.max(50, origCost - 50));
       }
       swapTitle = "Premium Restoration & Deep-Clean Kit";
-      baseSwapDesc = `Swap to a ${formatINR(swapCost)} restoration kit or curated alternative—same fresh look, `;
-      baseSimplerDesc = `Spend ${formatINR(swapCost)} instead of ${formatINR(origCost)}—same fresh style and save `;
-    } else if (isEntertainment) {
-      if (origCost === 2200) {
-        swapCost = 700;
-      } else {
-        const raw = Math.round((origCost * 0.40) / 50) * 50;
-        swapCost = Math.min(Math.max(50, raw), Math.max(50, origCost - 50));
-      }
-      swapTitle = "Twilight Matinee & BYO Snacks";
-      baseSwapDesc = `Swap to a ${formatINR(swapCost)} twilight screening with friends + bring your own snacks—same great vibe, `;
-      baseSimplerDesc = `Catch the alternative for ${formatINR(swapCost)} instead of ${formatINR(origCost)}—same movie fun and save `;
+      const savedDiff = Math.max(0, origCost - swapCost);
+      swapDescription = `Swap to a ${formatINR(swapCost)} restoration kit or curated alternative—same fresh look, ${formatINR(savedDiff)} cheaper.`;
+      simplerText = `Spend ${formatINR(swapCost)} instead of ${formatINR(origCost)}—same fresh style and save ${formatINR(savedDiff)} for your ${activeGoal.title}.`;
     } else {
       const raw = Math.round((origCost * 0.40) / 50) * 50;
       swapCost = Math.min(Math.max(50, raw), Math.max(50, origCost - 50));
       swapTitle = "Curated Feel-Good Alternative";
-      baseSwapDesc = `Swap to a quality curated alternative for ${formatINR(swapCost)}—enjoy the moment, `;
-      baseSimplerDesc = `Spend ${formatINR(swapCost)} instead of ${formatINR(origCost)}—have fun while saving `;
+      const savedDiff = Math.max(0, origCost - swapCost);
+      swapDescription = `Swap to a quality curated alternative for ${formatINR(swapCost)}—enjoy the moment, ${formatINR(savedDiff)} cheaper.`;
+      simplerText = `Spend ${formatINR(swapCost)} instead of ${formatINR(origCost)}—have fun while saving ${formatINR(savedDiff)} for your ${activeGoal.title}.`;
     }
 
     // 4. Dynamic Savings & Sweep Math: strictly bound to savedDifference
     const savedDifference = Math.max(0, origCost - swapCost);
-    const swapDescription = `${baseSwapDesc}${formatINR(savedDifference)} cheaper.`;
     const swapButtonText = `Take the Swap & Sweep ${formatINR(savedDifference)} to Goal Jar`;
-    const simplerText = `${baseSimplerDesc}${formatINR(savedDifference)} for your ${activeGoal.title}.`;
 
     return {
       originalItem: text || (isWatch ? "Mechanical Watch" : isFood ? "Food Order" : isSneakers ? "Branded Sneakers" : isEntertainment ? "Entertainment" : "Extra Spend Item"),
@@ -181,7 +210,33 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
       savedDifference,
       swapButtonText,
       simplerText,
+      isFoodOrHangout: isFood,
+      isEntertainment,
+      primaryPlace,
+      runnerUpPlaces,
+      isLivePlaces: false,
     };
+  };
+
+  // Helper to switch active swap to a runner-up budget restaurant
+  const handleSelectRunnerUp = (place: PlaceSwapItem) => {
+    if (!smartSwapResult) return;
+    const origCost = smartSwapResult.originalCost;
+    const newCost = place.estimatedCost;
+    const newSaved = Math.max(0, origCost - newCost);
+    const newDesc = `Skip the ${formatINR(origCost)} splurge—grab a meal at ${place.displayName} (${place.rating}★ on Google, ~${formatINR(place.estimatedCost)} for one) instead. Same great food, +${formatINR(newSaved)} swept straight into your ${activeGoal.title} jar.`;
+    const newSimpler = `Dine at ${place.displayName} (${place.rating}★) for ~${formatINR(place.estimatedCost)} instead of ${formatINR(origCost)}—have equal fun while saving ${formatINR(newSaved)} for your ${activeGoal.title}.`;
+
+    setSmartSwapResult({
+      ...smartSwapResult,
+      swapTitle: place.displayName,
+      swapCost: newCost,
+      savedDifference: newSaved,
+      swapDescription: newDesc,
+      simplerText: newSimpler,
+      swapButtonText: `Take the Swap & Sweep ${formatINR(newSaved)} to Goal Jar`,
+      primaryPlace: place,
+    });
   };
 
   // Evaluate query
@@ -204,6 +259,8 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
       parsedAmount = extractQueryAmount(query);
     }
 
+    const isFood = /food|dinner|eat out|dining|restaurant|cafe|coffee|drinks|beer|burger|swiggy|zomato|hangout|party|craving|biryani|pizza/i.test(query);
+
     setTimeout(() => {
       if (isGeneralCoachQuestion || (!parsedAmount && query.length > 5)) {
         // Evaluate as Beginner Coach response
@@ -219,6 +276,7 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
         setCoachAnswerResult(advice);
         setSmartSwapResult(null);
         setActiveTab("coach");
+        setIsLoading(false);
       } else {
         // Evaluate as Smart Swap purchase check
         const effectiveAmount = parsedAmount || 1500;
@@ -226,8 +284,48 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
         setSmartSwapResult(result);
         setCoachAnswerResult(null);
         setActiveTab("swaps");
+        setIsLoading(false);
+
+        // If query involves food, dining, or cafes, fetch live nearby Google Places in background
+        if (isFood) {
+          getUserCoordinates().then(async (coords) => {
+            try {
+              const { places, isLive } = await fetchNearbyBudgetPlaces({
+                query,
+                lat: coords.lat,
+                lng: coords.lng,
+                originalPrice: effectiveAmount,
+              });
+
+              if (places && places.length > 0) {
+                const topPlace = places[0];
+                const runners = places.slice(1, 3);
+                const cost = topPlace.estimatedCost;
+                const saved = Math.max(0, effectiveAmount - cost);
+
+                setSmartSwapResult((prev) => {
+                  if (!prev) return prev;
+                  return {
+                    ...prev,
+                    swapTitle: topPlace.displayName,
+                    swapCost: cost,
+                    savedDifference: saved,
+                    swapDescription: `Skip the ${formatINR(effectiveAmount)} splurge—grab a meal at ${topPlace.displayName} (${topPlace.rating}★ on Google, ~${formatINR(topPlace.estimatedCost)} for one) instead. Same great food, +${formatINR(saved)} swept straight into your ${activeGoal.title} jar.`,
+                    simplerText: `Dine at ${topPlace.displayName} (${topPlace.rating}★) for ~${formatINR(topPlace.estimatedCost)} instead of ${formatINR(effectiveAmount)}—have equal fun while saving ${formatINR(saved)} for your ${activeGoal.title}.`,
+                    swapButtonText: `Take the Swap & Sweep ${formatINR(saved)} to Goal Jar`,
+                    primaryPlace: topPlace,
+                    runnerUpPlaces: runners,
+                    isLivePlaces: isLive,
+                    isFoodOrHangout: true,
+                  };
+                });
+              }
+            } catch (err) {
+              console.warn("Async Google Places update failed:", err);
+            }
+          });
+        }
       }
-      setIsLoading(false);
     }, 250);
   };
 
@@ -538,6 +636,150 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
                     &ldquo;{smartSwapResult.swapDescription}&rdquo;
                   </p>
 
+                  {/* Real Nearby Budget Restaurant Card (Google Maps & Reviews) */}
+                  {smartSwapResult.isFoodOrHangout && smartSwapResult.primaryPlace && (
+                    <div className="p-3.5 rounded-xl bg-gradient-to-r from-emerald-50/90 via-teal-50/50 to-slate-50 border border-emerald-200/90 space-y-2.5 shadow-2xs">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                        <div className="flex items-start gap-2.5">
+                          <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs mt-0.5">
+                            <MapPin className="w-4 h-4 fill-white/20" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-bold text-slate-900 text-sm">
+                                {smartSwapResult.primaryPlace.displayName}
+                              </span>
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-900 border border-amber-200 text-[10px] font-bold font-mono">
+                                <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                                <span>{smartSwapResult.primaryPlace.rating}★</span>
+                                {smartSwapResult.primaryPlace.userRatingCount && (
+                                  <span className="text-amber-700/80 font-normal">
+                                    ({smartSwapResult.primaryPlace.userRatingCount >= 1000
+                                      ? `${(smartSwapResult.primaryPlace.userRatingCount / 1000).toFixed(1)}k`
+                                      : smartSwapResult.primaryPlace.userRatingCount})
+                                  </span>
+                                )}
+                              </span>
+                              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold">
+                                ~{formatINR(smartSwapResult.primaryPlace.estimatedCost)} for one
+                              </span>
+                            </div>
+                            {smartSwapResult.primaryPlace.address && (
+                              <span className="text-[11px] text-slate-500 block truncate max-w-xs sm:max-w-md mt-0.5">
+                                {smartSwapResult.primaryPlace.address}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Direct "Open in Google Maps" Button */}
+                        <a
+                          href={smartSwapResult.primaryPlace.mapsUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-slate-50 text-emerald-800 border border-emerald-300 shadow-2xs transition-colors shrink-0 self-start sm:self-auto"
+                        >
+                          <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>Open in Google Maps</span>
+                          <ExternalLink className="w-3 h-3 text-slate-400" />
+                        </a>
+                      </div>
+
+                      {/* Runner-up budget spots (1–2 spots) */}
+                      {smartSwapResult.runnerUpPlaces && smartSwapResult.runnerUpPlaces.length > 0 && (
+                        <div className="pt-2 border-t border-emerald-200/60 space-y-1.5">
+                          <span className="text-[10px] uppercase font-bold tracking-wider text-slate-600 block">
+                            1–2 More Budget Alternatives Nearby:
+                          </span>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {smartSwapResult.runnerUpPlaces.map((runner) => (
+                              <div
+                                key={runner.id}
+                                className="p-2.5 rounded-lg bg-white/95 border border-emerald-100 flex items-center justify-between gap-2 text-xs shadow-2xs"
+                              >
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="font-semibold text-slate-800 truncate text-[11px]">
+                                      {runner.displayName}
+                                    </span>
+                                    <span className="text-[10px] font-mono text-amber-700 font-bold shrink-0">
+                                      {runner.rating}★
+                                    </span>
+                                  </div>
+                                  <span className="text-[10px] text-slate-500 font-mono block">
+                                    ~{formatINR(runner.estimatedCost)} for one
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSelectRunnerUp(runner)}
+                                    className="px-2 py-1 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors"
+                                  >
+                                    Use Swap
+                                  </button>
+                                  <a
+                                    href={runner.mapsUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="p-1 text-slate-400 hover:text-slate-700 rounded transition-colors"
+                                    title="View on Google Maps"
+                                  >
+                                    <ExternalLink className="w-3 h-3" />
+                                  </a>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="pt-1 flex items-center justify-between text-[10px] text-slate-500">
+                        <span>
+                          {smartSwapResult.isLivePlaces
+                            ? "📍 Live Google Maps Places (3km radius, 4.2★+)"
+                            : "📍 Curated Top-Rated Local Alternatives (Bengaluru)"}
+                        </span>
+                        <a
+                          href={FALLBACK_MAPS_NEARBY_URL}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-emerald-700 hover:text-emerald-800 underline font-medium"
+                        >
+                          <span>Explore all budget spots near me</span>
+                          <ExternalLink className="w-2.5 h-2.5" />
+                        </a>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* High-Value Digital Swap Card (Netflix 1-Month Plan) */}
+                  {smartSwapResult.isEntertainment && (
+                    <div className="p-3.5 rounded-xl bg-gradient-to-r from-rose-50/70 via-red-50/40 to-slate-50 border border-red-200/80 space-y-2 shadow-2xs">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-lg bg-red-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                            <Tv className="w-4 h-4 fill-white/20" />
+                          </div>
+                          <div>
+                            <span className="font-bold text-slate-900 text-xs sm:text-sm block">
+                              1-Month Netflix Mobile Plan
+                            </span>
+                            <span className="text-[10px] text-red-700 font-medium">
+                              Unlimited Movies &amp; Shows All Month
+                            </span>
+                          </div>
+                        </div>
+                        <span className="text-xs font-mono font-bold text-red-700 bg-white px-2.5 py-1 rounded-lg border border-red-200 shadow-2xs">
+                          Only ₹199/month
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-600 leading-relaxed font-sans">
+                        Skip the single {formatINR(smartSwapResult.originalCost)} ticket—grab a 1-month Netflix plan for ₹199, watch 4 new releases this week + unlimited shows all month, and sweep +{formatINR(smartSwapResult.savedDifference)} straight to your {activeGoal.title} jar.
+                      </p>
+                    </div>
+                  )}
+
                   {/* Math Breakdown Comparison */}
                   <div className="grid grid-cols-3 gap-2 pt-2 text-center font-mono text-xs">
                     <div className="p-2 rounded-lg bg-slate-50 border border-slate-200">
@@ -551,6 +793,47 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
                     <div className="p-2 rounded-lg bg-emerald-100 border border-emerald-300">
                       <span className="text-[9px] text-emerald-700 block uppercase font-bold">You Sweep</span>
                       <span className="font-black text-emerald-900">+{formatINR(smartSwapResult.savedDifference)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 1. Clear Money-Split Breakdown (Where the Money Goes) */}
+                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                      <ArrowRightLeft className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Where the Money Goes:</span>
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-mono">
+                      2-Part Money Split
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {/* Part 1: Spent Now */}
+                    <div className="p-3 rounded-lg bg-white border border-slate-200/90 shadow-2xs space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-slate-700">Spent Now</span>
+                        <span className="text-xs font-mono font-bold text-slate-900">
+                          {formatINR(smartSwapResult.swapCost)}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 leading-relaxed font-sans">
+                        Deducted from your Safe Pool to satisfy the immediate craving right now.
+                      </p>
+                    </div>
+
+                    {/* Part 2: Swept to Goal Jar */}
+                    <div className="p-3 rounded-lg bg-emerald-50/80 border border-emerald-200 shadow-2xs space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-emerald-800">Swept to Goal Jar</span>
+                        <span className="text-xs font-mono font-bold text-emerald-700">
+                          +{formatINR(smartSwapResult.savedDifference)}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-emerald-700/90 leading-relaxed font-sans">
+                        Immediately locked into your {activeGoal.title} Goal Jar so you can&apos;t accidentally spend it later.
+                      </p>
                     </div>
                   </div>
                 </div>
