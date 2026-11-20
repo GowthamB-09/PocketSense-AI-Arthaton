@@ -129,7 +129,7 @@ export const SmartCashFlowCalendar: React.FC<SmartCashFlowCalendarProps> = ({
     return events.filter((e) => e.category === "autopay" || e.id.includes("autopay"));
   }, [events]);
 
-  // Calendar Geometry
+  // Calendar Geometry & Dynamic Payday Alignment with Settings
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
   const firstDayOfWeek = new Date(viewYear, viewMonth, 1).getDay(); // 0 is Sunday
   const prefixEmptyDays = (firstDayOfWeek + 6) % 7; // Monday-first offset (0 for Mon, 6 for Sun)
@@ -139,6 +139,11 @@ export const SmartCashFlowCalendar: React.FC<SmartCashFlowCalendarProps> = ({
     "July", "August", "September", "October", "November", "December"
   ];
   const currentMonthName = monthNames[viewMonth];
+
+  // Dynamic Payday derived from Settings (profile.salaryCreditDay)
+  const salaryCreditDay = profile.salaryCreditDay || 1;
+  const paydayNum = Math.min(salaryCreditDay, daysInMonth);
+  const paydayDateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(paydayNum).padStart(2, "0")}`;
 
   const handlePrevMonth = () => {
     if (viewMonth === 0) {
@@ -239,25 +244,24 @@ export const SmartCashFlowCalendar: React.FC<SmartCashFlowCalendarProps> = ({
 
   // Events on the currently selected date
   const selectedDateEvents = useMemo(() => {
-    const list = events.filter((e) => e.date === selectedDateStr);
-    // Check if Nov 30 (Payday)
-    if (selectedDateStr === "2026-11-30") {
-      const hasPayday = list.some((e) => e.id === "evt_payday");
-      if (!hasPayday) {
-        list.push({
-          id: "evt_payday",
-          title: "Monthly Salary Credited (Payday 🎉)",
-          date: "2026-11-30",
-          budget: profile.monthlySalary || 75000,
-          category: "autopay",
-          isPreLocked: false,
-          isPaid: false,
-          notes: "Salary cycle resets. Take-Home credited.",
-        });
-      }
+    // Filter user/pre-loaded events (ignoring any static evt_payday)
+    const list = events.filter((e) => e.date === selectedDateStr && e.id !== "evt_payday");
+
+    // Dynamic Payday Event aligned to Settings
+    if (selectedDateStr === paydayDateStr) {
+      list.push({
+        id: "evt_payday",
+        title: "Monthly Salary Credited (Payday 🎉)",
+        date: paydayDateStr,
+        budget: profile.monthlySalary || 75000,
+        category: "autopay",
+        isPreLocked: false,
+        isPaid: false,
+        notes: `Salary credited on Day ${salaryCreditDay} (configured in Settings).`,
+      });
     }
     return list;
-  }, [events, selectedDateStr, profile.monthlySalary]);
+  }, [events, selectedDateStr, paydayDateStr, profile.monthlySalary, salaryCreditDay]);
 
   // Formatted date label for selected date
   const selectedDateLabel = useMemo(() => {
@@ -356,10 +360,16 @@ export const SmartCashFlowCalendar: React.FC<SmartCashFlowCalendarProps> = ({
           <span className="text-[10px] text-slate-400 font-mono hidden sm:inline">(Nov 26: Aarav)</span>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div
+          onClick={() => setSelectedDateStr(paydayDateStr)}
+          className="flex items-center gap-1.5 cursor-pointer hover:opacity-85 transition-opacity"
+          title={`Payday set to Day ${paydayNum} in Budget Settings. Click to view.`}
+        >
           <span className="text-amber-500 text-xs shrink-0">⭐</span>
           <span className="font-semibold text-emerald-800">Payday</span>
-          <span className="text-[10px] text-slate-400 font-mono hidden sm:inline">(Nov 30 • ₹75,000)</span>
+          <span className="text-[10px] text-slate-400 font-mono hidden sm:inline">
+            ({currentMonthName.slice(0, 3)} {paydayNum} • {formatINR(profile.monthlySalary || 75000)})
+          </span>
         </div>
 
         <div className="flex items-center gap-1.5">
@@ -398,10 +408,10 @@ export const SmartCashFlowCalendar: React.FC<SmartCashFlowCalendarProps> = ({
             const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(dayNum).padStart(2, "0")}`;
             const isToday = viewYear === 2026 && viewMonth === 10 && dayNum === 20;
             const isSelected = selectedDateStr === dateStr;
-            const isPayday = viewYear === 2026 && viewMonth === 10 && dayNum === 30;
+            const isPayday = dayNum === paydayNum;
 
-            // Events on this date
-            const dayEvents = events.filter((e) => e.date === dateStr);
+            // Events on this date (excluding static evt_payday)
+            const dayEvents = events.filter((e) => e.date === dateStr && e.id !== "evt_payday");
             const hasAutoPay = dayEvents.some((e) => e.category === "autopay") || isPayday;
             const hasPersonal = dayEvents.some((e) => e.category !== "autopay");
             const hasPreLocked = dayEvents.some((e) => e.isPreLocked && !e.isPaid);
@@ -439,7 +449,10 @@ export const SmartCashFlowCalendar: React.FC<SmartCashFlowCalendarProps> = ({
                   )}
 
                   {isPayday && (
-                    <span className="text-amber-500 text-xs shrink-0 drop-shadow-xs" title="Payday (₹75,000)">
+                    <span
+                      className="text-amber-500 text-xs shrink-0 drop-shadow-xs"
+                      title={`Payday: Salary Credited (${formatINR(profile.monthlySalary || 75000)})`}
+                    >
                       ⭐
                     </span>
                   )}
@@ -447,6 +460,19 @@ export const SmartCashFlowCalendar: React.FC<SmartCashFlowCalendarProps> = ({
 
                 {/* Event Indicators Row Inside Cell */}
                 <div className="space-y-0.5 mt-auto">
+                  {/* Dynamic Payday Badge if this is the Payday */}
+                  {isPayday && (
+                    <div
+                      className="hidden sm:flex items-center gap-1 px-1 py-0.5 rounded text-[9px] font-mono font-semibold truncate border bg-emerald-50 border-emerald-300 text-emerald-900"
+                      title={`Monthly Salary Credited (${formatINR(profile.monthlySalary || 75000)})`}
+                    >
+                      <span className="shrink-0">⭐</span>
+                      <span className="truncate">Payday</span>
+                      <span className="ml-auto font-bold shrink-0">
+                        ₹{Math.round((profile.monthlySalary || 75000) / 1000)}k
+                      </span>
+                    </div>
+                  )}
                   {dayEvents.map((evt) => {
                     const cfg = CATEGORY_CONFIG[evt.category] || CATEGORY_CONFIG.birthday;
                     return (

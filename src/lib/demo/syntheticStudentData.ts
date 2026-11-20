@@ -32,16 +32,6 @@ export const INITIAL_CALENDAR_EVENTS: CalendarEvent[] = [
     isPaid: false,
     notes: "Auto-debit from HDFC Primary A/c",
   },
-  {
-    id: "evt_payday",
-    title: "Salary Credited (Payday 🎉)",
-    date: "2026-11-30",
-    budget: 75000,
-    category: "autopay",
-    isPreLocked: false,
-    isPaid: false,
-    notes: "Monthly paycheck credited (₹75,000)",
-  },
 ];
 
 export const INITIAL_GOAL_JARS: GoalJar[] = [
