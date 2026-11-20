@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useFinancialMemory } from "@/lib/memory/memoryContext";
 import { Transaction } from "@/types";
-import { formatINR } from "@/lib/utils";
+import { formatINR, extractQueryAmount } from "@/lib/utils";
 import {
   Zap,
   X,
@@ -197,13 +197,7 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
 
     let parsedAmount = overrideAmount || 0;
     if (!parsedAmount) {
-      const match = query.match(/(?:(?:Rs\.?|INR|₹)\s*([\d,]+(?:\.\d{1,2})?))|(?:\b(\d{2,6})\s*(?:rs|rupees|bucks|inr)?\b)/i);
-      if (match) {
-        parsedAmount = parseFloat((match[1] || match[2]).replace(/,/g, ""));
-      } else {
-        const pureNum = parseFloat(query.replace(/[^\d.]/g, ""));
-        if (!isNaN(pureNum) && pureNum > 0) parsedAmount = pureNum;
-      }
+      parsedAmount = extractQueryAmount(query);
     }
     if (!parsedAmount) parsedAmount = 1500;
 

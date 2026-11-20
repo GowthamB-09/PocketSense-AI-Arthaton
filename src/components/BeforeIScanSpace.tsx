@@ -3,7 +3,7 @@
 import React, { useState, useRef } from "react";
 import { useFinancialMemory } from "@/lib/memory/memoryContext";
 import { Transaction } from "@/types";
-import { formatINR } from "@/lib/utils";
+import { formatINR, extractQueryAmount } from "@/lib/utils";
 import {
   PRESET_COACH_QUESTIONS,
   CoachAnswer,
@@ -197,16 +197,10 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
       /^(can i afford|sip vs|why|how|should i|what is|tell me|explain)/i.test(query) &&
       !/(buy|order|spend|purchase|shopping|sneaker|ticket)/i.test(query);
 
-    // Extract numerical price if any
+    // Extract numerical price if any (supports standard 1,200 and Indian 1,50,000 comma formatting)
     let parsedAmount = overrideAmount || 0;
     if (!parsedAmount && !isGeneralCoachQuestion) {
-      const match = query.match(/(?:(?:Rs\.?|INR|₹)\s*([\d,]+(?:\.\d{1,2})?))|(?:\b(\d{2,6})\s*(?:rs|rupees|bucks|inr)?\b)/i);
-      if (match) {
-        parsedAmount = parseFloat((match[1] || match[2]).replace(/,/g, ""));
-      } else {
-        const pureNum = parseFloat(query.replace(/[^\d.]/g, ""));
-        if (!isNaN(pureNum) && pureNum > 0) parsedAmount = pureNum;
-      }
+      parsedAmount = extractQueryAmount(query);
     }
 
     setTimeout(() => {
