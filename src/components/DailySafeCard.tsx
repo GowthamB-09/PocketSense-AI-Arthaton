@@ -90,9 +90,6 @@ export const DailySafeCard: React.FC<DailySafeCardProps> = ({
             </p>
           </div>
 
-          <p className="text-xs text-slate-600 pt-1 leading-relaxed max-w-2xl">
-            No rigid daily caps. Spend unevenly across weekdays and weekend dinners with zero guilt. Automatically calculated from all linked accounts minus card dues.
-          </p>
         </div>
 
         {/* 3-Pill Multi-Account Math Breakdown */}
