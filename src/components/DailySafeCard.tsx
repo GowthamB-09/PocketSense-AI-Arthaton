@@ -13,6 +13,7 @@ import {
   CreditCard,
   Wallet,
   CheckCircle2,
+  AlertTriangle,
 } from "lucide-react";
 
 interface DailySafeCardProps {
@@ -33,11 +34,12 @@ export const DailySafeCard: React.FC<DailySafeCardProps> = ({
     dateLabel,
     currentDayOfMonth,
     daysInMonth,
+    projectedRunOutDay,
   } = analysis;
 
   // Total Safe-to-Spend Pool Until Payday
-  // Default to computed remaining monthly pool (e.g. ₹30,592)
-  const safePoolAmount = remainingMonthlyPool > 0 ? remainingMonthlyPool : 30592;
+  // Default to computed remaining monthly pool (show 0 when depleted)
+  const safePoolAmount = typeof remainingMonthlyPool === "number" ? remainingMonthlyPool : 30592;
 
   // Breakdown across multi-bank and cards
   const estimatedBankCash = 48500;
@@ -45,16 +47,41 @@ export const DailySafeCard: React.FC<DailySafeCardProps> = ({
 
   const daysToPayday = daysRemaining || 17;
 
+  // Dynamic Spend Speed calculation
+  const estimatedDayToLast = projectedRunOutDay || 30;
+  const cycleDaysTotal = daysInMonth || 30;
+  const todayDay = currentDayOfMonth || 14;
+  const isDepleted = remainingMonthlyPool <= 0;
+  const isOverspending = estimatedDayToLast < cycleDaysTotal || isDepleted;
+  const isCritical = estimatedDayToLast <= todayDay || isDepleted;
+
   return (
     <div className="fintech-card rounded-2xl p-6 sm:p-7 flex flex-col justify-between h-full bg-white border border-slate-200 shadow-sm space-y-6">
       <div>
         {/* Top Bar with Spend Speed */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
           <div className="flex items-center gap-2 flex-wrap">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 border border-emerald-200 text-emerald-800">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Spend Speed: Good</span>
-            </div>
+            {isOverspending ? (
+              <div
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
+                  isCritical
+                    ? "bg-rose-50 border border-rose-200 text-rose-800"
+                    : "bg-amber-50 border border-amber-200 text-amber-800"
+                }`}
+              >
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    isCritical ? "bg-rose-500" : "bg-amber-500"
+                  } animate-pulse`}
+                />
+                <span>Spend Speed: High / Overspending</span>
+              </div>
+            ) : (
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 border border-emerald-200 text-emerald-800">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Spend Speed: Good</span>
+              </div>
+            )}
             <span className="text-xs text-slate-500 font-mono flex items-center gap-1">
               <Calendar className="w-3.5 h-3.5 text-slate-400" />
               {dateLabel || `Day ${currentDayOfMonth || 14} of ${daysInMonth || 30}`}
@@ -82,11 +109,31 @@ export const DailySafeCard: React.FC<DailySafeCardProps> = ({
 
           {/* Simple Pacing Indicator */}
           <div className="flex items-center gap-2 pt-1">
-            <div className="p-1 rounded-full bg-emerald-100 text-emerald-700">
-              <CheckCircle2 className="w-3.5 h-3.5" />
+            <div
+              className={`p-1 rounded-full ${
+                isCritical
+                  ? "bg-rose-100 text-rose-700"
+                  : isOverspending
+                  ? "bg-amber-100 text-amber-700"
+                  : "bg-emerald-100 text-emerald-700"
+              }`}
+            >
+              {isOverspending ? (
+                <AlertTriangle className="w-3.5 h-3.5" />
+              ) : (
+                <CheckCircle2 className="w-3.5 h-3.5" />
+              )}
             </div>
-            <p className="text-xs font-semibold text-emerald-800 font-mono">
-              {daysToPayday} Days Left • Spend Speed: Good
+            <p
+              className={`text-xs font-semibold font-mono ${
+                isCritical
+                  ? "text-rose-800"
+                  : isOverspending
+                  ? "text-amber-800"
+                  : "text-emerald-800"
+              }`}
+            >
+              {daysToPayday} Days Left • {isOverspending ? "Spend Speed: High / Overspending" : "Spend Speed: Good"}
             </p>
           </div>
 

@@ -7,10 +7,17 @@ import { Activity, AlertCircle, CheckCircle2, Calendar } from "lucide-react";
 
 export const RunOutDayPredictor: React.FC = () => {
   const { analysis } = useFinancialMemory();
-  const { burnRatePerDay, dailySafeToSpend, projectedRunOutDay, currentDayOfMonth, daysInMonth } = analysis;
+  const { burnRatePerDay, dailySafeToSpend, projectedRunOutDay, currentDayOfMonth, daysInMonth, remainingMonthlyPool } = analysis;
+
+  const estimatedDayToLast = projectedRunOutDay || 30;
+  const cycleDaysTotal = daysInMonth || 30;
+  const todayDay = currentDayOfMonth || 14;
+  const isDepleted = (remainingMonthlyPool ?? 1) <= 0;
+  const isOverspending = estimatedDayToLast < cycleDaysTotal || isDepleted;
+  const isCritical = estimatedDayToLast <= todayDay || isDepleted;
 
   const isBurnFast = burnRatePerDay > dailySafeToSpend;
-  const isSqueezeRisk = projectedRunOutDay < daysInMonth;
+  const isSqueezeRisk = projectedRunOutDay < daysInMonth || isDepleted;
 
   return (
     <div className="fintech-card rounded-2xl p-6 flex flex-col justify-between h-full bg-white border border-slate-200 shadow-sm">
@@ -31,10 +38,23 @@ export const RunOutDayPredictor: React.FC = () => {
             </div>
           </div>
 
-          <span className="inline-flex items-center gap-1 text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-            <CheckCircle2 className="w-3 h-3" />
-            <span>Spend Speed: Good</span>
-          </span>
+          {isOverspending ? (
+            <span
+              className={`inline-flex items-center gap-1 text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-full ${
+                isCritical
+                  ? "bg-rose-50 text-rose-700 border border-rose-200"
+                  : "bg-amber-50 text-amber-700 border border-amber-200"
+              }`}
+            >
+              <AlertCircle className="w-3 h-3" />
+              <span>Spend Speed: High / Overspending</span>
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <CheckCircle2 className="w-3 h-3" />
+              <span>Spend Speed: Good</span>
+            </span>
+          )}
         </div>
 
         {/* Burn Metrics Grid */}

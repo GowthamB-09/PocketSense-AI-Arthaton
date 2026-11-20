@@ -14,6 +14,8 @@ import {
   Mail,
   Radio,
   Coins,
+  AlertCircle,
+  ShieldAlert,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 
@@ -34,6 +36,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   const { analysis, profile, loadSyntheticDemo, addBatchTransactions, claimSavings, isAutoPayPaused } = useFinancialMemory();
   const [loadedAlert, setLoadedAlert] = useState(false);
   const [syncAlert, setSyncAlert] = useState<string | null>(null);
+  const [isSimulating, setIsSimulating] = useState(false);
+
+  const isDepleted = analysis.remainingMonthlyPool <= 0;
 
   const handleLoadDemo = () => {
     loadSyntheticDemo();
@@ -48,6 +53,19 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   // 1-Click "Simulate Incoming Multi-Bank Spend" (across HDFC, SBI, and ICICI Card)
   const handleSimulateMultiBankSpend = () => {
+    // 400ms button debounce/cooldown so rapid double-clicks don't stack unintended transactions
+    if (isSimulating) return;
+
+    // Check if Safe Pool reached ₹0
+    if (analysis.remainingMonthlyPool <= 0) {
+      setSyncAlert("Safe Pool reached ₹0! Click ‘Reset Demo’ to test again.");
+      setTimeout(() => setSyncAlert(null), 4000);
+      return;
+    }
+
+    setIsSimulating(true);
+    setTimeout(() => setIsSimulating(false), 400);
+
     const sampleIncoming = [
       {
         merchant: "Blue Tokai Coffee Roasters",
@@ -181,12 +199,30 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* 1-Click "Simulate Incoming Multi-Bank Spend" Button */}
             <button
               onClick={handleSimulateMultiBankSpend}
-              className="flex items-center gap-1.5 px-3 py-1.5 min-h-[38px] rounded-xl text-xs font-bold bg-slate-900 hover:bg-black text-white shadow-sm transition-all active:scale-95"
-              title="Simulate incoming multi-bank spend (HDFC, SBI, ICICI Card) with spare change round-up"
+              disabled={isSimulating}
+              className={`flex items-center gap-1.5 px-3 py-1.5 min-h-[38px] rounded-xl text-xs font-bold shadow-sm transition-all active:scale-95 ${
+                isDepleted
+                  ? "bg-rose-900/90 text-rose-100 hover:bg-rose-900 border border-rose-700/60"
+                  : "bg-slate-900 hover:bg-black text-white"
+              } ${isSimulating ? "opacity-70 cursor-not-allowed" : ""}`}
+              title={
+                isDepleted
+                  ? "Safe Pool reached ₹0! Click ‘Reset Demo’ to test again."
+                  : "Simulate incoming multi-bank spend (HDFC, SBI, ICICI Card) with spare change round-up"
+              }
             >
-              <Zap className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="hidden sm:inline">Simulate Incoming Multi-Bank Spend</span>
-              <span className="sm:hidden font-mono text-[11px]">Simulate Spend</span>
+              <Zap className={`w-3.5 h-3.5 ${isDepleted ? "text-rose-400" : "text-emerald-400"}`} />
+              {isDepleted ? (
+                <>
+                  <span className="hidden sm:inline">Safe Pool Depleted (₹0 Left)</span>
+                  <span className="sm:hidden font-mono text-[11px]">Depleted (₹0)</span>
+                </>
+              ) : (
+                <>
+                  <span className="hidden sm:inline">Simulate Incoming Multi-Bank Spend</span>
+                  <span className="sm:hidden font-mono text-[11px]">Simulate Spend</span>
+                </>
+              )}
             </button>
 
             {/* Salary Cycle Indicator */}
@@ -231,8 +267,22 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Live Background Sync Notification Toast */}
       {syncAlert && (
-        <div className="bg-emerald-600 text-white px-4 py-2.5 text-xs font-medium text-center animate-fade-in flex items-center justify-center gap-2 shadow-sm">
-          <CheckCircle2 className="w-4 h-4 shrink-0" />
+        <div
+          className={`${
+            syncAlert.includes("reached ₹0")
+              ? "bg-rose-600 text-white"
+              : syncAlert.includes("Silent Risk Guard")
+              ? "bg-amber-600 text-white"
+              : "bg-emerald-600 text-white"
+          } px-4 py-2.5 text-xs font-medium text-center animate-fade-in flex items-center justify-center gap-2 shadow-sm`}
+        >
+          {syncAlert.includes("reached ₹0") ? (
+            <AlertCircle className="w-4 h-4 shrink-0" />
+          ) : syncAlert.includes("Silent Risk Guard") ? (
+            <ShieldAlert className="w-4 h-4 shrink-0" />
+          ) : (
+            <CheckCircle2 className="w-4 h-4 shrink-0" />
+          )}
           <span>{syncAlert}</span>
         </div>
       )}
