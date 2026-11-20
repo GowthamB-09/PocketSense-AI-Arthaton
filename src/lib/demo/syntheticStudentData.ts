@@ -290,6 +290,7 @@ export const SYNTHETIC_DEMO_PROFILE: FinancialMemoryProfile = {
   totalSavedToJars: 27100,
   isAutoPayPaused: true,
   creditCardDues: 17908,
+  totalLinkedBankCash: 48500,
   vulnerabilityZones: [
     "Friday & Saturday night bistro/craft beer tabs exceeding ₹2,500",
     "Daily ₹420 third-wave coffee habits",

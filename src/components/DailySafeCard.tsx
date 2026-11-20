@@ -42,8 +42,8 @@ export const DailySafeCard: React.FC<DailySafeCardProps> = ({
   const safePoolAmount = typeof remainingMonthlyPool === "number" ? remainingMonthlyPool : 30592;
 
   // Breakdown across multi-bank and cards
-  const estimatedBankCash = 48500;
-  const estimatedCardBills = 17908;
+  const estimatedBankCash = profile.totalLinkedBankCash ?? 48500;
+  const estimatedCardBills = profile.creditCardDues ?? 17908;
 
   const daysToPayday = daysRemaining || 17;
 
@@ -158,9 +158,11 @@ export const DailySafeCard: React.FC<DailySafeCardProps> = ({
               <span className="text-[10px] uppercase font-semibold">Upcoming Card Dues</span>
             </div>
             <span className="text-base font-bold text-blue-700">
-              -{formatINR(estimatedCardBills)}
+              {estimatedCardBills > 0 ? `-${formatINR(estimatedCardBills)}` : formatINR(0)}
             </span>
-            <span className="text-[10px] text-slate-400 block mt-0.5">ICICI + HDFC Bills</span>
+            <span className="text-[10px] text-slate-400 block mt-0.5">
+              {estimatedCardBills > 0 ? "ICICI + HDFC Bills" : "All Bills Cleared ✓"}
+            </span>
           </div>
 
           <div className="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200">

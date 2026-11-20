@@ -34,6 +34,8 @@ interface FinancialMemoryContextType {
   claimSavings: (goalId: string, amount: number, promptText?: string) => void;
   isAutoPayPaused: boolean;
   toggleAutoPayPause: (val?: boolean) => void;
+  payCardBills: () => void;
+  updateCreditCardDues: (newDues: number, newBankCash?: number) => void;
   recordSmartSwap: (params: {
     goalId: string;
     originalCost: number;
@@ -195,13 +197,44 @@ export function FinancialMemoryProvider({ children }: { children: React.ReactNod
     });
   };
 
-  const isAutoPayPaused = analysis.isAutoPayPaused;
+  const isAutoPayPaused =
+    typeof profile.isAutoPayPaused === "boolean"
+      ? profile.isAutoPayPaused
+      : (profile.creditCardDues ?? 17908) > (profile.monthlySalary || 75000) * 0.2;
 
   const toggleAutoPayPause = (val?: boolean) => {
     setProfile((prev) => ({
       ...prev,
       isAutoPayPaused: typeof val === "boolean" ? val : !prev.isAutoPayPaused,
     }));
+  };
+
+  const payCardBills = () => {
+    setProfile((prev) => {
+      const dues = prev.creditCardDues ?? 17908;
+      const currentBankCash = prev.totalLinkedBankCash ?? 48500;
+      const newBankCash = Math.max(0, currentBankCash - dues);
+
+      return {
+        ...prev,
+        totalLinkedBankCash: newBankCash,
+        creditCardDues: 0,
+        isAutoPayPaused: false, // Immediately untriggers Silent Risk Guard and resumes sweeps
+      };
+    });
+  };
+
+  const updateCreditCardDues = (newDues: number, newBankCash?: number) => {
+    setProfile((prev) => {
+      const salary = prev.monthlySalary || 75000;
+      const isPaused = newDues > salary * 0.2;
+      return {
+        ...prev,
+        creditCardDues: Math.max(0, newDues),
+        totalLinkedBankCash: typeof newBankCash === "number" ? Math.max(0, newBankCash) : prev.totalLinkedBankCash,
+        isAutoPayPaused: isPaused,
+      };
+    });
   };
 
   const recordSmartSwap = ({
@@ -437,6 +470,8 @@ ${profile.vulnerabilityZones.map((z) => `- ${z}`).join("\n")}
         recordSmartSwap,
         isAutoPayPaused,
         toggleAutoPayPause,
+        payCardBills,
+        updateCreditCardDues,
         updateSalary,
         addGoalJar,
         updateGoalJar,

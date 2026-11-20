@@ -79,6 +79,7 @@ export interface FinancialMemoryProfile {
   }>;
   isAutoPayPaused?: boolean;
   creditCardDues?: number;
+  totalLinkedBankCash?: number;
 }
 
 export interface DailyBudgetAnalysis {
@@ -105,6 +106,7 @@ export interface DailyBudgetAnalysis {
   nextPaydayLabel: string;
   isAutoPayPaused: boolean;
   creditCardDues: number;
+  totalLinkedBankCash: number;
 }
 
 export interface SmsParseResult {

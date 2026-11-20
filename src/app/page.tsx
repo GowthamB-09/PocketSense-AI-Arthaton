@@ -10,6 +10,7 @@ import { BeforeIScanModal } from "@/components/BeforeIScanModal";
 import { SmsParserDrawer } from "@/components/SmsParserDrawer";
 import { FinancialMemoryViewer } from "@/components/FinancialMemoryViewer";
 import { SettingsModal } from "@/components/SettingsModal";
+import { RiskDetailsModal } from "@/components/RiskDetailsModal";
 import { SolutionSpaceSwitcher, SolutionSpace } from "@/components/SolutionSpaceSwitcher";
 import { BeforeIScanSpace } from "@/components/BeforeIScanSpace";
 import { PassbookSpace } from "@/components/PassbookSpace";
@@ -23,15 +24,21 @@ import {
   Zap,
   ArrowRight,
   ShieldAlert,
+  CheckCircle2,
 } from "lucide-react";
 
 function DashboardContent() {
-  const { profile, analysis } = useFinancialMemory();
+  const { profile, analysis, isAutoPayPaused } = useFinancialMemory();
   const [activeSpace, setActiveSpace] = useState<SolutionSpace>("daily-safe");
   const [isBeforeIScanOpen, setIsBeforeIScanOpen] = useState(false);
   const [isSmsParserOpen, setIsSmsParserOpen] = useState(false);
   const [isMemoryViewerOpen, setIsMemoryViewerOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isRiskModalOpen, setIsRiskModalOpen] = useState(false);
+
+  const cardDues = profile.creditCardDues ?? 17908;
+  const salary = profile.monthlySalary || 75000;
+  const pctOfSalary = Math.round((cardDues / salary) * 100);
 
   return (
     <div className="min-h-screen fintech-mesh-bg text-slate-900 flex flex-col selection:bg-emerald-100 selection:text-emerald-900">
@@ -56,35 +63,67 @@ function DashboardContent() {
         {activeSpace === "daily-safe" && (
           <div className="space-y-6 animate-fade-in">
             {/* Silent Portfolio Risk Guard Quick Status Banner */}
-            <div className="fintech-card rounded-2xl p-4 sm:p-4.5 bg-white border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-start sm:items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center shrink-0">
-                  <ShieldAlert className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-slate-900">
-                      Silent Risk Guard: Multi-Card Bill Trap Detected
-                    </span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 font-semibold">
-                      Paused autopay sweep
-                    </span>
+            {isAutoPayPaused ? (
+              <div className="fintech-card rounded-2xl p-4 sm:p-4.5 bg-white border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-start sm:items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center shrink-0">
+                    <ShieldAlert className="w-4 h-4" />
                   </div>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Your credit card bills jumped to <strong>₹17,908 (24% of monthly salary)</strong>. Friday AutoPay sweep is paused so your bank balance stays safe until payday.
-                  </p>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-slate-900">
+                        Silent Risk Guard: Multi-Card Bill Trap Detected
+                      </span>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 font-semibold">
+                        Paused autopay sweep
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Your credit card bills jumped to <strong>{formatINR(cardDues)} ({pctOfSalary}% of monthly salary)</strong>. Friday AutoPay sweep is paused so your bank balance stays safe until payday.
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              <button
-                type="button"
-                onClick={() => setActiveSpace("goal-jars")}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 shrink-0 transition-colors self-start sm:self-auto"
-              >
-                <span>View Risk Details</span>
-                <ArrowRight className="w-3 h-3 text-slate-500" />
-              </button>
-            </div>
+                <button
+                  type="button"
+                  onClick={() => setIsRiskModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 shrink-0 transition-colors self-start sm:self-auto"
+                >
+                  <span>View Risk Details</span>
+                  <ArrowRight className="w-3 h-3 text-slate-500" />
+                </button>
+              </div>
+            ) : (
+              <div className="fintech-card rounded-2xl p-3.5 sm:p-4 bg-emerald-50/50 border border-emerald-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-start sm:items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center justify-center shrink-0">
+                    <CheckCircle2 className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-emerald-950">
+                        All Clear • AutoPay Sweeps Active
+                      </span>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-semibold">
+                        Sweeps Active
+                      </span>
+                    </div>
+                    <p className="text-xs text-emerald-800/80 mt-0.5">
+                      Credit card dues ({formatINR(cardDues)}) are safely under 20% of salary. Weekly Friday Goal Jar sweeps &amp; spare-change round-ups are running smoothly.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsRiskModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white hover:bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0 transition-colors self-start sm:self-auto"
+                >
+                  <span>View Risk Details</span>
+                  <ArrowRight className="w-3 h-3 text-emerald-600" />
+                </button>
+              </div>
+            )}
 
             {/* Transparent 4-Card Monthly Balance Sheet */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-3.5">
@@ -257,6 +296,10 @@ function DashboardContent() {
       <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
+      />
+      <RiskDetailsModal
+        isOpen={isRiskModalOpen}
+        onClose={() => setIsRiskModalOpen(false)}
       />
     </div>
   );

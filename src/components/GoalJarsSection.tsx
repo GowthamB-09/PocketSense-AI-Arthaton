@@ -32,7 +32,7 @@ import {
 import confetti from "canvas-confetti";
 
 export const GoalJarsSection: React.FC = () => {
-  const { profile, addGoalJar, deleteGoalJar, claimSavings } = useFinancialMemory();
+  const { profile, addGoalJar, deleteGoalJar, claimSavings, isAutoPayPaused } = useFinancialMemory();
   const [showAddModal, setShowAddModal] = useState(false);
   const [depositModalGoal, setDepositModalGoal] = useState<GoalJar | null>(null);
   const [depositAmount, setDepositAmount] = useState<string>("2000");
@@ -191,6 +191,11 @@ export const GoalJarsSection: React.FC = () => {
   // 1-Tap Trigger Friday Auto-Sweep
   const handleTriggerFridayAutoSweep = () => {
     if (!isMandateActive) return;
+    if (isAutoPayPaused) {
+      setToastMessage("Friday AutoPay sweep is paused by Silent Risk Guard until your credit card bills are settled.");
+      setTimeout(() => setToastMessage(null), 4000);
+      return;
+    }
 
     setIsSweeping(true);
     const simulatedBuffer = 2400; // unspent weekly buffer
@@ -642,14 +647,24 @@ export const GoalJarsSection: React.FC = () => {
             <button
               type="button"
               onClick={handleTriggerFridayAutoSweep}
-              disabled={!isMandateActive || isSweeping}
-              className="w-full py-3 px-4 rounded-xl text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-2 active:scale-98 min-h-[44px] bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-40"
+              disabled={!isMandateActive || isSweeping || isAutoPayPaused}
+              className={`w-full py-3 px-4 rounded-xl text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-2 active:scale-98 min-h-[44px] ${
+                isAutoPayPaused
+                  ? "bg-amber-100 text-amber-900 border border-amber-300 cursor-not-allowed"
+                  : "bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-40"
+              }`}
             >
-              <Zap className="w-4 h-4 fill-white" />
-              <span>Trigger Friday Auto-Sweep Now</span>
+              <Zap className={`w-4 h-4 ${isAutoPayPaused ? "text-amber-700" : "fill-white"}`} />
+              <span>
+                {isAutoPayPaused
+                  ? "AutoPay Sweep Paused by Silent Risk Guard"
+                  : "Trigger Friday Auto-Sweep Now"}
+              </span>
             </button>
             <span className="text-[10px] text-center text-slate-500 font-mono">
-              Sweeps ₹3,000 into Out-of-Sight Vaults
+              {isAutoPayPaused
+                ? "Paused: Card dues exceed 20% of salary. Settle bills in Risk Details to resume."
+                : "Sweeps ₹3,000 into Out-of-Sight Vaults"}
             </span>
           </div>
         </div>

@@ -33,7 +33,15 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenSmsParser,
   onOpenSettings,
 }) => {
-  const { analysis, profile, loadSyntheticDemo, addBatchTransactions, claimSavings, isAutoPayPaused } = useFinancialMemory();
+  const {
+    analysis,
+    profile,
+    loadSyntheticDemo,
+    addBatchTransactions,
+    claimSavings,
+    isAutoPayPaused,
+    updateCreditCardDues,
+  } = useFinancialMemory();
   const [loadedAlert, setLoadedAlert] = useState(false);
   const [syncAlert, setSyncAlert] = useState<string | null>(null);
   const [isSimulating, setIsSimulating] = useState(false);
@@ -74,6 +82,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         spendingType: "Impulse Want" as const,
         bank: "HDFC Bank UPI",
         rawSms: "Debited Rs.350.00 from HDFC Bank A/C **4412 via UPI to Blue Tokai. Avl Bal Rs.32,400.",
+        isCreditCard: false,
       },
       {
         merchant: "Swiggy Gourmet Bowl",
@@ -82,6 +91,34 @@ export const Navbar: React.FC<NavbarProps> = ({
         spendingType: "Impulse Want" as const,
         bank: "SBI UPI Webhook",
         rawSms: "SBI UPI: Rs.480.00 debited from A/C **9011 to Swiggy. Ref 63199201.",
+        isCreditCard: false,
+      },
+      {
+        merchant: "Zomato Gourmet Dining",
+        amount: 950,
+        category: "Dining & Social" as const,
+        spendingType: "Impulse Want" as const,
+        bank: "ICICI Credit Card Swipe",
+        rawSms: "ICICI Card ending 8810 spent Rs.950.00 at Zomato. Avl Limit Rs.1,44,050.",
+        isCreditCard: true,
+      },
+      {
+        merchant: "Amazon Prime Shopping",
+        amount: 2800,
+        category: "Shopping & Gear" as const,
+        spendingType: "Impulse Want" as const,
+        bank: "HDFC Credit Card Swipe",
+        rawSms: "HDFC Card ending 3321 spent Rs.2800.00 on Amazon Pay. Avl Limit Rs.1,82,000.",
+        isCreditCard: true,
+      },
+      {
+        merchant: "Myntra Fashion Haul",
+        amount: 1650,
+        category: "Shopping & Gear" as const,
+        spendingType: "Impulse Want" as const,
+        bank: "ICICI Credit Card Swipe",
+        rawSms: "ICICI Card ending 8810 spent Rs.1650.00 at Myntra. Avl Limit Rs.1,42,400.",
+        isCreditCard: true,
       },
       {
         merchant: "Zara Lifestyle Store",
@@ -90,6 +127,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         spendingType: "Impulse Want" as const,
         bank: "ICICI Credit Card Swipe",
         rawSms: "ICICI Card ending 8021 spent Rs.1120.00 at ZARA. Avl Limit Rs.1,45,000.",
+        isCreditCard: true,
       },
       {
         merchant: "Zepto 10-Min Groceries",
@@ -98,6 +136,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         spendingType: "Survival Need" as const,
         bank: "HDFC Bank Webhook",
         rawSms: "Debited Rs.320.00 from HDFC Bank to Zepto. Avl Bal Rs.32,080.",
+        isCreditCard: false,
       },
     ];
 
@@ -124,7 +163,30 @@ export const Navbar: React.FC<NavbarProps> = ({
 
     const estimatedRemaining = Math.max(0, analysis.remainingMonthlyPool - pick.amount);
 
-    if (isAutoPayPaused) {
+    // Multi-Account & Credit Card Dues Tracking
+    const currentCardDues = profile.creditCardDues ?? 17908;
+    const currentBankCash = profile.totalLinkedBankCash ?? 48500;
+    let newCardDues = currentCardDues;
+    let newBankCash = currentBankCash;
+
+    if (pick.isCreditCard) {
+      newCardDues += pick.amount;
+    } else {
+      newBankCash = Math.max(0, newBankCash - pick.amount);
+    }
+
+    const salary = profile.monthlySalary || 75000;
+    const threshold = salary * 0.2; // 20% of salary = ₹15,000
+    const shouldPause = newCardDues > threshold;
+    const justSnappedOn = !isAutoPayPaused && shouldPause;
+
+    updateCreditCardDues(newCardDues, newBankCash);
+
+    if (justSnappedOn) {
+      setSyncAlert(
+        `⚠️ ${pick.merchant} pushed card dues to ${formatINR(newCardDues)} (${Math.round((newCardDues / salary) * 100)}% of salary). Silent Risk Guard snapped ON — Friday AutoPay sweep paused!`
+      );
+    } else if (shouldPause) {
       // 1. Block Automatic Round-Up Sweeps When Paused (+₹0 swept to Goal Jar)
       // 2. Show a Clear Risk Guard Message
       setSyncAlert(
