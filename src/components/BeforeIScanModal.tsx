@@ -111,84 +111,80 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
   }, [isOpen, onClose]);
 
   const generateSmartSwap = (text: string, parsedAmount: number): SmartSwapData => {
-    const isFood = /food|dinner|drinks|beer|burger|swiggy|zomato/i.test(text) || parsedAmount === 1500;
-    const isSneakers = /sneaker|shoes|kicks|apparel|shirt|zara/i.test(text) || parsedAmount === 4500;
-    const isEntertainment = /concert|movie|outing|show|theatre/i.test(text) || parsedAmount === 2200;
+    const isFood = /food|dinner|drinks|beer|burger|swiggy|zomato/i.test(text);
+    const isSneakers = /sneaker|shoes|kicks|apparel|shirt|zara/i.test(text);
+    const isEntertainment = /concert|movie|outing|show|theatre|ticket/i.test(text);
+
+    // 1. Ensure origCost is numeric and positive
+    const origCost = parsedAmount > 0 ? parsedAmount : 1500;
+
+    // 2. Proportional Goal Delay Reality Check based on user's daily savings rate (~₹140/day)
+    const dailySavingsRate = 140;
+    const delayDays = Math.max(1, Math.round(origCost / dailySavingsRate));
+    const goalDelayText = `Buying this for ${formatINR(origCost)} delays your ${activeGoal.title} Goal Jar by ${delayDays} ${delayDays === 1 ? "day" : "days"}.`;
+
+    // 3. Dynamic Swap Calculation: ensure swapCost is always strictly less than origCost
+    let swapCost: number;
+    let swapTitle: string;
+    let baseSwapDesc: string;
+    let baseSimplerDesc: string;
 
     if (isFood) {
-      const origCost = parsedAmount || 1500;
-      const swapCost = 550;
-      const diff = Math.max(0, origCost - swapCost);
-      return {
-        originalItem: "Friday Night Food Order",
-        originalCost: origCost,
-        delayDays: 11,
-        activeGoalTitle: activeGoal.title,
-        goalDelayText: `Buying this for ${formatINR(origCost)} delays your ${activeGoal.title} Goal Jar by 11 days.`,
-        swapTitle: "Local Spot & House Hangout",
-        swapDescription: "Swap to a ₹550 local spot or house hangout—same great night, ₹950 cheaper.",
-        swapCost,
-        savedDifference: diff,
-        swapButtonText: `Take the Swap & Sweep ${formatINR(diff)} to Goal Jar`,
-        simplerText: "Spend ₹550 instead of ₹1,500 tonight—you have equal fun and save ₹950 for your iPhone.",
-      };
+      if (origCost === 1500) {
+        swapCost = 550;
+      } else {
+        const raw = Math.round((origCost * 0.40) / 50) * 50;
+        swapCost = Math.min(Math.max(50, raw), Math.max(50, origCost - 50));
+      }
+      swapTitle = "Local Spot & House Hangout";
+      baseSwapDesc = `Swap to a ${formatINR(swapCost)} local spot or house hangout—same great night, `;
+      baseSimplerDesc = `Spend ${formatINR(swapCost)} instead of ${formatINR(origCost)} tonight—you have equal fun and save `;
+    } else if (isSneakers) {
+      if (origCost === 4500) {
+        swapCost = 650;
+      } else {
+        const raw = Math.round((origCost * 0.35) / 50) * 50;
+        swapCost = Math.min(Math.max(50, raw), Math.max(50, origCost - 50));
+      }
+      swapTitle = "Sneaker Restoration & Deep-Clean Kit";
+      baseSwapDesc = `Swap to a ${formatINR(swapCost)} premium sneaker restoration kit—same fresh kick feel, `;
+      baseSimplerDesc = `Spend ${formatINR(swapCost)} instead of ${formatINR(origCost)}—same fresh look and save `;
+    } else if (isEntertainment) {
+      if (origCost === 2200) {
+        swapCost = 700;
+      } else {
+        const raw = Math.round((origCost * 0.40) / 50) * 50;
+        swapCost = Math.min(Math.max(50, raw), Math.max(50, origCost - 50));
+      }
+      swapTitle = "Twilight Matinee & BYO Snacks";
+      baseSwapDesc = `Swap to a ${formatINR(swapCost)} twilight screening with friends + bring your own snacks—same great vibe, `;
+      baseSimplerDesc = `Catch the matinee for ${formatINR(swapCost)} instead of ${formatINR(origCost)}—same movie fun and save `;
+    } else {
+      const raw = Math.round((origCost * 0.40) / 50) * 50;
+      swapCost = Math.min(Math.max(50, raw), Math.max(50, origCost - 50));
+      swapTitle = "Curated Feel-Good Alternative";
+      baseSwapDesc = `Swap to a quality curated alternative for ${formatINR(swapCost)}—enjoy the moment, `;
+      baseSimplerDesc = `Spend ${formatINR(swapCost)} instead of ${formatINR(origCost)}—have fun while saving `;
     }
 
-    if (isSneakers) {
-      const origCost = parsedAmount || 4500;
-      const swapCost = 650;
-      const diff = Math.max(0, origCost - swapCost);
-      return {
-        originalItem: "Branded Sneakers",
-        originalCost: origCost,
-        delayDays: 27,
-        activeGoalTitle: activeGoal.title,
-        goalDelayText: `Buying this for ${formatINR(origCost)} delays your ${activeGoal.title} Goal Jar by 27 days.`,
-        swapTitle: "Sneaker Restoration & Deep-Clean Kit",
-        swapDescription: "Swap to a ₹650 premium sneaker restoration kit to make your current favorite pair look brand new—same fresh kick feel, ₹3,850 cheaper.",
-        swapCost,
-        savedDifference: diff,
-        swapButtonText: `Take the Swap & Sweep ${formatINR(diff)} to Goal Jar`,
-        simplerText: "Clean your favorite kicks for ₹650 instead of spending ₹4,500—same fresh look, ₹3,850 saved.",
-      };
-    }
-
-    if (isEntertainment) {
-      const origCost = parsedAmount || 2200;
-      const swapCost = 700;
-      const diff = Math.max(0, origCost - swapCost);
-      return {
-        originalItem: "Concert / Movie Outing",
-        originalCost: origCost,
-        delayDays: 16,
-        activeGoalTitle: activeGoal.title,
-        goalDelayText: `Buying this for ${formatINR(origCost)} delays your ${activeGoal.title} Goal Jar by 16 days.`,
-        swapTitle: "Twilight Matinee & BYO Snacks",
-        swapDescription: "Swap to a ₹700 twilight screening with friends + bring your own favorite snacks—same great vibe, ₹1,500 cheaper.",
-        swapCost,
-        savedDifference: diff,
-        swapButtonText: `Take the Swap & Sweep ${formatINR(diff)} to Goal Jar`,
-        simplerText: "Catch the matinee for ₹700 instead of ₹2,200—same movie fun, ₹1,500 saved for your goal.",
-      };
-    }
-
-    const origCost = parsedAmount > 0 ? parsedAmount : 1800;
-    const swapCost = Math.round(origCost * 0.35);
-    const diff = Math.max(0, origCost - swapCost);
-    const estimatedDays = Math.max(2, Math.round(origCost / 135));
+    // 4. Dynamic Savings & Sweep Math: strictly bound to savedDifference
+    const savedDifference = Math.max(0, origCost - swapCost);
+    const swapDescription = `${baseSwapDesc}${formatINR(savedDifference)} cheaper.`;
+    const swapButtonText = `Take the Swap & Sweep ${formatINR(savedDifference)} to Goal Jar`;
+    const simplerText = `${baseSimplerDesc}${formatINR(savedDifference)} for your ${activeGoal.title}.`;
 
     return {
-      originalItem: text || "Item",
+      originalItem: text || (isFood ? "Food Order" : isSneakers ? "Branded Sneakers" : isEntertainment ? "Entertainment" : "Extra Spend Item"),
       originalCost: origCost,
-      delayDays: estimatedDays,
+      delayDays,
       activeGoalTitle: activeGoal.title,
-      goalDelayText: `Buying this for ${formatINR(origCost)} delays your ${activeGoal.title} Goal Jar by ${estimatedDays} days.`,
-      swapTitle: "Curated Feel-Good Alternative",
-      swapDescription: `Swap to a quality curated alternative for ${formatINR(swapCost)}—enjoy the moment while keeping ${formatINR(diff)} in your pocket.`,
+      goalDelayText,
+      swapTitle,
+      swapDescription,
       swapCost,
-      savedDifference: diff,
-      swapButtonText: `Take the Swap & Sweep ${formatINR(diff)} to Goal Jar`,
-      simplerText: `Spend ${formatINR(swapCost)} instead of ${formatINR(origCost)}—have fun while saving ${formatINR(diff)} for your ${activeGoal.title}.`,
+      savedDifference,
+      swapButtonText,
+      simplerText,
     };
   };
 
@@ -269,7 +265,7 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
             </div>
             <div>
               <h3 className="text-sm font-bold text-slate-900 tracking-tight">
-                Before-I-Scan AI Pay Guard
+                AI Pay Guard
               </h3>
               <p className="text-[11px] text-slate-500">
                 AI evaluates your spend and suggests a feel-good Smart Swap
