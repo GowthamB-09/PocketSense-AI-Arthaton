@@ -257,7 +257,7 @@ export const SmartCashFlowCalendar: React.FC<SmartCashFlowCalendarProps> = ({
         category: "autopay",
         isPreLocked: false,
         isPaid: false,
-        notes: `Salary credited on Day ${salaryCreditDay} (configured in Settings).`,
+        notes: `Salary credited on Day ${salaryCreditDay}.`,
       });
     }
     return list;
@@ -360,7 +360,7 @@ export const SmartCashFlowCalendar: React.FC<SmartCashFlowCalendarProps> = ({
         <div
           onClick={() => setSelectedDateStr(paydayDateStr)}
           className="flex items-center gap-1.5 cursor-pointer hover:opacity-85 transition-opacity"
-          title={`Payday set to Day ${paydayNum} in Budget Settings. Click to view.`}
+          title={`Payday: Day ${paydayNum}. Click to view.`}
         >
           <span className="text-amber-500 text-xs shrink-0">⭐</span>
           <span className="font-semibold text-emerald-800">Payday</span>
@@ -457,19 +457,6 @@ export const SmartCashFlowCalendar: React.FC<SmartCashFlowCalendarProps> = ({
 
                 {/* Event Indicators Row Inside Cell */}
                 <div className="space-y-0.5 mt-auto">
-                  {/* Dynamic Payday Badge if this is the Payday */}
-                  {isPayday && (
-                    <div
-                      className="hidden sm:flex items-center gap-1 px-1 py-0.5 rounded text-[9px] font-mono font-semibold truncate border bg-emerald-50 border-emerald-300 text-emerald-900"
-                      title={`Monthly Salary Credited (${formatINR(profile.monthlySalary || 75000)})`}
-                    >
-                      <span className="shrink-0">⭐</span>
-                      <span className="truncate">Payday</span>
-                      <span className="ml-auto font-bold shrink-0">
-                        ₹{Math.round((profile.monthlySalary || 75000) / 1000)}k
-                      </span>
-                    </div>
-                  )}
                   {dayEvents.map((evt) => {
                     const cfg = CATEGORY_CONFIG[evt.category] || CATEGORY_CONFIG.birthday;
                     return (
