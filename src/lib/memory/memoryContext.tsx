@@ -9,8 +9,10 @@ import {
 } from "@/types";
 import {
   calculateDailyBudgetAnalysis,
+  deduplicateImpulseDecisions,
   getStoredProfile,
   getStoredTransactions,
+  isMatchingImpulseDecision,
   resetStorageToDemo,
   saveProfile,
   saveTransactions,
@@ -30,6 +32,15 @@ interface FinancialMemoryContextType {
   addBatchTransactions: (txs: Transaction[]) => void;
   deleteTransaction: (id: string) => void;
   claimSavings: (goalId: string, amount: number, promptText?: string) => void;
+  recordSmartSwap: (params: {
+    goalId: string;
+    originalCost: number;
+    swapCost: number;
+    savedDifference: number;
+    originalItem: string;
+    swapTitle: string;
+    query?: string;
+  }) => { oldAmountSaved: number; netAdjustment: number; newTotalSwept: number };
   updateSalary: (
     monthlySalary: number,
     fixedEssentials: number,
@@ -169,14 +180,126 @@ export function FinancialMemoryProvider({ children }: { children: React.ReactNod
         targetGoalJarId: goalId,
       };
 
+      const updatedDecisions = deduplicateImpulseDecisions([newDecision, ...prev.pastImpulseDecisions]);
+
       return {
         ...prev,
         goals: updatedGoals,
         totalSavedToJars: prev.totalSavedToJars + amount,
         disciplineStreak: prev.disciplineStreak + 1,
-        pastImpulseDecisions: [newDecision, ...prev.pastImpulseDecisions],
+        pastImpulseDecisions: updatedDecisions,
       };
     });
+  };
+
+  const recordSmartSwap = ({
+    goalId,
+    originalCost,
+    swapCost,
+    savedDifference,
+    originalItem,
+    swapTitle,
+    query,
+  }: {
+    goalId: string;
+    originalCost: number;
+    swapCost: number;
+    savedDifference: number;
+    originalItem: string;
+    swapTitle: string;
+    query?: string;
+  }) => {
+    let oldAmountSaved = 0;
+    let netAdjustment = savedDifference;
+    let newTotal = 0;
+
+    // 1. Deduct swapCost from Safe Pool & add to Spent This Month via real transaction
+    const swapTx: Transaction = {
+      id: "tx_swap_" + Date.now(),
+      merchant: `Smart Swap: ${swapTitle}`,
+      amount: swapCost,
+      date: new Date().toISOString().split("T")[0],
+      category: "Shopping & Gear",
+      spendingType: "Impulse Want",
+      upiRef: "SWAP" + Math.floor(1000000000 + Math.random() * 9000000000),
+      bank: "UPI Smart Swap",
+      triggerTag: "smart-swap-accepted",
+      rawSms: `[Smart Swap Accepted] Paid Rs. ${swapCost} instead of full Rs. ${originalCost}`,
+    };
+
+    setTransactions((prev) => {
+      const filtered = prev.filter((t) => {
+        if (t.triggerTag === "smart-swap-accepted" || t.triggerTag === "full-spend-proceeded") {
+          return !isMatchingImpulseDecision(
+            { prompt: t.merchant, amount: t.amount },
+            query || originalItem,
+            originalItem,
+            originalCost
+          );
+        }
+        return true;
+      });
+      return [swapTx, ...filtered];
+    });
+
+    // 2. Recompute Goal Jar & Total Swept: reverse old full-skip & apply new swap savings
+    setProfile((prev) => {
+      const existingDecisions = prev.pastImpulseDecisions || [];
+      const matchingIdx = existingDecisions.findIndex((dec) =>
+        isMatchingImpulseDecision(dec, query || originalItem, originalItem, originalCost)
+      );
+
+      let remainingDecisions = [...existingDecisions];
+      if (matchingIdx !== -1) {
+        const prevDec = existingDecisions[matchingIdx];
+        oldAmountSaved = prevDec.amountSaved || prevDec.amount;
+        netAdjustment = savedDifference - oldAmountSaved;
+        remainingDecisions.splice(matchingIdx, 1);
+      } else {
+        oldAmountSaved = 0;
+        netAdjustment = savedDifference;
+      }
+
+      const newDecision = {
+        id: "dec_swap_" + Date.now(),
+        timestamp: new Date().toISOString(),
+        prompt: query || `Smart Swap: ${originalItem} (₹${originalCost.toLocaleString("en-IN")})`,
+        amount: originalCost,
+        merchant: `Smart Swap: ${swapTitle}`,
+        verdict: "BLOCKED" as const,
+        actionTaken: "skipped_and_saved" as const,
+        amountSaved: savedDifference,
+        targetGoalJarId: goalId,
+      };
+
+      const updatedDecisions = deduplicateImpulseDecisions([newDecision, ...remainingDecisions]);
+
+      const updatedGoals = prev.goals.map((goal) => {
+        if (goal.id === goalId || (goal.title.toLowerCase().includes("iphone") && goalId.includes("iphone"))) {
+          return {
+            ...goal,
+            currentAmount: Math.max(0, goal.currentAmount + netAdjustment),
+            totalSavedFromNudges: Math.max(0, goal.totalSavedFromNudges + netAdjustment),
+            lastUpdated: new Date().toISOString(),
+          };
+        }
+        return goal;
+      });
+
+      newTotal = Math.max(0, prev.totalSavedToJars + netAdjustment);
+
+      const updatedProfile = {
+        ...prev,
+        goals: updatedGoals,
+        totalSavedToJars: newTotal,
+        pastImpulseDecisions: updatedDecisions,
+      };
+
+      saveProfile(updatedProfile);
+      return updatedProfile;
+    });
+
+    return { oldAmountSaved, netAdjustment, newTotalSwept: newTotal };
   };
 
   const updateSalary = (
@@ -293,6 +416,7 @@ ${profile.vulnerabilityZones.map((z) => `- ${z}`).join("\n")}
         addBatchTransactions,
         deleteTransaction,
         claimSavings,
+        recordSmartSwap,
         updateSalary,
         addGoalJar,
         updateGoalJar,

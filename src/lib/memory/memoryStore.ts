@@ -200,6 +200,90 @@ export function calculateDailyBudgetAnalysis(
   };
 }
 
+/**
+ * Generates a normalized semantic key for an impulse decision item
+ * to match decisions across different user queries or swap descriptions.
+ */
+export function normalizeDecisionKey(prompt?: string, merchant?: string, amount?: number): string {
+  const text = `${prompt || ""} ${merchant || ""}`.toLowerCase();
+  
+  if (text.includes("watch") || text.includes("tissot") || text.includes("timepiece") || amount === 14990) {
+    return "item_mechanical_watch";
+  }
+  if (text.includes("staycation") || text.includes("resort") || (amount === 4500 && text.includes("weekend"))) {
+    return "item_staycation";
+  }
+  if (text.includes("food") || text.includes("dinner") || text.includes("burger") || text.includes("swiggy") || amount === 1500) {
+    return "item_food_order";
+  }
+  if (text.includes("sneaker") || text.includes("shoes") || text.includes("kicks") || (amount === 4500 && text.includes("sneaker"))) {
+    return "item_sneakers";
+  }
+  if (text.includes("concert") || text.includes("movie") || text.includes("ticket") || amount === 2200) {
+    return "item_entertainment";
+  }
+
+  // Fallback: strip punctuation and non-alphanumeric, extract core words
+  const cleaned = text
+    .replace(/[₹$,]/g, "")
+    .replace(/\b(can i buy|should i buy|should i|can i|smart swap|saved|spent|instead of|a|an|the|on sale|flash sale)\b/g, "")
+    .replace(/[^\w]/g, "")
+    .trim();
+  
+  return cleaned ? `item_${cleaned}` : `item_${amount || 0}`;
+}
+
+/**
+ * Checks whether an impulse decision matches a query/item
+ */
+export function isMatchingImpulseDecision(
+  dec: { prompt: string; merchant?: string; amount?: number; amountSaved?: number },
+  query: string,
+  originalItem: string,
+  originalCost: number
+): boolean {
+  const key1 = normalizeDecisionKey(dec.prompt, dec.merchant, dec.amount || dec.amountSaved);
+  const key2 = normalizeDecisionKey(query, originalItem, originalCost);
+  if (key1 && key2 && key1 === key2) return true;
+
+  const normQuery = (query || "").toLowerCase().replace(/[^\w]/g, "");
+  const normItem = (originalItem || "").toLowerCase().replace(/[^\w]/g, "");
+  const normPrompt = (dec.prompt || "").toLowerCase().replace(/[^\w]/g, "");
+  const normMerchant = ((dec.merchant || "")).toLowerCase().replace(/[^\w]/g, "");
+
+  if (normPrompt.includes(normQuery) || normQuery.includes(normPrompt)) return true;
+  if (normPrompt.includes(normItem) || normItem.includes(normPrompt)) return true;
+  if (normMerchant.includes(normItem) || normItem.includes(normMerchant)) return true;
+
+  if (originalCost > 1000 && (dec.amount === originalCost || dec.amountSaved === originalCost)) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Deduplicates past impulse decisions so only the latest decision is preserved for each item.
+ */
+export function deduplicateImpulseDecisions(
+  decisions: FinancialMemoryProfile["pastImpulseDecisions"]
+): FinancialMemoryProfile["pastImpulseDecisions"] {
+  if (!Array.isArray(decisions)) return [];
+
+  const seenKeys = new Set<string>();
+  const deduplicated: FinancialMemoryProfile["pastImpulseDecisions"] = [];
+
+  for (const dec of decisions) {
+    const key = normalizeDecisionKey(dec.prompt, dec.merchant, dec.amount || dec.amountSaved);
+    if (!seenKeys.has(key)) {
+      seenKeys.add(key);
+      deduplicated.push(dec);
+    }
+  }
+
+  return deduplicated;
+}
+
 export function getStoredProfile(): FinancialMemoryProfile {
   if (typeof window === "undefined") return SYNTHETIC_DEMO_PROFILE;
   try {
@@ -209,8 +293,14 @@ export function getStoredProfile(): FinancialMemoryProfile {
       // Ensure goals array is valid; only initialize with demo goals if never set
       if (!Array.isArray(parsed.goals)) {
         parsed.goals = INITIAL_GOAL_JARS;
-        localStorage.setItem(STORAGE_KEY_PROFILE, JSON.stringify(parsed));
       }
+
+      // Deduplicate impulse decisions on load & clean up duplicates
+      if (Array.isArray(parsed.pastImpulseDecisions)) {
+        parsed.pastImpulseDecisions = deduplicateImpulseDecisions(parsed.pastImpulseDecisions);
+      }
+
+      localStorage.setItem(STORAGE_KEY_PROFILE, JSON.stringify(parsed));
       return parsed;
     }
   } catch (e) {

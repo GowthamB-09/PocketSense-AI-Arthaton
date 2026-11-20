@@ -9,6 +9,7 @@ import {
   CoachAnswer,
   generateBeginnerCoachAdvice,
 } from "@/lib/ai/coachResponses";
+import { deduplicateImpulseDecisions } from "@/lib/memory/memoryStore";
 import {
   Zap,
   Sparkles,
@@ -50,7 +51,7 @@ interface SmartSwapData {
 export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
   onSwitchToGoals,
 }) => {
-  const { profile, analysis, claimSavings, addBatchTransactions } = useFinancialMemory();
+  const { profile, analysis, claimSavings, recordSmartSwap, addBatchTransactions } = useFinancialMemory();
   const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"swaps" | "coach">("swaps");
@@ -99,12 +100,13 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
 
   // Helper to generate goal-aware Smart Swap advice
   const generateSmartSwap = (text: string, parsedAmount: number): SmartSwapData => {
+    // 1. Ensure origCost is numeric and positive
+    const origCost = parsedAmount > 0 ? parsedAmount : 1500;
+
     const isFood = /food|dinner|drinks|beer|burger|swiggy|zomato/i.test(text);
     const isSneakers = /sneaker|shoes|kicks|apparel|shirt|zara/i.test(text);
     const isEntertainment = /concert|movie|outing|show|theatre|ticket/i.test(text);
-
-    // 1. Ensure origCost is numeric and positive
-    const origCost = parsedAmount > 0 ? parsedAmount : 1500;
+    const isWatch = /watch|mechanical|tissot|timepiece|horology/i.test(text) || origCost === 14990;
 
     // 2. Proportional Goal Delay Reality Check based on user's daily savings rate (~₹140/day)
     const dailySavingsRate = 140;
@@ -117,7 +119,12 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
     let baseSwapDesc: string;
     let baseSimplerDesc: string;
 
-    if (isFood) {
+    if (isWatch) {
+      swapCost = origCost === 14990 ? 5247 : Math.round(origCost * 0.35);
+      swapTitle = "Seiko/Citizen Automatic Alternative";
+      baseSwapDesc = `Swap to a ${formatINR(swapCost)} curated automatic mechanical alternative—same timeless horology, `;
+      baseSimplerDesc = `Spend ${formatINR(swapCost)} instead of ${formatINR(origCost)}—same classic mechanical look and save `;
+    } else if (isFood) {
       if (origCost === 1500) {
         swapCost = 550;
       } else {
@@ -162,7 +169,7 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
     const simplerText = `${baseSimplerDesc}${formatINR(savedDifference)} for your ${activeGoal.title}.`;
 
     return {
-      originalItem: text || (isFood ? "Food Order" : isSneakers ? "Branded Sneakers" : isEntertainment ? "Entertainment" : "Extra Spend Item"),
+      originalItem: text || (isWatch ? "Mechanical Watch" : isFood ? "Food Order" : isSneakers ? "Branded Sneakers" : isEntertainment ? "Entertainment" : "Extra Spend Item"),
       originalCost: origCost,
       delayDays,
       activeGoalTitle: activeGoal.title,
@@ -233,31 +240,31 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
   const handleAcceptSmartSwap = () => {
     if (!smartSwapResult) return;
 
-    const { swapCost, savedDifference, swapTitle, originalItem } = smartSwapResult;
+    const { swapCost, savedDifference, swapTitle, originalItem, originalCost } = smartSwapResult;
+    const queryText = prompt.trim() || originalItem;
 
-    // 1. Deduct ONLY swapCost (e.g. ₹550) from "Total Safe-to-Spend Pool" via a real ledger transaction
-    const swapTx: Transaction = {
-      id: "tx_swap_" + Date.now(),
-      merchant: `Smart Swap: ${swapTitle}`,
-      amount: swapCost,
-      date: new Date().toISOString().split("T")[0],
-      category: "Dining & Social",
-      spendingType: "Impulse Want",
-      upiRef: "SWAP" + Math.floor(1000000000 + Math.random() * 9000000000),
-      bank: "UPI Smart Swap",
-      triggerTag: "smart-swap-accepted",
-      rawSms: `[Smart Swap Accepted] Paid Rs. ${swapCost} instead of full Rs. ${smartSwapResult.originalCost}`,
-    };
-    addBatchTransactions([swapTx]);
+    // Use recordSmartSwap to replace superseded entry, adjust goal jar & safe pool, and deduplicate
+    const { oldAmountSaved, netAdjustment } = recordSmartSwap({
+      goalId: activeGoal.id,
+      originalCost,
+      swapCost,
+      savedDifference,
+      originalItem,
+      swapTitle,
+      query: queryText,
+    });
 
-    // 2. Add the savedDifference (e.g. ₹950) directly into the active Goal Jar progress bar
-    claimSavings(activeGoal.id, savedDifference, `Smart Swap: Saved ${formatINR(savedDifference)} on ${originalItem}`);
-
-    // 3. Show celebratory confirmation toast
     const newPool = Math.max(0, safePoolAmount - swapCost);
-    setSwapSuccessMessage(
-      `🎉 Smart Swap Accepted! Spent only ${formatINR(swapCost)} • ${formatINR(savedDifference)} swept directly into your ${activeGoal.title} Goal Jar! Total Safe Pool: ${formatINR(newPool)}.`
-    );
+
+    if (oldAmountSaved > 0) {
+      setSwapSuccessMessage(
+        `🎉 Smart Swap Accepted! Spent only ${formatINR(swapCost)} • Replaced previous full-skip (${formatINR(oldAmountSaved)}) with +${formatINR(savedDifference)} swept into your ${activeGoal.title} Goal Jar (Net adjustment: ${netAdjustment >= 0 ? "+" : ""}${formatINR(netAdjustment)}) • Safe Pool: ${formatINR(newPool)}.`
+      );
+    } else {
+      setSwapSuccessMessage(
+        `🎉 Smart Swap Accepted! Spent only ${formatINR(swapCost)} • ${formatINR(savedDifference)} swept directly into your ${activeGoal.title} Goal Jar! Total Safe Pool: ${formatINR(newPool)}.`
+      );
+    }
 
     confetti({
       particleCount: 55,
@@ -732,43 +739,49 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
           </span>
         </div>
 
-        {profile.pastImpulseDecisions.length === 0 ? (
-          <div className="text-center py-8 text-xs text-slate-500">
-            No impulse purchases intercepted yet. Tap any preset above to test the Smart Swap!
-          </div>
-        ) : (
-          <div className="divide-y divide-slate-100">
-            {profile.pastImpulseDecisions.map((dec) => (
-              <div
-                key={dec.id}
-                className="py-3.5 flex items-center justify-between gap-3 text-xs"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center shrink-0 mt-0.5">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                  </div>
-                  <div>
-                    <span className="font-semibold text-slate-900 block">
-                      {dec.prompt}
-                    </span>
-                    <span className="text-[11px] text-slate-500">
-                      {dec.merchant} • Swept into {profile.goals.find((g) => g.id === dec.targetGoalJarId)?.title || activeGoal.title}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="text-right font-mono shrink-0">
-                  <span className="font-bold text-emerald-700 text-sm block">
-                    +{formatINR(dec.amountSaved || dec.amount)}
-                  </span>
-                  <span className="text-[10px] text-slate-500">
-                    Swept
-                  </span>
-                </div>
+        {(() => {
+          const displayedDecisions = deduplicateImpulseDecisions(profile.pastImpulseDecisions);
+          if (displayedDecisions.length === 0) {
+            return (
+              <div className="text-center py-8 text-xs text-slate-500">
+                No impulse purchases intercepted yet. Tap any preset above to test the Smart Swap!
               </div>
-            ))}
-          </div>
-        )}
+            );
+          }
+          return (
+            <div className="divide-y divide-slate-100">
+              {displayedDecisions.map((dec) => (
+                <div
+                  key={dec.id}
+                  className="py-3.5 flex items-center justify-between gap-3 text-xs"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center shrink-0 mt-0.5">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                    </div>
+                    <div>
+                      <span className="font-semibold text-slate-900 block">
+                        {dec.prompt}
+                      </span>
+                      <span className="text-[11px] text-slate-500">
+                        {dec.merchant} • Swept into {profile.goals.find((g) => g.id === dec.targetGoalJarId)?.title || activeGoal.title}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="text-right font-mono shrink-0">
+                    <span className="font-bold text-emerald-700 text-sm block">
+                      +{formatINR(dec.amountSaved || dec.amount)}
+                    </span>
+                    <span className="text-[10px] text-slate-500">
+                      Swept
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          );
+        })()}
       </div>
     </div>
   );

@@ -47,7 +47,7 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { profile, analysis, claimSavings, addBatchTransactions } = useFinancialMemory();
+  const { profile, analysis, recordSmartSwap } = useFinancialMemory();
   const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [smartSwapResult, setSmartSwapResult] = useState<SmartSwapData | null>(null);
@@ -217,30 +217,28 @@ export const BeforeIScanModal: React.FC<BeforeIScanModalProps> = ({
   const handleAcceptSmartSwap = () => {
     if (!smartSwapResult) return;
 
-    const { swapCost, savedDifference, swapTitle, originalItem } = smartSwapResult;
+    const { swapCost, savedDifference, swapTitle, originalItem, originalCost } = smartSwapResult;
 
-    // Deduct ONLY swapCost from Total Safe-to-Spend Pool
-    const swapTx: Transaction = {
-      id: "tx_modal_swap_" + Date.now(),
-      merchant: `Smart Swap: ${swapTitle}`,
-      amount: swapCost,
-      date: new Date().toISOString().split("T")[0],
-      category: "Dining & Social",
-      spendingType: "Impulse Want",
-      upiRef: "SWAP" + Math.floor(1000000000 + Math.random() * 9000000000),
-      bank: "UPI Pay Guard",
-      triggerTag: "smart-swap-accepted",
-      rawSms: `[Smart Swap Accepted] Paid Rs. ${swapCost} instead of full Rs. ${smartSwapResult.originalCost}`,
-    };
-    addBatchTransactions([swapTx]);
-
-    // Add savedDifference directly into active Goal Jar
-    claimSavings(activeGoal.id, savedDifference, `Smart Swap: Saved ${formatINR(savedDifference)} on ${originalItem}`);
+    const { oldAmountSaved, netAdjustment } = recordSmartSwap({
+      goalId: activeGoal.id,
+      originalCost,
+      swapCost,
+      savedDifference,
+      originalItem,
+      swapTitle,
+      query: prompt.trim() || originalItem,
+    });
 
     const newPool = Math.max(0, safePoolAmount - swapCost);
-    setSwapSuccessMessage(
-      `🎉 Smart Swap Accepted! Spent only ${formatINR(swapCost)} • ${formatINR(savedDifference)} swept directly into your ${activeGoal.title} Goal Jar!`
-    );
+    if (oldAmountSaved > 0) {
+      setSwapSuccessMessage(
+        `🎉 Smart Swap Accepted! Spent only ${formatINR(swapCost)} • Replaced previous full-skip (${formatINR(oldAmountSaved)}) with +${formatINR(savedDifference)} swept into your ${activeGoal.title} Goal Jar (Net adjustment: ${netAdjustment >= 0 ? "+" : ""}${formatINR(netAdjustment)}) • Safe Pool: ${formatINR(newPool)}.`
+      );
+    } else {
+      setSwapSuccessMessage(
+        `🎉 Smart Swap Accepted! Spent only ${formatINR(swapCost)} • ${formatINR(savedDifference)} swept directly into your ${activeGoal.title} Goal Jar! Total Safe Pool: ${formatINR(newPool)}.`
+      );
+    }
 
     confetti({
       particleCount: 50,
