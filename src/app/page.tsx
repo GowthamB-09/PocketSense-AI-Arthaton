@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { FinancialMemoryProvider, useFinancialMemory } from "@/lib/memory/memoryContext";
 import { Navbar } from "@/components/Navbar";
 import { DailySafeCard } from "@/components/DailySafeCard";
-import { RunOutDayPredictor } from "@/components/RunOutDayPredictor";
 import { GoalJarsSection } from "@/components/GoalJarsSection";
 import { BeforeIScanModal } from "@/components/BeforeIScanModal";
 import { SmsParserDrawer } from "@/components/SmsParserDrawer";
@@ -132,19 +131,12 @@ function DashboardContent() {
             {/* Salary Allocation & Safe Pool Breakdown Bar Card */}
             <SalaryAllocationBar onOpenSettings={() => setIsSettingsOpen(true)} />
 
-            {/* Hero Row: Daily Budget & Days Left */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-              <div className="lg:col-span-7">
-                <DailySafeCard
-                  onOpenBeforeIScan={() => setActiveSpace("before-i-scan")}
-                  onOpenSettings={() => setIsSettingsOpen(true)}
-                  onOpenRiskDetails={() => setIsRiskModalOpen(true)}
-                />
-              </div>
-              <div className="lg:col-span-5">
-                <RunOutDayPredictor />
-              </div>
-            </div>
+            {/* Main Safe Pool Card */}
+            <DailySafeCard
+              onOpenBeforeIScan={() => setActiveSpace("before-i-scan")}
+              onOpenSettings={() => setIsSettingsOpen(true)}
+              onOpenRiskDetails={() => setIsRiskModalOpen(true)}
+            />
 
             {/* Quick-Link CTA: Need a second opinion on a purchase? */}
             <div className="fintech-card rounded-2xl p-4 bg-gradient-to-r from-emerald-50/70 via-slate-50 to-white border border-emerald-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
