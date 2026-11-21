@@ -49,11 +49,11 @@ export const SolutionSpaceSwitcher: React.FC<SolutionSpaceSwitcherProps> = ({
     },
     {
       id: "passbook" as SolutionSpace,
-      label: "SMS & Insights",
-      mobileLabel: "SMS & Insights",
-      subtitle: "Zero-Touch Autopilot",
+      label: "Auto-Tracked Spending",
+      mobileLabel: "Auto-Tracked",
+      subtitle: "Auto-Synced Spends",
       icon: Smartphone,
-      badge: "Autopilot",
+      badge: "Auto-Sync",
     },
   ];
 

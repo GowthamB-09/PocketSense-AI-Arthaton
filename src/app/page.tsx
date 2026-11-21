@@ -178,7 +178,7 @@ function DashboardContent() {
           </div>
         )}
 
-        {/* SPACE 4: SMS & INSIGHTS (ZERO-TOUCH AUTOPILOT) */}
+        {/* SPACE 4: AUTO-TRACKED SPENDING */}
         {activeSpace === "passbook" && (
           <PassbookSpace onOpenSmsDrawer={() => setIsSmsParserOpen(true)} />
         )}
