@@ -9,11 +9,9 @@ import { SpendingTrendChart } from "@/components/SpendingTrendChart";
 import {
   Smartphone,
   Mail,
-  Radio,
   Zap,
   Check,
   Copy,
-  CheckCircle,
   CreditCard,
   ShoppingBag,
   UtensilsCrossed,
@@ -22,11 +20,7 @@ import {
   PieChart,
   Bell,
   Clock,
-  ArrowDownRight,
-  ArrowUpRight,
-  ShieldAlert,
   Layers,
-  Sparkles,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 
@@ -57,19 +51,17 @@ export interface ActivityEvent {
 export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
   const {
     profile,
-    transactions,
     addBatchTransactions,
     updateCreditCardDues,
     isAutoPayPaused,
     claimSavings,
-    updateSalary,
   } = useFinancialMemory();
 
   const [activeTab, setActiveTab] = useState<"autopilot-sync" | "insights" | "ledger">("autopilot-sync");
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [liveToast, setLiveToast] = useState<string | null>(null);
 
-  // Requirement 4: Top Spend Categories initialized to sum exactly to spentThisMonth (₹17,708)
+  // Top Spend Categories initialized to sum exactly to spentThisMonth (₹17,708)
   // 6850 + 4920 + 3438 + 2500 = 17,708
   const [categoryBreakdown, setCategoryBreakdown] = useState<Record<SpendCategory, number>>({
     "Food & Dining": 6850,
@@ -78,16 +70,16 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
     "Entertainment & Outings": 2500,
   });
 
-  // Requirement 4: Default Sample SMS with Avl Bal matching totalLinkedBankCash (INR 48,500.00)
+  // Default Sample SMS with Avl Bal matching totalLinkedBankCash (INR 48,500.00)
   const currentBankCash = profile.totalLinkedBankCash ?? 48500;
   const DEFAULT_SAMPLE_SMS = `Debited INR 540.00 from HDFC Bank A/C **4412 via UPI to ZOMATO ONLINE. Avl Bal: INR ${currentBankCash.toLocaleString("en-IN")}.00.`;
   const [smsInput, setSmsInput] = useState<string>(DEFAULT_SAMPLE_SMS);
 
-  // Requirement 3: Live Multi-Bank SMS Feed list
+  // Clean Consumer Activity Stream
   const [activityStream, setActivityStream] = useState<ActivityEvent[]>([
     {
       id: "ev_1",
-      source: "Phone SMS Webhook",
+      source: "Bank / UPI SMS",
       title: "UPI Debit Auto-Captured",
       merchant: "Swiggy Gourmet Bowl",
       amount: 480,
@@ -99,7 +91,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
     },
     {
       id: "ev_2",
-      source: "Gmail Auto-Forward",
+      source: "Credit Card SMS",
       title: "Credit Card e-Bill Parsed",
       merchant: "ICICI Bank Coral Card",
       amount: 11500,
@@ -110,7 +102,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
     },
     {
       id: "ev_3",
-      source: "Phone SMS Webhook",
+      source: "Bank / UPI SMS",
       title: "UPI Debit Auto-Captured",
       merchant: "Blue Tokai Coffee Roasters",
       amount: 350,
@@ -122,6 +114,17 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
     },
     {
       id: "ev_4",
+      source: "Gmail Auto-Forward",
+      title: "Index Fund SIP Auto-Debited",
+      merchant: "Nifty 50 Index Mutual Fund",
+      amount: 5000,
+      time: "Yesterday @ 6:00 PM",
+      type: "debit",
+      category: "Investments & SIPs",
+      bankTag: "Zerodha / HDFC Bank",
+    },
+    {
+      id: "ev_5",
       source: "Bank / UPI SMS",
       title: "Quick Commerce Debit Parsed",
       merchant: "Zepto 10-Min Groceries",
@@ -133,7 +136,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
       roundUp: 60,
     },
     {
-      id: "ev_5",
+      id: "ev_6",
       source: "Bank / UPI SMS",
       title: "Commute Debit Parsed",
       merchant: "Uber Ride Home",
@@ -146,13 +149,49 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
     },
   ]);
 
+  // Consumer Tag Helper for Clean Badges (UPI, Card Bill, SIP)
+  const getConsumerTag = (ev: ActivityEvent) => {
+    if (
+      ev.category === "Investments & SIPs" ||
+      /sip|invest/i.test(ev.title) ||
+      /sip|fund/i.test(ev.merchant)
+    ) {
+      return {
+        label: "SIP",
+        badgeClass: "bg-purple-50 text-purple-700 border-purple-200",
+        iconBg: "bg-purple-100 text-purple-700",
+        icon: <Layers className="w-4 h-4" />,
+      };
+    }
+    if (
+      ev.type === "bill" ||
+      ev.source === "Credit Card SMS" ||
+      ev.category === "Credit Card Bill" ||
+      /card/i.test(ev.merchant) ||
+      /card/i.test(ev.bankTag)
+    ) {
+      return {
+        label: "Card Bill",
+        badgeClass: "bg-blue-50 text-blue-700 border-blue-200",
+        iconBg: "bg-blue-100 text-blue-700",
+        icon: <CreditCard className="w-4 h-4" />,
+      };
+    }
+    return {
+      label: "UPI",
+      badgeClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
+      iconBg: "bg-emerald-100 text-emerald-700",
+      icon: <Smartphone className="w-4 h-4" />,
+    };
+  };
+
   // ─────────────────────────────────────────────────────────────────────────────
   // 1. REAL REGEX SMS PARSING ENGINE
   // ─────────────────────────────────────────────────────────────────────────────
   const parseSmsDetails = (text: string) => {
     const clean = text.trim();
 
-    // Requirement 1: Parse actual rupee amount using /INR\s*([\d,]+(?:\.\d+)?)|Rs\.?\s*([\d,]+(?:\.\d+)?)/i
+    // Parse rupee amount using /INR\s*([\d,]+(?:\.\d+)?)|Rs\.?\s*([\d,]+(?:\.\d+)?)/i
     // Matches INR 540.00 accurately to 540 (not 5,400)
     const amountRegex = /INR\s*([\d,]+(?:\.\d+)?)|Rs\.?\s*([\d,]+(?:\.\d+)?)/i;
     const match = clean.match(amountRegex);
@@ -163,7 +202,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
         amount = parseFloat(rawVal.replace(/,/g, ""));
       }
     }
-    // Fallback for ₹ symbol if neither INR nor Rs. is present
+    // Fallback for ₹ symbol
     if (amount === 0) {
       const symbolMatch = clean.match(/₹\s*([\d,]+(?:\.\d+)?)/i);
       if (symbolMatch && symbolMatch[1]) {
@@ -171,7 +210,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
       }
     }
 
-    // Requirement 1: Extract merchant name (e.g., ZOMATO ONLINE -> Zomato)
+    // Extract merchant name (e.g., ZOMATO ONLINE -> Zomato)
     let rawMerchant = "";
     const toMatch = clean.match(
       /(?:to|at|paid to|spent at)\s+([A-Za-z0-9&'\-\.\s]+?)(?:\s*(?:via|\.|\bon\b|\bAvl\b|\bRef\b|\bA\/C\b|\bBal\b|\bLimit\b|$))/i
@@ -180,7 +219,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
       rawMerchant = toMatch[1].trim();
     }
 
-    let merchant = "Zomato"; // Sensible default if raw is empty
+    let merchant = "Zomato"; // Default fallback
     if (/zomato/i.test(clean) || /zomato/i.test(rawMerchant)) {
       merchant = "Zomato";
     } else if (/swiggy/i.test(clean) || /swiggy/i.test(rawMerchant)) {
@@ -224,8 +263,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
       }
     }
 
-    // Requirement 1: Auto-classify category
-    // (Food & Dining, Shopping & Gear, Transport & Subscriptions, or Entertainment & Outings)
+    // Auto-classify category
     let category: SpendCategory = "Food & Dining";
     const searchStr = (merchant + " " + clean).toLowerCase();
     if (
@@ -254,15 +292,14 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
       category = "Entertainment & Outings";
     }
 
-    // Requirement 1: Calculate spare-change round-up dynamically to next ₹100
-    // const roundUp = amount % 100 === 0 ? 0 : 100 - (amount % 100);
+    // Calculate spare-change round-up dynamically to next ₹100
     const roundUp = amount > 0 ? (amount % 100 === 0 ? 0 : 100 - (amount % 100)) : 0;
 
     // Credit Card vs Bank/UPI detection
     const isCreditCard = /card|credit|limit/i.test(clean) && !/debit card|debit/i.test(clean);
 
-    let bankTag = isCreditCard ? "Credit Card Spend" : "HDFC Bank (UPI Debit)";
-    if (/ICICI/i.test(clean)) bankTag = isCreditCard ? "ICICI Credit Card" : "ICICI Bank UPI";
+    let bankTag = isCreditCard ? "Credit Card" : "HDFC Bank (UPI)";
+    if (/ICICI/i.test(clean)) bankTag = isCreditCard ? "ICICI Card" : "ICICI Bank UPI";
     else if (/SBI/i.test(clean)) bankTag = isCreditCard ? "SBI Card" : "SBI UPI";
     else if (/HDFC/i.test(clean)) bankTag = isCreditCard ? "HDFC Card" : "HDFC Bank UPI";
     else if (/Axis/i.test(clean)) bankTag = isCreditCard ? "Axis Card" : "Axis Bank UPI";
@@ -280,7 +317,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
   const currentParsed = parseSmsDetails(smsInput);
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // 3. PARSE & LOG SMS ACTION (STATE SYNCHRONIZATION)
+  // 2. PARSE & LOG SMS ACTION (STATE SYNCHRONIZATION)
   // ─────────────────────────────────────────────────────────────────────────────
   const handleParseAndLogSms = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -290,11 +327,11 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
     const bankCash = profile.totalLinkedBankCash ?? 48500;
     const cardDues = profile.creditCardDues ?? 17908;
 
-    // 1. Prepend the newly parsed transaction to the Live Multi-Bank SMS Feed list below
+    // 1. Prepend the newly parsed transaction to Recent Auto-Tracked Activity
     const newFeedEvent: ActivityEvent = {
       id: "ev_sms_" + Date.now(),
       source: isCreditCard ? "Credit Card SMS" : "Bank / UPI SMS",
-      title: isCreditCard ? "Card Spend Auto-Captured" : "UPI Debit Auto-Captured",
+      title: isCreditCard ? "Card Spend" : "UPI Debit",
       merchant,
       amount,
       time: "Just now",
@@ -322,8 +359,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
       [category]: prev[category] + amount,
     }));
 
-    // Requirement 2: Respect Silent Risk Guard (isAutoPayPaused) in SMS Round-Ups
-    // When isAutoPayPaused is true, +₹0 is swept. When false, sweep roundUp to Goal Jars.
+    // Respect Silent Risk Guard (isAutoPayPaused) in SMS Round-Ups
     if (!isAutoPayPaused && roundUp > 0) {
       const targetGoal = profile.goals?.[0]?.id || "goal_iphone";
       claimSavings(
@@ -333,7 +369,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
       );
     }
 
-    // Also append transaction to Ledger
+    // Append transaction to Ledger
     const newTx: Transaction = {
       id: "tx_sms_" + Date.now(),
       merchant,
@@ -350,10 +386,10 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
 
     // Feedback Toast & Confetti
     const roundUpMessage = isAutoPayPaused
-      ? "+₹0 Round-Up (AutoPay Paused)"
+      ? "AutoPay paused by Risk Guard"
       : `+₹${roundUp} swept to Goal Jars`;
     setLiveToast(
-      `✓ Parsed & Logged: ₹${amount.toLocaleString("en-IN")} to ${merchant} (${category}). ${roundUpMessage}. Safe Pool updated live!`
+      `✓ Logged: ₹${amount.toLocaleString("en-IN")} at ${merchant} (${category}). ${roundUpMessage}.`
     );
 
     confetti({
@@ -441,7 +477,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Smart Budgeting Header Hub */}
+      {/* Header Hub */}
       <div className="fintech-card rounded-2xl p-6 bg-white border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-start sm:items-center gap-3">
           <div className="w-11 h-11 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center shrink-0 shadow-xs">
@@ -455,7 +491,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
               </span>
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              No daily SMS copy-pasting, no manual monthly PDF downloads. PocketSense connects via background Gmail forwarding &amp; phone SMS webhook.
+              Effortless, zero-touch tracking. PocketSense automatically syncs bank alerts, credit card dues, and UPI spends.
             </p>
           </div>
         </div>
@@ -515,107 +551,65 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
       {/* TAB 1: ZERO-TOUCH AUTOPILOT CONNECTORS, REAL REGEX PARSER & LIVE FEED */}
       {activeTab === "autopilot-sync" && (
         <div className="space-y-6 animate-fade-in">
-          {/* THE 2 SET-ONCE CONNECTORS GRID */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* CONNECTOR A: GMAIL AUTO-FORWARD */}
-            <div className="fintech-card rounded-2xl p-5 bg-white border border-slate-200 shadow-sm space-y-4 flex flex-col justify-between">
-              <div>
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 flex items-center justify-center shadow-xs">
-                      <Mail className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h3 className="text-xs font-bold text-slate-900 tracking-tight flex items-center gap-1.5">
-                        <span>Gmail Bank/Card Auto-Forward: ON</span>
-                      </h3>
-                      <span className="text-[10px] font-mono text-emerald-700 font-semibold flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        Active &amp; Verified
-                      </span>
-                    </div>
+          {/* ─────────────────────────────────────────────────────────────────────────────
+              2. SLEEK COMPACT 2-PILL STATUS BAR (JARGON-FREE)
+          ───────────────────────────────────────────────────────────────────────────── */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Pill 1: Bank & Card Email Sync */}
+            <div className="p-3.5 px-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
+                  <Mail className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-xs font-bold text-slate-900">Bank &amp; Card Email Sync:</span>
+                    <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      ON
+                    </span>
                   </div>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 font-medium">
-                    No PDF Uploads
+                  <span className="text-xs font-mono text-slate-500 truncate block">
+                    alex@pocketsense.ai
                   </span>
                 </div>
-
-                <p className="text-xs text-slate-600 leading-relaxed mt-2">
-                  Automatically parses incoming bank emails, credit card statements (HDFC, ICICI, SBI), and CAMS/Zerodha investment alerts silently in the background.
-                </p>
-
-                {/* Forwarding Address Box */}
-                <div className="mt-3 p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2 font-mono text-xs">
-                  <div className="truncate">
-                    <span className="text-[10px] text-slate-400 block uppercase font-medium">Forwarding Address:</span>
-                    <strong className="text-slate-900 truncate">alex@pocketsense.ai</strong>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleCopyForwardingEmail}
-                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 transition-colors shadow-xs shrink-0 font-medium active:scale-95"
-                  >
-                    {copiedEmail ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-slate-500" />}
-                    <span>{copiedEmail ? "Copied!" : "Copy"}</span>
-                  </button>
-                </div>
               </div>
-
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono text-slate-500">
-                <span>Rules: HDFC, SBI, ICICI, Zerodha</span>
-                <span className="text-emerald-700 font-semibold">Synced 1m ago</span>
-              </div>
+              <button
+                type="button"
+                onClick={handleCopyForwardingEmail}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 transition-colors shrink-0 shadow-2xs active:scale-95"
+              >
+                {copiedEmail ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-slate-400" />}
+                <span>{copiedEmail ? "Copied" : "Copy"}</span>
+              </button>
             </div>
 
-            {/* CONNECTOR B: PHONE UPI WEBHOOK */}
-            <div className="fintech-card rounded-2xl p-5 bg-white border border-slate-200 shadow-sm space-y-4 flex flex-col justify-between">
-              <div>
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center shadow-xs">
-                      <Radio className="w-4 h-4 animate-pulse" />
-                    </div>
-                    <div>
-                      <h3 className="text-xs font-bold text-slate-900 tracking-tight flex items-center gap-1.5">
-                        <span>Phone UPI Webhook: ON</span>
-                      </h3>
-                      <span className="text-[10px] font-mono text-emerald-700 font-semibold flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                        Live Listener Active
-                      </span>
-                    </div>
+            {/* Pill 2: UPI & Bank SMS Sync */}
+            <div className="p-3.5 px-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100">
+                  <Smartphone className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-xs font-bold text-slate-900">UPI &amp; Bank SMS Sync:</span>
+                    <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      ON
+                    </span>
                   </div>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">
-                    No Daily Typing
+                  <span className="text-xs font-mono text-slate-500 truncate block">
+                    HDFC • SBI • ICICI • UPI
                   </span>
                 </div>
-
-                <p className="text-xs text-slate-600 leading-relaxed mt-2">
-                  Silently intercepts incoming payment debits as you spend across Google Pay, PhonePe, Paytm, and bank SMS without opening the app or copying text.
-                </p>
-
-                {/* Live Channels */}
-                <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] font-mono">
-                  <div className="p-2 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between">
-                    <span className="text-slate-700 font-semibold">Google Pay / PhonePe</span>
-                    <span className="text-emerald-700 font-bold">✓ Synced</span>
-                  </div>
-                  <div className="p-2 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between">
-                    <span className="text-slate-700 font-semibold">HDFC &amp; SBI Debits</span>
-                    <span className="text-emerald-700 font-bold">✓ Synced</span>
-                  </div>
-                </div>
               </div>
-
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono text-slate-500">
-                <span>Latency: &lt; 400ms detection</span>
-                <span className="text-emerald-700 font-semibold">28 UPI Spends Synced</span>
-              </div>
+              <span className="text-[10px] font-mono font-semibold px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Active
+              </span>
             </div>
           </div>
 
           {/* ─────────────────────────────────────────────────────────────────────────────
-              FEATURE 1: REAL REGEX SMS PARSER & ZERO-TOUCH LOGGER
+              PARSE & LOG SMS CARD (ZERO-TOUCH AUTOPILOT)
           ───────────────────────────────────────────────────────────────────────────── */}
           <div className="fintech-card rounded-2xl p-5 sm:p-6 bg-white border border-slate-200 shadow-sm space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
@@ -706,7 +700,6 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
 
                 <div className="col-span-2 sm:col-span-1">
                   <span className="text-[10px] text-slate-400 block uppercase font-medium">Spare Change</span>
-                  {/* Requirement 2: Respect Silent Risk Guard (isAutoPayPaused) */}
                   {isAutoPayPaused ? (
                     <span className="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full inline-block">
                       +₹0 (AutoPay Paused)
@@ -741,7 +734,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
           </div>
 
           {/* ─────────────────────────────────────────────────────────────────────────────
-              FEATURE 2: TOP SPEND CATEGORIES (DONUT CHART & SYNCED BREAKDOWN)
+              TOP SPEND CATEGORIES (DONUT CHART & SYNCED BREAKDOWN)
           ───────────────────────────────────────────────────────────────────────────── */}
           <div className="fintech-card rounded-2xl p-5 sm:p-6 bg-white border border-slate-200 shadow-sm space-y-5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
@@ -884,19 +877,19 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
           </div>
 
           {/* ─────────────────────────────────────────────────────────────────────────────
-              FEATURE 3: LIVE MULTI-BANK SMS FEED
+              3. CLEAN CONSUMER ACTIVITY FEED (RECENT AUTO-TRACKED ACTIVITY)
           ───────────────────────────────────────────────────────────────────────────── */}
           <div className="fintech-card rounded-2xl p-5 bg-white border border-slate-200 shadow-sm space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-100">
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-slate-500" />
                 <h4 className="text-xs font-bold text-slate-900 tracking-tight">
-                  Live Multi-Bank SMS Feed ({activityStream.length} Events)
+                  Recent Auto-Tracked Activity ({activityStream.length} Events)
                 </h4>
               </div>
               <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-semibold flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Real-Time Ingestion
+                Auto-Synced
               </span>
             </div>
 
@@ -904,6 +897,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
               {activityStream.map((ev) => {
                 const roundUpAmt =
                   ev.roundUp ?? (ev.amount % 100 === 0 ? 0 : 100 - (ev.amount % 100));
+                const consumerTag = getConsumerTag(ev);
 
                 return (
                   <div
@@ -913,32 +907,22 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
                     <div className="flex items-center gap-3 min-w-0">
                       <div
                         className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                          ev.source === "Credit Card SMS" || ev.type === "bill"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-emerald-100 text-emerald-800"
+                          consumerTag.iconBg
                         }`}
                       >
-                        {ev.source === "Credit Card SMS" || ev.type === "bill" ? (
-                          <CreditCard className="w-4 h-4" />
-                        ) : (
-                          <Smartphone className="w-4 h-4" />
-                        )}
+                        {consumerTag.icon}
                       </div>
                       <div className="truncate">
                         <div className="flex items-center gap-2">
                           <span className="font-bold text-slate-900 truncate">{ev.merchant}</span>
                           <span
-                            className={`text-[9px] px-1.5 py-0.2 rounded border font-semibold ${
-                              ev.source === "Credit Card SMS" || ev.type === "bill"
-                                ? "bg-blue-50 text-blue-700 border-blue-200"
-                                : "bg-emerald-50 text-emerald-700 border-emerald-200"
-                            }`}
+                            className={`text-[9px] px-1.5 py-0.2 rounded border font-semibold ${consumerTag.badgeClass}`}
                           >
-                            {ev.source}
+                            {consumerTag.label}
                           </span>
                         </div>
                         <span className="text-[10px] text-slate-500 block truncate">
-                          {ev.title} • {ev.bankTag} • {ev.time}
+                          {ev.bankTag} • {ev.time}
                         </span>
                       </div>
                     </div>
@@ -948,7 +932,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
                         className={`text-sm font-bold block ${
                           ev.type === "credit"
                             ? "text-emerald-700"
-                            : ev.type === "bill"
+                            : ev.type === "bill" || consumerTag.label === "Card Bill"
                             ? "text-blue-700"
                             : "text-slate-900"
                         }`}
@@ -957,18 +941,12 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
                         {formatINR(ev.amount)}
                       </span>
 
-                      {/* Spare-change round-up badge */}
-                      {ev.type === "debit" && ev.amount > 0 && (
+                      {/* Spare-change round-up badge: HIDDEN whenever Silent Risk Guard (isAutoPayPaused) is active */}
+                      {!isAutoPayPaused && ev.type === "debit" && ev.amount > 0 && roundUpAmt > 0 && (
                         <div className="mt-0.5">
-                          {isAutoPayPaused ? (
-                            <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-50 text-amber-800 border border-amber-200 font-semibold">
-                              +₹0 (AutoPay Paused)
-                            </span>
-                          ) : (
-                            <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">
-                              +₹{roundUpAmt} Round-Up
-                            </span>
-                          )}
+                          <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">
+                            +₹{roundUpAmt} Round-Up
+                          </span>
                         </div>
                       )}
                     </div>
