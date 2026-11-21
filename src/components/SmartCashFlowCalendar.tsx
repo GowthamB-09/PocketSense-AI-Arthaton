@@ -620,6 +620,10 @@ export const SmartCashFlowCalendar: React.FC<SmartCashFlowCalendarProps> = ({
                         <span className="text-[10px] font-mono text-emerald-700 font-bold">
                           Pre-Locked
                         </span>
+                      ) : evt.isPaid ? (
+                        <span className="text-[10px] font-mono text-slate-500 font-medium">
+                          Settled
+                        </span>
                       ) : null}
                     </div>
                   </div>
@@ -648,19 +652,26 @@ export const SmartCashFlowCalendar: React.FC<SmartCashFlowCalendarProps> = ({
                       </div>
                     ) : !isAutoPay ? (
                       <>
-                        <button
-                          type="button"
-                          onClick={() => togglePreLock(evt.id)}
-                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium transition-colors ${
-                            evt.isPreLocked
-                              ? "bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200"
-                              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                          }`}
-                          title="Ring-Fenced Event Shield toggle"
-                        >
-                          {evt.isPreLocked ? <Lock className="w-3 h-3 text-emerald-600" /> : <Unlock className="w-3 h-3 text-slate-400" />}
-                          <span>{evt.isPreLocked ? "Shield: Pre-Locked" : "Pre-Lock Off"}</span>
-                        </button>
+                        {evt.isPaid ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold bg-slate-100 text-slate-500 border border-slate-200">
+                            <Check className="w-3 h-3 text-emerald-600" />
+                            <span>Settled</span>
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => togglePreLock(evt.id)}
+                            className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium transition-colors cursor-pointer ${
+                              evt.isPreLocked
+                                ? "bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200"
+                                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                            }`}
+                            title="Ring-Fenced Event Shield toggle"
+                          >
+                            {evt.isPreLocked ? <Lock className="w-3 h-3 text-emerald-600" /> : <Unlock className="w-3 h-3 text-slate-400" />}
+                            <span>{evt.isPreLocked ? "Shield: Pre-Locked" : "Pre-Lock Off"}</span>
+                          </button>
+                        )}
 
                         <div className="flex items-center gap-1.5">
                           {!evt.isPaid && (
