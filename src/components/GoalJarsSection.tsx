@@ -19,6 +19,8 @@ import {
   ArrowUpRight,
   TrendingUp,
   TrendingDown,
+  ChevronDown,
+  ChevronUp,
   Zap,
   CheckCircle2,
   AlertTriangle,
@@ -38,6 +40,14 @@ export const GoalJarsSection: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [depositModalGoal, setDepositModalGoal] = useState<GoalJar | null>(null);
   const [depositAmount, setDepositAmount] = useState<string>("2000");
+  const [expandedGoalIds, setExpandedGoalIds] = useState<Record<string, boolean>>({});
+
+  const toggleGoalExpanded = (goalId: string) => {
+    setExpandedGoalIds((prev) => ({
+      ...prev,
+      [goalId]: !prev[goalId],
+    }));
+  };
 
   // New Goal Form State
   const [newTitle, setNewTitle] = useState("");
@@ -394,6 +404,7 @@ export const GoalJarsSection: React.FC = () => {
             const percent = Math.min(100, Math.round((jar.currentAmount / jar.targetAmount) * 100));
             const VaultIcon = getVaultIcon(jar.title, jar.category);
             const trendData = getGoalAiTrendData(jar.title, jar.category, jar.deadline);
+            const isExpanded = Boolean(expandedGoalIds[jar.id]);
 
             return (
               <div
@@ -428,81 +439,98 @@ export const GoalJarsSection: React.FC = () => {
                     </button>
                   </div>
 
-                {/* Balance & Progress Bar */}
-                <div className="space-y-1.5">
-                  <div className="flex items-baseline justify-between font-mono">
-                    <span className="text-xl font-black text-slate-900">{formatINR(jar.currentAmount)}</span>
-                    <span className="text-xs text-slate-500">Target: {formatINR(jar.targetAmount)}</span>
+                  {/* Balance & Progress Bar */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-baseline justify-between font-mono">
+                      <span className="text-xl font-black text-slate-900">{formatINR(jar.currentAmount)}</span>
+                      <span className="text-xs text-slate-500">Target: {formatINR(jar.targetAmount)}</span>
+                    </div>
+
+                    <div className="w-full h-2.5 rounded-full bg-slate-100 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-emerald-500 transition-all duration-300"
+                        style={{ width: `${percent}%` }}
+                      />
+                    </div>
+
+                    <div className="flex justify-between items-center text-[11px] font-mono text-slate-500">
+                      <span className="font-semibold text-slate-700">{percent}% funded</span>
+                      <span className="text-emerald-700 font-bold">{formatINR(jar.targetAmount - jar.currentAmount)} to go</span>
+                    </div>
                   </div>
 
-                  <div className="w-full h-2.5 rounded-full bg-slate-100 overflow-hidden">
-                    <div
-                      className="h-full rounded-full bg-emerald-500 transition-all duration-300"
-                      style={{ width: `${percent}%` }}
-                    />
-                  </div>
+                  {/* ─────────────────────────────────────────────────────────
+                      A. COMPACT 1-LINE ALERT STRIP WITH PROGRESSIVE DISCLOSURE
+                  ───────────────────────────────────────────────────────── */}
+                  <div className={`p-3 rounded-xl border ${trendData.boxBg} space-y-2.5 transition-all`}>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        {trendData.isDropping ? (
+                          <TrendingDown className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                        ) : trendData.isRising ? (
+                          <TrendingUp className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                        ) : (
+                          <Target className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                        )}
+                        <span className="text-xs font-bold leading-tight truncate">
+                          {trendData.trendBoxHeader}
+                        </span>
+                      </div>
 
-                  <div className="flex justify-between items-center text-[11px] font-mono text-slate-500">
-                    <span className="font-semibold text-slate-700">{percent}% funded</span>
-                    <span className="text-emerald-700 font-bold">{formatINR(jar.targetAmount - jar.currentAmount)} to go</span>
+                      <button
+                        type="button"
+                        onClick={() => toggleGoalExpanded(jar.id)}
+                        className="text-xs font-medium text-indigo-600 hover:text-indigo-800 transition-colors inline-flex items-center gap-0.5 shrink-0 cursor-pointer focus:outline-none"
+                        aria-expanded={isExpanded}
+                      >
+                        <span>{isExpanded ? "Show Less" : "Know More"}</span>
+                        {isExpanded ? (
+                          <ChevronUp className="w-3 h-3" />
+                        ) : (
+                          <ChevronDown className="w-3 h-3" />
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Expandable Details Container */}
+                    {isExpanded && (
+                      <div className="pt-2 border-t border-black/5 space-y-2.5 animate-fade-in">
+                        <p className="text-[11px] leading-relaxed font-sans opacity-90">
+                          {trendData.insight}
+                        </p>
+
+                        <div className="flex items-center justify-between text-[10px] font-mono font-semibold pt-1 border-t border-black/5">
+                          <span>Best Time to Buy:</span>
+                          <span className="font-bold underline">{trendData.bestTimeToBuy}</span>
+                        </div>
+
+                        {/* Out-of-Sight Safe Growth Vault Badge */}
+                        <div className="p-2.5 rounded-lg bg-white/80 border border-slate-200/80 text-xs space-y-0.5">
+                          <div className="flex items-center justify-between font-mono font-bold text-slate-900">
+                            <span className="flex items-center gap-1.5 truncate">
+                              <Lock className="w-3 h-3 text-emerald-600 shrink-0" />
+                              <span className="truncate">{trendData.vaultName}</span>
+                            </span>
+                          </div>
+                          <span className="text-slate-500 block font-mono text-[10px] leading-tight">
+                            {trendData.vaultTag}
+                          </span>
+                        </div>
+
+                        {/* Extra Earned While Waiting Counter */}
+                        <div className="p-2 rounded-lg bg-emerald-50/90 border border-emerald-300 text-xs font-mono text-emerald-950">
+                          <div className="flex items-center gap-1 font-bold text-emerald-900 mb-0.5 text-[11px]">
+                            <Sparkles className="w-3 h-3 text-emerald-600 shrink-0" />
+                            <span>{trendData.counterLabel}:</span>
+                          </div>
+                          <span className="text-[10px] block font-semibold text-emerald-800">
+                            +{formatINR(trendData.vaultEarned)} vault growth + {formatINR(trendData.smartSwapsEarned)} from Smart Swaps
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
-
-                {/* ─────────────────────────────────────────────────────────
-                    A. COLORED "AI PRICE-TREND & BEST TIME TO BUY" BOX
-                ───────────────────────────────────────────────────────── */}
-                <div className={`p-3.5 rounded-xl border space-y-1.5 ${trendData.boxBg}`}>
-                  <div className="flex items-start justify-between gap-1">
-                    <span className="text-xs font-bold leading-snug flex items-center gap-1.5">
-                      {trendData.isDropping ? (
-                        <TrendingDown className="w-3.5 h-3.5 text-rose-600 shrink-0" />
-                      ) : trendData.isRising ? (
-                        <TrendingUp className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                      ) : (
-                        <Target className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-                      )}
-                      <span>{trendData.trendBoxHeader}</span>
-                    </span>
-                  </div>
-
-                  <p className="text-[11px] leading-relaxed font-sans opacity-90">
-                    {trendData.insight}
-                  </p>
-
-                  <div className="pt-1 border-t border-black/5 flex items-center justify-between text-[10px] font-mono font-semibold">
-                    <span>Best Time to Buy:</span>
-                    <span className="font-bold underline">{trendData.bestTimeToBuy}</span>
-                  </div>
-                </div>
-
-                {/* ─────────────────────────────────────────────────────────
-                    B. "OUT-OF-SIGHT SAFE GROWTH VAULT" BADGE
-                ───────────────────────────────────────────────────────── */}
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1">
-                  <div className="flex items-center justify-between font-mono font-bold text-slate-900">
-                    <span className="flex items-center gap-1.5 truncate">
-                      <Lock className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                      <span className="truncate">{trendData.vaultName}</span>
-                    </span>
-                  </div>
-                  <span className="text-slate-500 block font-mono text-[10px] leading-tight">
-                    {trendData.vaultTag}
-                  </span>
-                </div>
-
-                {/* ─────────────────────────────────────────────────────────
-                    C. LIVE "+₹2,450 EXTRA EARNED WHILE WAITING" COUNTER
-                ───────────────────────────────────────────────────────── */}
-                <div className="p-2.5 rounded-xl bg-emerald-50/80 border border-emerald-300 text-xs font-mono text-emerald-950">
-                  <div className="flex items-center gap-1.5 font-bold text-emerald-900 mb-0.5">
-                    <Sparkles className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span>{trendData.counterLabel}:</span>
-                  </div>
-                  <span className="text-[10px] block font-semibold text-emerald-800">
-                    +{formatINR(trendData.vaultEarned)} vault growth + {formatINR(trendData.smartSwapsEarned)} from Smart Swaps
-                  </span>
-                </div>
-              </div>
 
               {/* Action Button: Top-Up Vault */}
               <div className="pt-2 border-t border-slate-100">
