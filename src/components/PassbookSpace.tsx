@@ -231,13 +231,13 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
           </div>
           <div>
             <h2 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
-              <span>SMS &amp; Insights: Zero-Touch Autopilot Sync</span>
+              <span>Auto-Tracked Spending</span>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">
-                Set Once, Forget Forever
+                Auto-Synced
               </span>
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              Effortless, zero-touch tracking. PocketSense automatically syncs bank alerts, credit card dues, and UPI spends.
+              Your UPI, bank, and card spends show up here automatically—no manual typing needed.
             </p>
           </div>
         </div>
@@ -252,8 +252,8 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
                 : "text-slate-500 hover:text-slate-800"
             }`}
           >
-            <span className="hidden sm:inline">Zero-Touch Autopilot</span>
-            <span className="sm:hidden">Autopilot</span>
+            <span className="hidden sm:inline">Auto-Sync</span>
+            <span className="sm:hidden">Sync</span>
           </button>
           <button
             onClick={() => setActiveTab("insights")}
@@ -263,7 +263,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
                 : "text-slate-500 hover:text-slate-800"
             }`}
           >
-            <span className="hidden sm:inline">Spending Insights</span>
+            <span className="hidden sm:inline">Where It Went</span>
             <span className="sm:hidden">Insights</span>
           </button>
           <button

@@ -162,8 +162,6 @@ export const TransactionHistory: React.FC = () => {
                       {tx.merchant}
                     </h4>
                     <div className="flex items-center gap-1.5 text-[11px] text-slate-500 font-mono mt-0.5 truncate">
-                      <span className="font-semibold text-slate-700">{account}</span>
-                      <span>•</span>
                       <span>{formatDate(tx.date)}</span>
                       <span>•</span>
                       <span className="text-slate-500 truncate">{tx.category}</span>
