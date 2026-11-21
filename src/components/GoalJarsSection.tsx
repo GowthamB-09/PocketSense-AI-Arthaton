@@ -32,15 +32,82 @@ import {
   Landmark,
   Clock,
   ShieldAlert,
+  X,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 
 export const GoalJarsSection: React.FC = () => {
-  const { profile, addGoalJar, deleteGoalJar, claimSavings, isAutoPayPaused } = useFinancialMemory();
+  const {
+    profile,
+    addGoalJar,
+    deleteGoalJar,
+    claimSavings,
+    updateCreditCardDues,
+    isAutoPayPaused,
+  } = useFinancialMemory();
   const [showAddModal, setShowAddModal] = useState(false);
-  const [depositModalGoal, setDepositModalGoal] = useState<GoalJar | null>(null);
-  const [depositAmount, setDepositAmount] = useState<string>("2000");
+  const [topUpGoal, setTopUpGoal] = useState<GoalJar | null>(null);
+  const [showTopUpModal, setShowTopUpModal] = useState<boolean>(false);
+  const [depositAmount, setDepositAmount] = useState<string>("1000");
+  const [topUpError, setTopUpError] = useState<string | null>(null);
   const [expandedGoalIds, setExpandedGoalIds] = useState<Record<string, boolean>>({});
+
+  // Net Safe Pool calculation
+  const totalLinkedBankCash = profile.totalLinkedBankCash ?? 48500;
+  const upcomingCardDues = profile.creditCardDues ?? 17908;
+  const ringFencedEventsAmount = (profile.calendarEvents || [])
+    .filter((e) => e.isPreLocked && !e.isPaid && e.category !== "autopay")
+    .reduce((sum, e) => sum + (e.budget || 0), 0);
+  const netSafePool = Math.max(0, totalLinkedBankCash - upcomingCardDues - ringFencedEventsAmount);
+
+  const handleOpenTopUp = (goal: GoalJar) => {
+    setTopUpGoal(goal);
+    setDepositAmount("1000");
+    setTopUpError(null);
+    setShowTopUpModal(true);
+  };
+
+  const handleCloseTopUp = () => {
+    setShowTopUpModal(false);
+    setTopUpGoal(null);
+    setTopUpError(null);
+  };
+
+  const handleConfirmTopUp = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!topUpGoal) return;
+    const amt = parseFloat(depositAmount);
+    if (isNaN(amt) || amt <= 0) {
+      setTopUpError("Please enter a valid amount greater than ₹0.");
+      return;
+    }
+    if (amt > netSafePool) {
+      setTopUpError(`Amount exceeds available Net Safe Pool (${formatINR(netSafePool)}).`);
+      return;
+    }
+
+    // 1. Deduct from Total Linked Bank Cash (so Net Safe Pool is reduced)
+    const newBankCash = Math.max(0, totalLinkedBankCash - amt);
+
+    // 2. Add to goal's saved amount
+    claimSavings(topUpGoal.id, amt, `Manual top-up to ${topUpGoal.title} Safe Vault`);
+
+    // 3. Update totalLinkedBankCash in profile
+    updateCreditCardDues(upcomingCardDues, newBankCash);
+
+    // 4. Confetti & Toast
+    confetti({
+      particleCount: 45,
+      spread: 60,
+      origin: { y: 0.6 },
+      colors: ["#059669", "#0284C7", "#D97706"],
+    });
+
+    const goalName = topUpGoal.title;
+    handleCloseTopUp();
+    setToastMessage(`✓ Transferred ${formatINR(amt)} from Safe Pool into ${goalName} Vault!`);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
 
   const toggleGoalExpanded = (goalId: string) => {
     setExpandedGoalIds((prev) => ({
@@ -297,23 +364,6 @@ export const GoalJarsSection: React.FC = () => {
     });
   };
 
-  const handleQuickDeposit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!depositModalGoal) return;
-    const amt = parseFloat(depositAmount);
-    if (isNaN(amt) || amt <= 0) return;
-
-    claimSavings(depositModalGoal.id, amt, `Manual top-up to ${depositModalGoal.title} Safe Vault`);
-    setDepositModalGoal(null);
-
-    confetti({
-      particleCount: 40,
-      spread: 60,
-      origin: { y: 0.6 },
-      colors: ["#059669", "#0284C7", "#D97706"],
-    });
-  };
-
   return (
     <div className="space-y-6 animate-fade-in pb-12">
       {/* ─────────────────────────────────────────────────────────────────────────────
@@ -536,7 +586,7 @@ export const GoalJarsSection: React.FC = () => {
               <div className="pt-2 border-t border-slate-100">
                 <button
                   type="button"
-                  onClick={() => setDepositModalGoal(jar)}
+                  onClick={() => handleOpenTopUp(jar)}
                   className="w-full py-2 px-3 rounded-xl text-xs font-bold bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-900 text-slate-700 border border-slate-200 transition-all flex items-center justify-center gap-1.5 active:scale-95 min-h-[38px]"
                 >
                   <ArrowUpRight className="w-3.5 h-3.5 text-emerald-600" />
@@ -958,62 +1008,139 @@ export const GoalJarsSection: React.FC = () => {
       )}
 
       {/* ─────────────────────────────────────────────────────────────────────────────
-          8. QUICK TOP-UP VAULT MODAL
+          8. TOP-UP SAFE VAULT MODAL (Self-Contained Root-Level Overlay)
       ───────────────────────────────────────────────────────────────────────────── */}
-      {depositModalGoal && (
-        <div className="fixed inset-0 z-50 flex sm:items-center sm:justify-center items-end p-0 sm:p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white border-t sm:border border-slate-200 rounded-t-3xl sm:rounded-2xl w-full sm:max-w-sm p-6 shadow-2xl space-y-4 animate-slide-up-mobile sm:animate-fade-in">
-            <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto -mt-2 mb-2 sm:hidden" />
-            <div>
-              <h3 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                <Lock className="w-4 h-4 text-emerald-600" />
-                <span>Top-Up Safe Vault: {depositModalGoal.title}</span>
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Locks cash out-of-sight from UPI into high-yield growth.
-              </p>
+      {showTopUpModal && topUpGoal && (
+        <div
+          onClick={handleCloseTopUp}
+          className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white border border-slate-200 rounded-2xl w-full max-w-sm sm:max-w-md p-5 sm:p-6 shadow-2xl space-y-4 animate-fade-in relative"
+          >
+            {/* Header: "Top-Up Safe Vault" + Goal title + Close button */}
+            <div className="flex items-start justify-between gap-2 pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center shrink-0 shadow-xs">
+                  <Lock className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">
+                    Top-Up Safe Vault
+                  </h3>
+                  <p className="text-xs font-semibold text-emerald-700">
+                    {topUpGoal.title}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleCloseTopUp}
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                aria-label="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
 
-            <form onSubmit={handleQuickDeposit} className="space-y-3.5">
+            {/* Current Progress Preview */}
+            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/90 space-y-2 text-xs">
+              <div className="flex items-center justify-between font-mono">
+                <span className="text-slate-500 font-sans">Current Saved:</span>
+                <span className="font-black text-slate-900">{formatINR(topUpGoal.currentAmount)}</span>
+              </div>
+              <div className="flex items-center justify-between font-mono">
+                <span className="text-slate-500 font-sans">Target Price:</span>
+                <span className="font-bold text-slate-700">{formatINR(topUpGoal.targetAmount)}</span>
+              </div>
+              <div className="pt-2 border-t border-slate-200 flex items-center justify-between font-mono">
+                <span className="text-slate-700 font-sans font-semibold flex items-center gap-1">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Available Net Safe Pool:</span>
+                </span>
+                <span className="font-black text-emerald-700">{formatINR(netSafePool)}</span>
+              </div>
+            </div>
+
+            {/* Quick-Add Chips & Numeric Custom Input Form */}
+            <form onSubmit={handleConfirmTopUp} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Amount (₹)</label>
-                <input
-                  type="number"
-                  required
-                  min="100"
-                  value={depositAmount}
-                  onChange={(e) => setDepositAmount(e.target.value)}
-                  className="w-full px-3 py-2 text-base sm:text-sm font-mono bg-slate-50 border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors min-h-[44px]"
-                />
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Transfer Amount (₹)
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-base font-bold text-slate-400">
+                    ₹
+                  </span>
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    max={netSafePool > 0 ? netSafePool : undefined}
+                    maxLength={9}
+                    value={depositAmount}
+                    onChange={(e) => {
+                      setDepositAmount(e.target.value.slice(0, 9));
+                      setTopUpError(null);
+                    }}
+                    placeholder="Enter amount (e.g. 1500)"
+                    className="w-full pl-8 pr-3 py-2.5 text-base sm:text-sm font-mono font-bold bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors min-h-[46px]"
+                  />
+                </div>
               </div>
 
-              <div className="grid grid-cols-4 gap-2">
-                {["1000", "2500", "5000", "10000"].map((preset) => (
-                  <button
-                    key={preset}
-                    type="button"
-                    onClick={() => setDepositAmount(preset)}
-                    className="py-2 text-xs font-mono font-medium rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 transition-colors min-h-[38px] active:scale-95"
-                  >
-                    +₹{preset}
-                  </button>
-                ))}
+              {/* Quick-Add Chips: +₹500, +₹1,000, +₹2,500, +₹5,000 */}
+              <div>
+                <label className="block text-[11px] font-mono text-slate-500 mb-1.5 uppercase tracking-wider font-semibold">
+                  Quick-Add Chips:
+                </label>
+                <div className="grid grid-cols-4 gap-2">
+                  {[500, 1000, 2500, 5000].map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => {
+                        setDepositAmount(String(preset));
+                        setTopUpError(null);
+                      }}
+                      className={`py-2 text-xs font-mono font-bold rounded-lg border transition-all min-h-[38px] active:scale-95 ${
+                        depositAmount === String(preset)
+                          ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
+                          : "bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 border-slate-200"
+                      }`}
+                    >
+                      +₹{preset.toLocaleString("en-IN")}
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+              {/* Error Message */}
+              {topUpError && (
+                <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-center gap-1.5 animate-fade-in">
+                  <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                  <span>{topUpError}</span>
+                </div>
+              )}
+
+              {/* Modal Actions */}
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
                 <button
                   type="button"
-                  onClick={() => setDepositModalGoal(null)}
-                  className="px-3.5 py-2 text-xs font-medium text-slate-600 hover:text-slate-900 min-h-[40px]"
+                  onClick={handleCloseTopUp}
+                  className="px-4 py-2.5 text-xs font-semibold text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition-colors min-h-[42px]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 flex items-center gap-1.5 shadow-xs min-h-[40px] active:scale-95"
+                  disabled={netSafePool <= 0}
+                  className="px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-1.5 shadow-sm transition-all min-h-[42px] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
-                  <span>Lock in Safe Vault</span>
+                  <span>Transfer to Vault</span>
                 </button>
               </div>
             </form>
