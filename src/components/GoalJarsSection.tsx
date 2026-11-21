@@ -13,10 +13,12 @@ import {
   Laptop,
   Smartphone,
   Coins,
+  Shield,
   ShieldCheck,
   Target,
   ArrowUpRight,
   TrendingUp,
+  TrendingDown,
   Zap,
   CheckCircle2,
   AlertTriangle,
@@ -67,8 +69,10 @@ export const GoalJarsSection: React.FC = () => {
     // Placed before iPhone to prevent 'headphone' from matching 'phone'
     if (t.includes("headphone") || t.includes("audio") || t.includes("sony") || t.includes("bose") || t.includes("earphone") || t.includes("airpod")) {
       return {
-        trendStatus: "Seasonal Sale Watch 📉",
-        trendBoxHeader: "Seasonal Sale Watch 📉 — Wait for the next electronics sale to save ~₹3,300 (15% off)",
+        trendStatus: "Seasonal Sale Watch",
+        trendBoxHeader: "Seasonal Sale Watch — Wait for the next electronics sale to save ~₹3,300 (15% off)",
+        isDropping: true,
+        isRising: false,
         boxBg: "bg-purple-50/90 border-purple-200 text-purple-950",
         pillBg: "bg-purple-100 text-purple-800 border-purple-300",
         bestTimeToBuy: "Next Electronics Sale (Save ~15%)",
@@ -86,8 +90,10 @@ export const GoalJarsSection: React.FC = () => {
     // Goal 2: New iPhone
     if (t.includes("iphone") || t.includes("apple") || (/\bphone\b/i.test(t) && !t.includes("headphone"))) {
       return {
-        trendStatus: "Price Dropping Soon 📉",
-        trendBoxHeader: "Price Dropping Soon 📉 — Wait until October to save ~₹11,000",
+        trendStatus: "Price Dropping Soon",
+        trendBoxHeader: "Price Dropping Soon — Wait until October to save ~₹11,000",
+        isDropping: true,
+        isRising: false,
         boxBg: "bg-rose-50/90 border-rose-200 text-rose-950",
         pillBg: "bg-rose-100 text-rose-800 border-rose-300",
         bestTimeToBuy: "October (Diwali Festive Sale)",
@@ -105,8 +111,10 @@ export const GoalJarsSection: React.FC = () => {
     // Goal 3: 24K Gold
     if (t.includes("gold") || t.includes("jewel") || category === "Wealth") {
       return {
-        trendStatus: "Price Rising 📈",
-        trendBoxHeader: "Price Rising 📈 — Buy via monthly Digital Gold micro-buys",
+        trendStatus: "Price Rising",
+        trendBoxHeader: "Price Rising — Buy via monthly Digital Gold micro-buys",
+        isDropping: false,
+        isRising: true,
         boxBg: "bg-amber-50/90 border-amber-200 text-amber-950",
         pillBg: "bg-amber-100 text-amber-800 border-amber-300",
         bestTimeToBuy: "Lock in Gradually (Micro-Buys)",
@@ -127,8 +135,10 @@ export const GoalJarsSection: React.FC = () => {
 
     if (isTechOrGadget) {
       return {
-        trendStatus: "Price Dropping Soon 📉",
-        trendBoxHeader: "Price Dropping Soon 📉 — Wait for Q4 Holiday Clearance",
+        trendStatus: "Price Dropping Soon",
+        trendBoxHeader: "Price Dropping Soon — Wait for Q4 Holiday Clearance",
+        isDropping: true,
+        isRising: false,
         boxBg: "bg-rose-50/90 border-rose-200 text-rose-950",
         pillBg: "bg-rose-100 text-rose-800 border-rose-300",
         bestTimeToBuy: "Q4 Festive Sales (Save ~10–15%)",
@@ -145,8 +155,10 @@ export const GoalJarsSection: React.FC = () => {
 
     if (isTravel) {
       return {
-        trendStatus: "Price Rising 📈",
-        trendBoxHeader: "Price Rising 📈 — Book 7–9 weeks in advance",
+        trendStatus: "Price Rising",
+        trendBoxHeader: "Price Rising — Book 7–9 weeks in advance",
+        isDropping: false,
+        isRising: true,
         boxBg: "bg-amber-50/90 border-amber-200 text-amber-950",
         pillBg: "bg-amber-100 text-amber-800 border-amber-300",
         bestTimeToBuy: "Midweek Booking Window",
@@ -162,8 +174,10 @@ export const GoalJarsSection: React.FC = () => {
     }
 
     return {
-      trendStatus: "Holding Steady ➡️",
-      trendBoxHeader: "Holding Steady ➡️ — Buy anytime once funded",
+      trendStatus: "Holding Steady",
+      trendBoxHeader: "Holding Steady — Buy anytime once funded",
+      isDropping: false,
+      isRising: false,
       boxBg: "bg-slate-50 border-slate-200 text-slate-900",
       pillBg: "bg-slate-100 text-slate-800 border-slate-300",
       bestTimeToBuy: "When Target Reached",
@@ -180,12 +194,13 @@ export const GoalJarsSection: React.FC = () => {
 
   const getVaultIcon = (title: string, category: string) => {
     const t = title.toLowerCase();
-    if (t.includes("iphone") || t.includes("apple") || t.includes("phone")) return Smartphone;
-    if (t.includes("gold") || t.includes("jewel") || category === "Wealth") return Coins;
-    if (t.includes("headphone") || t.includes("audio")) return Headphones;
-    if (t.includes("trip") || t.includes("travel") || category === "Travel") return Plane;
-    if (t.includes("macbook") || t.includes("laptop") || category === "Tech") return Laptop;
-    if (t.includes("emergency") || t.includes("shield") || category === "Emergency") return ShieldCheck;
+    const c = (category || "").toLowerCase();
+    if (t.includes("iphone") || t.includes("apple") || t.includes("phone") || c.includes("tech")) return Smartphone;
+    if (t.includes("gold") || t.includes("jewel") || c.includes("wealth")) return Coins;
+    if (t.includes("headphone") || t.includes("audio") || c.includes("audio") || c.includes("lifestyle")) return Headphones;
+    if (t.includes("emergency") || t.includes("shield") || c.includes("emergency")) return Shield;
+    if (t.includes("trip") || t.includes("travel") || c.includes("travel")) return Plane;
+    if (t.includes("macbook") || t.includes("laptop")) return Laptop;
     return Target;
   };
 
@@ -438,8 +453,15 @@ export const GoalJarsSection: React.FC = () => {
                 ───────────────────────────────────────────────────────── */}
                 <div className={`p-3.5 rounded-xl border space-y-1.5 ${trendData.boxBg}`}>
                   <div className="flex items-start justify-between gap-1">
-                    <span className="text-xs font-bold leading-snug">
-                      {trendData.trendBoxHeader}
+                    <span className="text-xs font-bold leading-snug flex items-center gap-1.5">
+                      {trendData.isDropping ? (
+                        <TrendingDown className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                      ) : trendData.isRising ? (
+                        <TrendingUp className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                      ) : (
+                        <Target className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                      )}
+                      <span>{trendData.trendBoxHeader}</span>
                     </span>
                   </div>
 
@@ -462,7 +484,6 @@ export const GoalJarsSection: React.FC = () => {
                       <Lock className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                       <span className="truncate">{trendData.vaultName}</span>
                     </span>
-                    <span className="text-emerald-700 text-[11px] shrink-0 font-black">{trendData.vaultRate}</span>
                   </div>
                   <span className="text-slate-500 block font-mono text-[10px] leading-tight">
                     {trendData.vaultTag}

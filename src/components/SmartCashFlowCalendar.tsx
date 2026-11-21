@@ -436,10 +436,10 @@ export const SmartCashFlowCalendar: React.FC<SmartCashFlowCalendarProps> = ({
             const isPayday = dayNum === paydayNum;
 
             // Events on this date (excluding static evt_payday)
-            const dayEvents = events.filter((e) => e.date === dateStr && e.id !== "evt_payday");
-            const hasAutoPay = dayEvents.some((e) => e.category === "autopay");
-            const hasPersonal = dayEvents.some((e) => e.category !== "autopay" && e.category !== "payday");
-            const hasPreLocked = dayEvents.some((e) => e.isPreLocked && !e.isPaid && e.category !== "payday");
+            const dayEvents = isPayday ? [] : events.filter((e) => e.date === dateStr && e.id !== "evt_payday");
+            const hasAutoPay = !isPayday && dayEvents.some((e) => e.category === "autopay");
+            const hasPersonal = !isPayday && dayEvents.some((e) => e.category !== "autopay" && e.category !== "payday");
+            const hasPreLocked = !isPayday && dayEvents.some((e) => e.isPreLocked && !e.isPaid && e.category !== "payday");
 
             return (
               <div
@@ -501,11 +501,13 @@ export const SmartCashFlowCalendar: React.FC<SmartCashFlowCalendarProps> = ({
                   })}
 
                   {/* Mobile Dot Indicators */}
-                  <div className="flex sm:hidden items-center gap-1 justify-center pt-0.5">
-                    {hasAutoPay && <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />}
-                    {hasPersonal && <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />}
-                    {hasPreLocked && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />}
-                  </div>
+                  {!isPayday && (
+                    <div className="flex sm:hidden items-center gap-1 justify-center pt-0.5">
+                      {hasAutoPay && <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />}
+                      {hasPersonal && <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />}
+                      {hasPreLocked && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />}
+                    </div>
+                  )}
                 </div>
 
                 {/* Pre-Lock Shield Icon Indicator */}
