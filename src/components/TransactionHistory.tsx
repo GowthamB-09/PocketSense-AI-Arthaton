@@ -2,14 +2,11 @@
 
 import React, { useState } from "react";
 import { useFinancialMemory } from "@/lib/memory/memoryContext";
-import { SpendingType, Transaction } from "@/types";
-import { formatINR, formatDate } from "@/lib/utils";
+import { Transaction } from "@/types";
+import { formatDate } from "@/lib/utils";
 import {
   Search,
   Trash2,
-  CheckCircle2,
-  Compass,
-  Clock,
   UtensilsCrossed,
   ShoppingBag,
   Car,
@@ -23,7 +20,7 @@ import {
 export const TransactionHistory: React.FC = () => {
   const { transactions, deleteTransaction } = useFinancialMemory();
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedFilter, setSelectedFilter] = useState<string>("ALL");
+  const [selectedFilter, setSelectedFilter] = useState<"ALL" | "UPI" | "CARDS">("ALL");
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -47,96 +44,71 @@ export const TransactionHistory: React.FC = () => {
     }
   };
 
+  // Helper to extract clean Account (HDFC / SBI / ICICI)
+  const getAccountLabel = (tx: Transaction): string => {
+    const text = `${tx.bank || ""} ${tx.rawSms || ""}`.toLowerCase();
+    if (text.includes("icici")) return "ICICI";
+    if (text.includes("sbi")) return "SBI";
+    if (text.includes("hdfc")) return "HDFC";
+    if (text.includes("axis")) return "Axis";
+    return "HDFC";
+  };
+
+  // Helper to detect Card vs UPI
+  const isCardTx = (tx: Transaction): boolean => {
+    const text = `${tx.bank || ""} ${tx.rawSms || ""} ${tx.category || ""}`.toLowerCase();
+    return text.includes("card");
+  };
+
   const filteredTransactions = transactions.filter((tx) => {
+    const account = getAccountLabel(tx);
     const matchesSearch =
       tx.merchant.toLowerCase().includes(searchTerm.toLowerCase()) ||
       tx.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (tx.upiRef && tx.upiRef.includes(searchTerm));
+      account.toLowerCase().includes(searchTerm.toLowerCase());
 
     if (!matchesSearch) return false;
     if (selectedFilter === "ALL") return true;
-    return tx.spendingType === selectedFilter;
+    if (selectedFilter === "CARDS") return isCardTx(tx);
+    if (selectedFilter === "UPI") return !isCardTx(tx) || Boolean(tx.upiRef);
+    return true;
   });
 
-  const needSpent = transactions
-    .filter((t) => t.spendingType === "Survival Need")
-    .reduce((sum, t) => sum + t.amount, 0);
-  const impulseSpent = transactions
-    .filter((t) => t.spendingType === "Impulse Want")
-    .reduce((sum, t) => sum + t.amount, 0);
-  const leakSpent = transactions
-    .filter((t) => t.spendingType === "Silent Subscription Leak")
-    .reduce((sum, t) => sum + t.amount, 0);
-
   return (
-    <div className="fintech-card rounded-2xl p-6 space-y-4 bg-white border border-slate-200 shadow-sm">
+    <div className="fintech-card rounded-2xl p-5 sm:p-6 space-y-4 bg-white border border-slate-200 shadow-sm">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700">
+          <div className="p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700">
             <Receipt className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-2">
-              <span>Expenses</span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-700 font-medium">
-                {transactions.length}
+            <h3 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2">
+              <span>Passbook Ledger</span>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-semibold">
+                {filteredTransactions.length} Spends
               </span>
             </h3>
+            <p className="text-xs text-slate-500">
+              Clean record of your tracked expenses across bank accounts and cards.
+            </p>
           </div>
         </div>
 
-        {/* Micro totals */}
-        <div className="flex items-center gap-3 text-xs font-mono bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span className="text-slate-500">Needs:</span>
-            <span className="text-emerald-700 font-bold">{formatINR(needSpent)}</span>
-          </div>
-          <span className="text-slate-300">•</span>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-amber-500" />
-            <span className="text-slate-500">Wants:</span>
-            <span className="text-amber-700 font-bold">{formatINR(impulseSpent)}</span>
-          </div>
-          <span className="text-slate-300">•</span>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-rose-500" />
-            <span className="text-slate-500">Subscriptions:</span>
-            <span className="text-rose-700 font-bold">{formatINR(leakSpent)}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row gap-3 pt-1">
-        {/* Search */}
-        <div className="relative flex-1">
-          <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search expenses..."
-            className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors"
-          />
-        </div>
-
-        {/* Filter Pills */}
-        <div className="flex gap-1.5 overflow-x-auto pb-1 sm:pb-0 text-xs">
+        {/* Filter Pills (All / UPI / Cards) */}
+        <div className="flex rounded-xl bg-slate-100 border border-slate-200 p-1 text-xs font-semibold self-start sm:self-auto">
           {[
-            { id: "ALL", label: "All" },
-            { id: "Survival Need", label: "Needs" },
-            { id: "Impulse Want", label: "Wants" },
-            { id: "Silent Subscription Leak", label: "Subscriptions" },
+            { id: "ALL" as const, label: "All" },
+            { id: "UPI" as const, label: "UPI" },
+            { id: "CARDS" as const, label: "Cards" },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setSelectedFilter(tab.id)}
-              className={`px-3 py-1.5 rounded-lg whitespace-nowrap text-xs font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 selectedFilter === tab.id
-                  ? "bg-slate-900 text-white shadow-sm"
-                  : "text-slate-600 hover:text-slate-900 border border-transparent hover:bg-slate-100"
+                  ? "bg-white text-slate-900 shadow-xs font-bold"
+                  : "text-slate-500 hover:text-slate-900"
               }`}
             >
               {tab.label}
@@ -145,68 +117,74 @@ export const TransactionHistory: React.FC = () => {
         </div>
       </div>
 
-      {/* Transaction Records List */}
-      <div className="space-y-2 max-h-[460px] overflow-y-auto pr-1">
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search by merchant, category, or account (HDFC, SBI, ICICI)..."
+          className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-500 transition-colors"
+        />
+      </div>
+
+      {/* Clean Scannable Transaction List */}
+      <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
         {filteredTransactions.length === 0 ? (
           <div className="p-8 text-center border border-dashed border-slate-200 rounded-xl text-xs text-slate-400">
-            No expenses found.
+            No expenses found matching your filter.
           </div>
         ) : (
           filteredTransactions.map((tx) => {
             const CatIcon = getCategoryIcon(tx.category);
+            const account = getAccountLabel(tx);
+            const isCard = isCardTx(tx);
 
             return (
               <div
                 key={tx.id}
-                className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-200/80 hover:bg-slate-50 hover:border-slate-300 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
+                className="p-3.5 rounded-xl bg-slate-50/70 border border-slate-200/80 hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center justify-between gap-3 group"
               >
-                {/* Left */}
-                <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 text-slate-700 shadow-sm">
-                    <CatIcon className="w-4 h-4 text-emerald-600" />
+                {/* Left: Icon + Merchant Name + Clean Subtitle (Account • Date • Category) */}
+                <div className="flex items-center gap-3 min-w-0">
+                  <div
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border shadow-2xs ${
+                      isCard
+                        ? "bg-blue-50 border-blue-200 text-blue-700"
+                        : "bg-emerald-50 border-emerald-200 text-emerald-700"
+                    }`}
+                  >
+                    <CatIcon className="w-4 h-4" />
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-xs font-bold text-slate-900 tracking-tight">{tx.merchant}</h4>
-                      {tx.triggerTag && (
-                        <span className="text-[10px] font-mono px-2 py-0.2 rounded-full bg-slate-200/60 text-slate-700 font-medium">
-                          #{tx.triggerTag}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-500 font-mono mt-0.5">
+                  <div className="min-w-0 truncate">
+                    <h4 className="text-xs font-bold text-slate-900 tracking-tight truncate">
+                      {tx.merchant}
+                    </h4>
+                    <div className="flex items-center gap-1.5 text-[11px] text-slate-500 font-mono mt-0.5 truncate">
+                      <span className="font-semibold text-slate-700">{account}</span>
+                      <span>•</span>
                       <span>{formatDate(tx.date)}</span>
                       <span>•</span>
-                      <span>{tx.category}</span>
-                      {tx.upiRef && (
-                        <>
-                          <span>•</span>
-                          <span className="text-slate-400">Ref: {tx.upiRef}</span>
-                        </>
-                      )}
+                      <span className="text-slate-500 truncate">{tx.category}</span>
                     </div>
                   </div>
                 </div>
 
-                {/* Right */}
-                <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0">
+                {/* Right: Amount & Delete */}
+                <div className="flex items-center gap-3 shrink-0">
                   <div className="text-right">
-                    <div className="font-mono text-sm font-black text-slate-900">
-                      -{formatINR(tx.amount)}
+                    <div className="font-mono text-xs sm:text-sm font-bold text-slate-900">
+                      -₹{tx.amount.toLocaleString("en-IN")}
                     </div>
                     <span
-                      className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
-                        tx.spendingType === "Survival Need"
-                          ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-                          : tx.spendingType === "Silent Subscription Leak"
-                          ? "bg-rose-50 border-rose-200 text-rose-800"
-                          : "bg-amber-50 border-amber-200 text-amber-800"
+                      className={`text-[9px] font-mono font-semibold px-2 py-0.2 rounded-full border ${
+                        isCard
+                          ? "bg-blue-50 text-blue-700 border-blue-200"
+                          : "bg-emerald-50 text-emerald-700 border-emerald-200"
                       }`}
                     >
-                      {tx.spendingType === "Survival Need" && <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />}
-                      {tx.spendingType === "Impulse Want" && <Compass className="w-2.5 h-2.5 text-amber-600" />}
-                      {tx.spendingType === "Silent Subscription Leak" && <Clock className="w-2.5 h-2.5 text-rose-600" />}
-                      <span>{tx.spendingType}</span>
+                      {account} {isCard ? "Card" : "UPI"}
                     </span>
                   </div>
 

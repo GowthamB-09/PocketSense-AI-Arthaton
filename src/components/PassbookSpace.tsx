@@ -5,7 +5,6 @@ import { useFinancialMemory } from "@/lib/memory/memoryContext";
 import { Transaction } from "@/types";
 import { formatINR } from "@/lib/utils";
 import { TransactionHistory } from "@/components/TransactionHistory";
-import { SpendingTrendChart } from "@/components/SpendingTrendChart";
 import {
   Smartphone,
   Mail,
@@ -21,6 +20,7 @@ import {
   Bell,
   Clock,
   Layers,
+  Sparkles,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 
@@ -75,81 +75,81 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
   const DEFAULT_SAMPLE_SMS = `Debited INR 540.00 from HDFC Bank A/C **4412 via UPI to ZOMATO ONLINE. Avl Bal: INR ${currentBankCash.toLocaleString("en-IN")}.00.`;
   const [smsInput, setSmsInput] = useState<string>(DEFAULT_SAMPLE_SMS);
 
-  // Clean Consumer Activity Stream
+  // Clean Consumer Recent Activity Stream
   const [activityStream, setActivityStream] = useState<ActivityEvent[]>([
     {
       id: "ev_1",
       source: "Bank / UPI SMS",
-      title: "UPI Debit Auto-Captured",
+      title: "UPI Debit",
       merchant: "Swiggy Gourmet Bowl",
       amount: 480,
       time: "12 mins ago",
       type: "debit",
       category: "Food & Dining",
-      bankTag: "PhonePe / HDFC Bank",
+      bankTag: "HDFC Bank",
       roundUp: 20,
     },
     {
       id: "ev_2",
       source: "Credit Card SMS",
-      title: "Credit Card e-Bill Parsed",
+      title: "Credit Card Bill",
       merchant: "ICICI Bank Coral Card",
-      amount: 11500,
+      amount: 9800, // Matches app's live card dues (₹9,800 ICICI / ₹8,108 HDFC)
       time: "1 hour ago",
       type: "bill",
       category: "Credit Card Bill",
-      bankTag: "ICICI Bank (Statement)",
+      bankTag: "ICICI Bank",
     },
     {
       id: "ev_3",
       source: "Bank / UPI SMS",
-      title: "UPI Debit Auto-Captured",
+      title: "UPI Debit",
       merchant: "Blue Tokai Coffee Roasters",
       amount: 350,
       time: "3 hours ago",
       type: "debit",
       category: "Food & Dining",
-      bankTag: "Google Pay / SBI",
+      bankTag: "SBI UPI",
       roundUp: 50,
     },
     {
       id: "ev_4",
       source: "Gmail Auto-Forward",
-      title: "Index Fund SIP Auto-Debited",
+      title: "Mutual Fund SIP",
       merchant: "Nifty 50 Index Mutual Fund",
       amount: 5000,
       time: "Yesterday @ 6:00 PM",
       type: "debit",
       category: "Investments & SIPs",
-      bankTag: "Zerodha / HDFC Bank",
+      bankTag: "HDFC Bank",
     },
     {
       id: "ev_5",
       source: "Bank / UPI SMS",
-      title: "Quick Commerce Debit Parsed",
+      title: "Quick Commerce Debit",
       merchant: "Zepto 10-Min Groceries",
       amount: 540,
       time: "Yesterday @ 2:15 PM",
       type: "debit",
       category: "Food & Dining",
-      bankTag: "CRED UPI / HDFC",
+      bankTag: "HDFC Bank",
       roundUp: 60,
     },
     {
       id: "ev_6",
       source: "Bank / UPI SMS",
-      title: "Commute Debit Parsed",
+      title: "Commute Debit",
       merchant: "Uber Ride Home",
       amount: 350,
       time: "2 days ago",
       type: "debit",
       category: "Transport & Subscriptions",
-      bankTag: "HDFC Bank UPI",
+      bankTag: "HDFC Bank",
       roundUp: 50,
     },
   ]);
 
-  // Consumer Tag Helper for Clean Badges (UPI, Card Bill, SIP)
+  // Consumer Tag Helper for Clean Badges (UPI, Card, SIP)
   const getConsumerTag = (ev: ActivityEvent) => {
     if (
       ev.category === "Investments & SIPs" ||
@@ -171,7 +171,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
       /card/i.test(ev.bankTag)
     ) {
       return {
-        label: "Card Bill",
+        label: "Card",
         badgeClass: "bg-blue-50 text-blue-700 border-blue-200",
         iconBg: "bg-blue-100 text-blue-700",
         icon: <CreditCard className="w-4 h-4" />,
@@ -186,7 +186,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
   };
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // 1. REAL REGEX SMS PARSING ENGINE
+  // REAL REGEX SMS PARSING ENGINE
   // ─────────────────────────────────────────────────────────────────────────────
   const parseSmsDetails = (text: string) => {
     const clean = text.trim();
@@ -202,7 +202,6 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
         amount = parseFloat(rawVal.replace(/,/g, ""));
       }
     }
-    // Fallback for ₹ symbol
     if (amount === 0) {
       const symbolMatch = clean.match(/₹\s*([\d,]+(?:\.\d+)?)/i);
       if (symbolMatch && symbolMatch[1]) {
@@ -210,7 +209,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
       }
     }
 
-    // Extract merchant name (e.g., ZOMATO ONLINE -> Zomato)
+    // Extract merchant name
     let rawMerchant = "";
     const toMatch = clean.match(
       /(?:to|at|paid to|spent at)\s+([A-Za-z0-9&'\-\.\s]+?)(?:\s*(?:via|\.|\bon\b|\bAvl\b|\bRef\b|\bA\/C\b|\bBal\b|\bLimit\b|$))/i
@@ -219,7 +218,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
       rawMerchant = toMatch[1].trim();
     }
 
-    let merchant = "Zomato"; // Default fallback
+    let merchant = "Zomato";
     if (/zomato/i.test(clean) || /zomato/i.test(rawMerchant)) {
       merchant = "Zomato";
     } else if (/swiggy/i.test(clean) || /swiggy/i.test(rawMerchant)) {
@@ -317,7 +316,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
   const currentParsed = parseSmsDetails(smsInput);
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // 2. PARSE & LOG SMS ACTION (STATE SYNCHRONIZATION)
+  // PARSE & LOG SMS ACTION
   // ─────────────────────────────────────────────────────────────────────────────
   const handleParseAndLogSms = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -327,7 +326,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
     const bankCash = profile.totalLinkedBankCash ?? 48500;
     const cardDues = profile.creditCardDues ?? 17908;
 
-    // 1. Prepend the newly parsed transaction to Recent Auto-Tracked Activity
+    // 1. Prepend newly parsed transaction to Recent Activity
     const newFeedEvent: ActivityEvent = {
       id: "ev_sms_" + Date.now(),
       source: isCreditCard ? "Credit Card SMS" : "Bank / UPI SMS",
@@ -343,8 +342,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
     };
     setActivityStream((prev) => [newFeedEvent, ...prev]);
 
-    // 2. Deduct debited amount from totalLinkedBankCash (if bank/UPI SMS)
-    //    or add it to upcomingCardDues (if credit card SMS), updating Net Safe Cash Pool live
+    // 2. Deduct debited amount from totalLinkedBankCash (if bank/UPI) or add to upcomingCardDues (if card)
     if (isCreditCard) {
       const updatedCardDues = cardDues + amount;
       updateCreditCardDues(updatedCardDues, bankCash);
@@ -353,13 +351,13 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
       updateCreditCardDues(cardDues, updatedBankCash);
     }
 
-    // 3. Increment the matching category in Top Spend Categories so donut chart totals stay synced with Spent This Month
+    // 3. Increment matching category in Top Spend Categories so totals stay synced with Spent This Month
     setCategoryBreakdown((prev) => ({
       ...prev,
       [category]: prev[category] + amount,
     }));
 
-    // Respect Silent Risk Guard (isAutoPayPaused) in SMS Round-Ups
+    // Respect Silent Risk Guard in SMS Round-Ups
     if (!isAutoPayPaused && roundUp > 0) {
       const targetGoal = profile.goals?.[0]?.id || "goal_iphone";
       claimSavings(
@@ -384,7 +382,6 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
     };
     addBatchTransactions([newTx]);
 
-    // Feedback Toast & Confetti
     const roundUpMessage = isAutoPayPaused
       ? "AutoPay paused by Risk Guard"
       : `+₹${roundUp} swept to Goal Jars`;
@@ -428,7 +425,6 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
     },
   ];
 
-  // Total spent calculation for Donut Chart
   const totalSpentThisMonth = Object.values(categoryBreakdown).reduce((a, b) => a + b, 0);
 
   const categoriesConfig: {
@@ -548,14 +544,14 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
         </div>
       )}
 
-      {/* TAB 1: ZERO-TOUCH AUTOPILOT CONNECTORS, REAL REGEX PARSER & LIVE FEED */}
+      {/* ─────────────────────────────────────────────────────────────────────────────
+          TAB 1: ZERO-TOUCH AUTOPILOT
+      ───────────────────────────────────────────────────────────────────────────── */}
       {activeTab === "autopilot-sync" && (
         <div className="space-y-6 animate-fade-in">
-          {/* ─────────────────────────────────────────────────────────────────────────────
-              2. SLEEK COMPACT 2-PILL STATUS BAR (JARGON-FREE)
-          ───────────────────────────────────────────────────────────────────────────── */}
+          {/* COMPACT SINGLE-LINE STATUS CARDS */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {/* Pill 1: Bank & Card Email Sync */}
+            {/* Card 1: Bank & Card Email Sync */}
             <div className="p-3.5 px-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
@@ -583,7 +579,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
               </button>
             </div>
 
-            {/* Pill 2: UPI & Bank SMS Sync */}
+            {/* Card 2: UPI & Bank SMS Sync */}
             <div className="p-3.5 px-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100">
@@ -608,9 +604,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
             </div>
           </div>
 
-          {/* ─────────────────────────────────────────────────────────────────────────────
-              PARSE & LOG SMS CARD (ZERO-TOUCH AUTOPILOT)
-          ───────────────────────────────────────────────────────────────────────────── */}
+          {/* PARSE & LOG SMS CARD */}
           <div className="fintech-card rounded-2xl p-5 sm:p-6 bg-white border border-slate-200 shadow-sm space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2">
@@ -734,8 +728,93 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
           </div>
 
           {/* ─────────────────────────────────────────────────────────────────────────────
-              TOP SPEND CATEGORIES (DONUT CHART & SYNCED BREAKDOWN)
+              RECENT ACTIVITY
           ───────────────────────────────────────────────────────────────────────────── */}
+          <div className="fintech-card rounded-2xl p-5 bg-white border border-slate-200 shadow-sm space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-slate-500" />
+                <h4 className="text-xs font-bold text-slate-900 tracking-tight">
+                  Recent Activity ({activityStream.length} Events)
+                </h4>
+              </div>
+              <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-semibold flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Auto-Synced
+              </span>
+            </div>
+
+            <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
+              {activityStream.map((ev) => {
+                const roundUpAmt =
+                  ev.roundUp ?? (ev.amount % 100 === 0 ? 0 : 100 - (ev.amount % 100));
+                const consumerTag = getConsumerTag(ev);
+
+                return (
+                  <div
+                    key={ev.id}
+                    className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3 text-xs font-mono hover:bg-slate-100/70 transition-colors"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                          consumerTag.iconBg
+                        }`}
+                      >
+                        {consumerTag.icon}
+                      </div>
+                      <div className="truncate">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-slate-900 truncate">{ev.merchant}</span>
+                          <span
+                            className={`text-[9px] px-1.5 py-0.2 rounded border font-semibold ${consumerTag.badgeClass}`}
+                          >
+                            {consumerTag.label}
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-slate-500 block truncate">
+                          {ev.bankTag} • {ev.time}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                      <span
+                        className={`text-sm font-bold block ${
+                          ev.type === "credit"
+                            ? "text-emerald-700"
+                            : ev.type === "bill" || consumerTag.label === "Card"
+                            ? "text-blue-700"
+                            : "text-slate-900"
+                        }`}
+                      >
+                        {ev.type === "credit" ? "+" : ev.type === "debit" ? "-" : ""}
+                        {formatINR(ev.amount)}
+                      </span>
+
+                      {/* Spare-change round-up badge: HIDDEN whenever Silent Risk Guard (isAutoPayPaused) is active */}
+                      {!isAutoPayPaused && ev.type === "debit" && ev.amount > 0 && roundUpAmt > 0 && (
+                        <div className="mt-0.5">
+                          <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">
+                            +₹{roundUpAmt} Round-Up
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─────────────────────────────────────────────────────────────────────────────
+          TAB 2: SPENDING INSIGHTS (CLEAN CATEGORY BREAKDOWN + ONE CONCISE AI TAKEAWAY)
+      ───────────────────────────────────────────────────────────────────────────── */}
+      {activeTab === "insights" && (
+        <div className="space-y-6 animate-fade-in">
+          {/* Clean Category Breakdown */}
           <div className="fintech-card rounded-2xl p-5 sm:p-6 bg-white border border-slate-200 shadow-sm space-y-5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2">
@@ -744,13 +823,13 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                    <span>Top Spend Categories</span>
+                    <span>Category Breakdown</span>
                     <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 font-semibold">
                       Synced with Spent This Month
                     </span>
                   </h3>
                   <p className="text-xs text-slate-500">
-                    Live distribution across your primary spending buckets. Every parsed SMS increments its category in real-time.
+                    Live distribution across your primary spending buckets. Totals sync automatically with simulated spends.
                   </p>
                 </div>
               </div>
@@ -774,7 +853,6 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
                     viewBox={`0 0 ${size} ${size}`}
                     className="transform -rotate-90"
                   >
-                    {/* Background Track */}
                     <circle
                       cx={size / 2}
                       cy={size / 2}
@@ -783,7 +861,6 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
                       strokeWidth={strokeWidth}
                       fill="none"
                     />
-                    {/* Category Slices */}
                     {categoriesConfig.map((cat) => {
                       const amount = categoryBreakdown[cat.key] || 0;
                       const pct = totalSpentThisMonth > 0 ? amount / totalSpentThisMonth : 0;
@@ -810,7 +887,6 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
                     })}
                   </svg>
 
-                  {/* Centered Total Label */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
                     <span className="text-[10px] font-mono text-slate-400 uppercase font-bold tracking-wider">
                       Spent
@@ -859,7 +935,6 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
                         </span>
                       </div>
 
-                      {/* Progress Bar */}
                       <div className="w-full h-1.5 rounded-full bg-slate-200 overflow-hidden">
                         <div
                           className="h-full rounded-full transition-all duration-500 ease-out"
@@ -876,181 +951,31 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
             </div>
           </div>
 
-          {/* ─────────────────────────────────────────────────────────────────────────────
-              3. CLEAN CONSUMER ACTIVITY FEED (RECENT AUTO-TRACKED ACTIVITY)
-          ───────────────────────────────────────────────────────────────────────────── */}
-          <div className="fintech-card rounded-2xl p-5 bg-white border border-slate-200 shadow-sm space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-100">
+          {/* Concise AI Takeaway Card */}
+          <div className="fintech-card rounded-2xl p-5 bg-gradient-to-br from-emerald-50/70 via-white to-blue-50/50 border border-emerald-200/80 shadow-sm flex items-start gap-3.5">
+            <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <Sparkles className="w-4 h-4" />
+            </div>
+            <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-slate-500" />
-                <h4 className="text-xs font-bold text-slate-900 tracking-tight">
-                  Recent Auto-Tracked Activity ({activityStream.length} Events)
+                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                  AI Spending Takeaway
                 </h4>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 font-semibold">
+                  Live Monthly Pace
+                </span>
               </div>
-              <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-semibold flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Auto-Synced
-              </span>
-            </div>
-
-            <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
-              {activityStream.map((ev) => {
-                const roundUpAmt =
-                  ev.roundUp ?? (ev.amount % 100 === 0 ? 0 : 100 - (ev.amount % 100));
-                const consumerTag = getConsumerTag(ev);
-
-                return (
-                  <div
-                    key={ev.id}
-                    className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3 text-xs font-mono hover:bg-slate-100/70 transition-colors"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div
-                        className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                          consumerTag.iconBg
-                        }`}
-                      >
-                        {consumerTag.icon}
-                      </div>
-                      <div className="truncate">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-slate-900 truncate">{ev.merchant}</span>
-                          <span
-                            className={`text-[9px] px-1.5 py-0.2 rounded border font-semibold ${consumerTag.badgeClass}`}
-                          >
-                            {consumerTag.label}
-                          </span>
-                        </div>
-                        <span className="text-[10px] text-slate-500 block truncate">
-                          {ev.bankTag} • {ev.time}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="text-right shrink-0">
-                      <span
-                        className={`text-sm font-bold block ${
-                          ev.type === "credit"
-                            ? "text-emerald-700"
-                            : ev.type === "bill" || consumerTag.label === "Card Bill"
-                            ? "text-blue-700"
-                            : "text-slate-900"
-                        }`}
-                      >
-                        {ev.type === "credit" ? "+" : ev.type === "debit" ? "-" : ""}
-                        {formatINR(ev.amount)}
-                      </span>
-
-                      {/* Spare-change round-up badge: HIDDEN whenever Silent Risk Guard (isAutoPayPaused) is active */}
-                      {!isAutoPayPaused && ev.type === "debit" && ev.amount > 0 && roundUpAmt > 0 && (
-                        <div className="mt-0.5">
-                          <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">
-                            +₹{roundUpAmt} Round-Up
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+              <p className="text-xs text-slate-600 leading-relaxed">
+                You have spent <strong>₹{totalSpentThisMonth.toLocaleString("en-IN")}</strong> this month across your 4 primary categories. Discretionary spending remains within safe boundaries, keeping your bank cash protected for upcoming card dues (₹17,908) and month-end savings.
+              </p>
             </div>
           </div>
         </div>
       )}
 
-      {/* TAB 2: SPENDING INSIGHTS */}
-      {activeTab === "insights" && (
-        <div className="space-y-6 animate-fade-in">
-          {/* Top Spend Categories Donut in Insights View */}
-          <div className="fintech-card rounded-2xl p-5 sm:p-6 bg-white border border-slate-200 shadow-sm space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <PieChart className="w-4 h-4 text-amber-600" />
-                <h3 className="text-sm font-bold text-slate-900 tracking-tight">
-                  Top Spend Categories Breakdown
-                </h3>
-              </div>
-              <span className="text-xs font-mono font-bold text-slate-900">
-                Total: ₹{totalSpentThisMonth.toLocaleString("en-IN")}
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-xs">
-              {categoriesConfig.map((cat) => {
-                const amount = categoryBreakdown[cat.key] || 0;
-                const pct = totalSpentThisMonth > 0 ? Math.round((amount / totalSpentThisMonth) * 100) : 0;
-                return (
-                  <div key={cat.key} className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-                    <div className="flex items-center gap-1.5">
-                      <span className={`w-2 h-2 rounded-full ${cat.dotBg}`} />
-                      <span className="text-[11px] font-bold text-slate-700 truncate">{cat.key}</span>
-                    </div>
-                    <span className="text-base font-black text-slate-900 block">
-                      ₹{amount.toLocaleString("en-IN")}
-                    </span>
-                    <span className="text-[10px] text-slate-500 font-sans">{pct}% of total</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <SpendingTrendChart />
-
-          {/* Silent Subscription Leaks & Traps */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="fintech-card rounded-2xl p-5 bg-white border border-slate-200 shadow-sm space-y-3">
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-900">
-                <CreditCard className="w-4 h-4 text-purple-600" />
-                <span>Detected Silent Subscription Leaks</span>
-              </div>
-              <p className="text-xs text-slate-500">
-                Recurring monthly charges detected automatically without user tagging.
-              </p>
-              <div className="space-y-2 font-mono text-xs">
-                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex justify-between items-center">
-                  <span>Spotify Premium Individual</span>
-                  <span className="font-bold text-slate-900">₹119/mo</span>
-                </div>
-                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex justify-between items-center">
-                  <span>Netflix HD Standard</span>
-                  <span className="font-bold text-slate-900">₹499/mo</span>
-                </div>
-                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex justify-between items-center">
-                  <span>Apple iCloud 200GB</span>
-                  <span className="font-bold text-slate-900">₹219/mo</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="fintech-card rounded-2xl p-5 bg-white border border-slate-200 shadow-sm space-y-3">
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-900">
-                <ShoppingBag className="w-4 h-4 text-amber-600" />
-                <span>Micro-Impulse Drain Summary</span>
-              </div>
-              <p className="text-xs text-slate-500">
-                Small spends (&lt; ₹500) that invisibly shorten your monthly Cash Left.
-              </p>
-              <div className="space-y-2 font-mono text-xs">
-                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex justify-between items-center">
-                  <span>Quick-Commerce Carts (Blinkit/Zepto)</span>
-                  <span className="font-bold text-amber-700">₹3,420 (8 orders)</span>
-                </div>
-                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex justify-between items-center">
-                  <span>Coffee &amp; Cafes (Blue Tokai/Third Wave)</span>
-                  <span className="font-bold text-amber-700">₹1,850 (5 visits)</span>
-                </div>
-                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex justify-between items-center">
-                  <span>Auto-Saved Spare Change from Rounds</span>
-                  <span className="font-bold text-emerald-700">+₹1,240 routed to FD</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* TAB 3: PASSBOOK LEDGER */}
+      {/* ─────────────────────────────────────────────────────────────────────────────
+          TAB 3: PASSBOOK LEDGER (CLEAN SCANNABLE LIST)
+      ───────────────────────────────────────────────────────────────────────────── */}
       {activeTab === "ledger" && (
         <div className="space-y-4 animate-fade-in">
           <TransactionHistory />
