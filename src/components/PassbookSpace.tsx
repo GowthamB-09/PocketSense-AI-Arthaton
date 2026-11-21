@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
+import { useFinancialMemory } from "@/lib/memory/memoryContext";
 import { TransactionHistory } from "@/components/TransactionHistory";
 import {
   Smartphone,
@@ -26,25 +27,42 @@ export type SpendCategory =
   | "Entertainment & Outings";
 
 export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
+  const { profile } = useFinancialMemory();
   const [activeTab, setActiveTab] = useState<"autopilot-sync" | "insights" | "ledger">("autopilot-sync");
   const [copiedEmail, setCopiedEmail] = useState(false);
 
-  // Top Spend Categories initialized to sum exactly to spentThisMonth (₹17,708)
-  // 6850 + 4920 + 3438 + 2500 = 17,708
-  const [categoryBreakdown] = useState<Record<SpendCategory, number>>({
-    "Food & Dining": 6850,
-    "Shopping & Gear": 4920,
-    "Transport & Subscriptions": 3438,
-    "Entertainment & Outings": 2500,
-  });
+  // Sync Spent This Month 1:1 with Top Salary Bar
+  const takeHomeSalary = Math.max(1, profile.monthlySalary || 75000);
+  const fixedBills = profile.fixedEssentials || 32000;
+  const totalLinkedBankCash = profile.totalLinkedBankCash ?? 48500;
+  const upcomingCardDues = profile.creditCardDues ?? 17908;
+
+  const ringFencedEventsAmount = (profile.calendarEvents || [])
+    .filter((e) => e.isPreLocked && !e.isPaid && e.category !== "autopay")
+    .reduce((sum, e) => sum + (e.budget || 0), 0);
+
+  const totalSafePool = Math.max(0, totalLinkedBankCash - upcomingCardDues - ringFencedEventsAmount);
+  const maxSpendableBudget = Math.max(0, takeHomeSalary - fixedBills);
+  const totalSpentThisMonth = Math.min(maxSpendableBudget, Math.max(0, maxSpendableBudget - totalSafePool));
+
+  // Dynamically allocate category breakdown to sum 100% to totalSpentThisMonth
+  const foodAmt = Math.round(totalSpentThisMonth * 0.38);
+  const shoppingAmt = Math.round(totalSpentThisMonth * 0.28);
+  const transportAmt = Math.round(totalSpentThisMonth * 0.20);
+  const entertainmentAmt = Math.max(0, totalSpentThisMonth - foodAmt - shoppingAmt - transportAmt);
+
+  const categoryBreakdown: Record<SpendCategory, number> = useMemo(() => ({
+    "Food & Dining": foodAmt,
+    "Shopping & Gear": shoppingAmt,
+    "Transport & Subscriptions": transportAmt,
+    "Entertainment & Outings": entertainmentAmt,
+  }), [foodAmt, shoppingAmt, transportAmt, entertainmentAmt]);
 
   const handleCopyForwardingEmail = () => {
     navigator.clipboard.writeText("alex@pocketsense.ai");
     setCopiedEmail(true);
     setTimeout(() => setCopiedEmail(false), 2500);
   };
-
-  const totalSpentThisMonth = Object.values(categoryBreakdown).reduce((a, b) => a + b, 0);
 
   const categoriesConfig: {
     key: SpendCategory;
@@ -88,7 +106,6 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
   const strokeWidth = 22;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  let accumulatedPct = 0;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -263,30 +280,33 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
                       strokeWidth={strokeWidth}
                       fill="none"
                     />
-                    {categoriesConfig.map((cat) => {
-                      const amount = categoryBreakdown[cat.key] || 0;
-                      const pct = totalSpentThisMonth > 0 ? amount / totalSpentThisMonth : 0;
-                      const strokeDasharray = `${pct * circumference} ${circumference}`;
-                      const strokeDashoffset = -accumulatedPct * circumference;
-                      accumulatedPct += pct;
+                    {(() => {
+                      let currentAccumulated = 0;
+                      return categoriesConfig.map((cat) => {
+                        const amount = categoryBreakdown[cat.key] || 0;
+                        const pct = totalSpentThisMonth > 0 ? amount / totalSpentThisMonth : 0;
+                        const strokeDasharray = `${pct * circumference} ${circumference}`;
+                        const strokeDashoffset = -currentAccumulated * circumference;
+                        currentAccumulated += pct;
 
-                      if (pct <= 0) return null;
+                        if (pct <= 0) return null;
 
-                      return (
-                        <circle
-                          key={cat.key}
-                          cx={size / 2}
-                          cy={size / 2}
-                          r={radius}
-                          stroke={cat.color}
-                          strokeWidth={strokeWidth}
-                          strokeDasharray={strokeDasharray}
-                          strokeDashoffset={strokeDashoffset}
-                          fill="none"
-                          className="transition-all duration-500 ease-out"
-                        />
-                      );
-                    })}
+                        return (
+                          <circle
+                            key={cat.key}
+                            cx={size / 2}
+                            cy={size / 2}
+                            r={radius}
+                            stroke={cat.color}
+                            strokeWidth={strokeWidth}
+                            strokeDasharray={strokeDasharray}
+                            strokeDashoffset={strokeDashoffset}
+                            fill="none"
+                            className="transition-all duration-500 ease-out"
+                          />
+                        );
+                      });
+                    })()}
                   </svg>
 
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
