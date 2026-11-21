@@ -118,8 +118,8 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
           <div>
             <h2 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
               <span>Auto-Tracked Spending</span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">
-                Auto-Synced
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 font-medium">
+                Simulated Demo
               </span>
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
