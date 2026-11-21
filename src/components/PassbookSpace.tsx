@@ -524,8 +524,8 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
                 : "text-slate-500 hover:text-slate-800"
             }`}
           >
-            <span className="hidden sm:inline">Passbook Ledger</span>
-            <span className="sm:hidden">Ledger</span>
+            <span className="hidden sm:inline">Spend History</span>
+            <span className="sm:hidden">History</span>
           </button>
         </div>
       </div>
@@ -613,10 +613,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                    <span>Parse &amp; Log SMS (Zero-Touch Autopilot)</span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">
-                      Real Regex Engine
-                    </span>
+                    <span>Parse &amp; Log SMS</span>
                   </h3>
                   <p className="text-xs text-slate-500">
                     Parse any pasted bank or credit card SMS. Auto-extracts amount, merchant, category, and sweeps spare change.
@@ -710,11 +707,7 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
               </div>
 
               {/* Action Button: Parse & Log SMS */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-1">
-                <span className="text-[11px] text-slate-500 font-mono">
-                  Regex Pattern: <code className="bg-slate-100 px-1 py-0.5 rounded text-slate-700">/INR\s*([\d,]+(?:\.\d+)?)|Rs\.?\s*([\d,]+(?:\.\d+)?)/i</code>
-                </span>
-
+              <div className="flex justify-end pt-1">
                 <button
                   type="submit"
                   disabled={currentParsed.amount <= 0}
@@ -725,86 +718,6 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
                 </button>
               </div>
             </form>
-          </div>
-
-          {/* ─────────────────────────────────────────────────────────────────────────────
-              RECENT ACTIVITY
-          ───────────────────────────────────────────────────────────────────────────── */}
-          <div className="fintech-card rounded-2xl p-5 bg-white border border-slate-200 shadow-sm space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-slate-500" />
-                <h4 className="text-xs font-bold text-slate-900 tracking-tight">
-                  Recent Activity ({activityStream.length} Events)
-                </h4>
-              </div>
-              <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-semibold flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Auto-Synced
-              </span>
-            </div>
-
-            <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
-              {activityStream.map((ev) => {
-                const roundUpAmt =
-                  ev.roundUp ?? (ev.amount % 100 === 0 ? 0 : 100 - (ev.amount % 100));
-                const consumerTag = getConsumerTag(ev);
-
-                return (
-                  <div
-                    key={ev.id}
-                    className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3 text-xs font-mono hover:bg-slate-100/70 transition-colors"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div
-                        className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                          consumerTag.iconBg
-                        }`}
-                      >
-                        {consumerTag.icon}
-                      </div>
-                      <div className="truncate">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-slate-900 truncate">{ev.merchant}</span>
-                          <span
-                            className={`text-[9px] px-1.5 py-0.2 rounded border font-semibold ${consumerTag.badgeClass}`}
-                          >
-                            {consumerTag.label}
-                          </span>
-                        </div>
-                        <span className="text-[10px] text-slate-500 block truncate">
-                          {ev.bankTag} • {ev.time}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="text-right shrink-0">
-                      <span
-                        className={`text-sm font-bold block ${
-                          ev.type === "credit"
-                            ? "text-emerald-700"
-                            : ev.type === "bill" || consumerTag.label === "Card"
-                            ? "text-blue-700"
-                            : "text-slate-900"
-                        }`}
-                      >
-                        {ev.type === "credit" ? "+" : ev.type === "debit" ? "-" : ""}
-                        {formatINR(ev.amount)}
-                      </span>
-
-                      {/* Spare-change round-up badge: HIDDEN whenever Silent Risk Guard (isAutoPayPaused) is active */}
-                      {!isAutoPayPaused && ev.type === "debit" && ev.amount > 0 && roundUpAmt > 0 && (
-                        <div className="mt-0.5">
-                          <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">
-                            +₹{roundUpAmt} Round-Up
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
           </div>
         </div>
       )}
@@ -929,9 +842,6 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
                       <div className="flex items-baseline justify-between">
                         <span className="text-base font-black text-slate-900">
                           ₹{amount.toLocaleString("en-IN")}
-                        </span>
-                        <span className="text-[10px] font-sans text-slate-400 font-medium">
-                          Active bucket
                         </span>
                       </div>
 

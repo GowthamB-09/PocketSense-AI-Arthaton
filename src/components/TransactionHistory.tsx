@@ -84,13 +84,13 @@ export const TransactionHistory: React.FC = () => {
           </div>
           <div>
             <h3 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2">
-              <span>Passbook Ledger</span>
+              <span>Spend History</span>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-semibold">
                 {filteredTransactions.length} Spends
               </span>
             </h3>
             <p className="text-xs text-slate-500">
-              Clean record of your tracked expenses across bank accounts and cards.
+              Every UPI, bank, and card spend tracked in one place.
             </p>
           </div>
         </div>
