@@ -75,6 +75,15 @@ const CATEGORY_CONFIG: Record<
     badgeText: "text-rose-800",
     dotColor: "bg-rose-500",
   },
+  payday: {
+    label: "Income Credit",
+    emoji: "⭐",
+    color: "#10B981", // Emerald / Gold
+    badgeBg: "bg-emerald-50",
+    badgeBorder: "border-emerald-200",
+    badgeText: "text-emerald-800",
+    dotColor: "bg-emerald-500",
+  },
 };
 
 export const SmartCashFlowCalendar: React.FC<SmartCashFlowCalendarProps> = ({
@@ -274,7 +283,7 @@ export const SmartCashFlowCalendar: React.FC<SmartCashFlowCalendarProps> = ({
         title: "Monthly Salary Credited (Payday 🎉)",
         date: paydayDateStr,
         budget: profile.monthlySalary || 75000,
-        category: "autopay",
+        category: "payday",
         isPreLocked: false,
         isPaid: false,
         notes: `Salary credited on Day ${salaryCreditDay}.`,
@@ -428,9 +437,9 @@ export const SmartCashFlowCalendar: React.FC<SmartCashFlowCalendarProps> = ({
 
             // Events on this date (excluding static evt_payday)
             const dayEvents = events.filter((e) => e.date === dateStr && e.id !== "evt_payday");
-            const hasAutoPay = dayEvents.some((e) => e.category === "autopay") || isPayday;
-            const hasPersonal = dayEvents.some((e) => e.category !== "autopay");
-            const hasPreLocked = dayEvents.some((e) => e.isPreLocked && !e.isPaid);
+            const hasAutoPay = dayEvents.some((e) => e.category === "autopay");
+            const hasPersonal = dayEvents.some((e) => e.category !== "autopay" && e.category !== "payday");
+            const hasPreLocked = dayEvents.some((e) => e.isPreLocked && !e.isPaid && e.category !== "payday");
 
             return (
               <div
@@ -496,7 +505,6 @@ export const SmartCashFlowCalendar: React.FC<SmartCashFlowCalendarProps> = ({
                     {hasAutoPay && <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />}
                     {hasPersonal && <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />}
                     {hasPreLocked && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />}
-                    {isPayday && <span className="text-[9px] text-amber-500 leading-none">⭐</span>}
                   </div>
                 </div>
 
@@ -546,13 +554,16 @@ export const SmartCashFlowCalendar: React.FC<SmartCashFlowCalendarProps> = ({
             {selectedDateEvents.map((evt) => {
               const cfg = CATEGORY_CONFIG[evt.category] || CATEGORY_CONFIG.birthday;
               const isAutoPay = evt.category === "autopay";
+              const isPayday = evt.category === "payday" || evt.id === "evt_payday";
               const collision = checkCollisionForDate(evt.date);
 
               return (
                 <div
                   key={evt.id}
                   className={`p-3 rounded-xl bg-white border shadow-2xs flex flex-col justify-between gap-2.5 transition-all ${
-                    evt.isPaid
+                    isPayday
+                      ? "border-emerald-200 bg-gradient-to-r from-emerald-50/50 via-white to-amber-50/20 ring-1 ring-emerald-400/20"
+                      : evt.isPaid
                       ? "border-slate-200 opacity-60 bg-slate-50/50"
                       : evt.isPreLocked
                       ? "border-emerald-300 ring-1 ring-emerald-400/20"
@@ -561,40 +572,58 @@ export const SmartCashFlowCalendar: React.FC<SmartCashFlowCalendarProps> = ({
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-start gap-2.5 min-w-0">
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border text-sm ${cfg.badgeBg} ${cfg.badgeBorder}`}>
-                        {cfg.emoji}
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border text-sm ${
+                        isPayday
+                          ? "bg-emerald-50 border-emerald-200 text-emerald-600 shadow-2xs"
+                          : `${cfg.badgeBg} ${cfg.badgeBorder}`
+                      }`}>
+                        {isPayday ? (
+                          <Sparkles className="w-4 h-4 text-emerald-600" />
+                        ) : (
+                          cfg.emoji
+                        )}
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <h4 className="text-xs font-bold text-slate-900 truncate">
                             {evt.title}
                           </h4>
-                          {evt.isPaid && (
+                          {isPayday ? (
+                            <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 border border-emerald-300">
+                              Income Credit
+                            </span>
+                          ) : evt.isPaid ? (
                             <span className="text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 border border-slate-200">
                               Paid / Settled
                             </span>
-                          )}
+                          ) : null}
                         </div>
                         <span className="text-[11px] font-mono text-slate-500 block">
-                          {cfg.label} {evt.notes ? `• ${evt.notes}` : ""}
+                          {isPayday
+                            ? `Income Credit • Salary credited on Day ${salaryCreditDay}.`
+                            : `${cfg.label} ${evt.notes ? `• ${evt.notes}` : ""}`}
                         </span>
                       </div>
                     </div>
 
                     <div className="text-right shrink-0">
-                      <span className="text-xs sm:text-sm font-bold font-mono text-slate-900 block">
-                        {formatINR(evt.budget)}
+                      <span className={`text-xs sm:text-sm font-bold font-mono block ${isPayday ? "text-emerald-700 font-extrabold" : "text-slate-900"}`}>
+                        {isPayday ? `+${formatINR(evt.budget)}` : formatINR(evt.budget)}
                       </span>
-                      {evt.isPreLocked && !evt.isPaid && (
+                      {isPayday ? (
+                        <span className="text-[10px] font-mono text-emerald-700 font-bold">
+                          Monthly Salary
+                        </span>
+                      ) : evt.isPreLocked && !evt.isPaid ? (
                         <span className="text-[10px] font-mono text-emerald-700 font-bold">
                           Pre-Locked
                         </span>
-                      )}
+                      ) : null}
                     </div>
                   </div>
 
                   {/* Standout Feature B: Bill-Week Collision Alert on the event card */}
-                  {!isAutoPay && collision && !evt.isPaid && (
+                  {!isAutoPay && !isPayday && collision && !evt.isPaid && (
                     <div className="p-2 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-[11px] flex items-start gap-1.5 leading-snug animate-fade-in">
                       <ShieldAlert className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
                       <div>
@@ -605,7 +634,17 @@ export const SmartCashFlowCalendar: React.FC<SmartCashFlowCalendarProps> = ({
 
                   {/* Actions Row */}
                   <div className="flex items-center justify-between pt-1 border-t border-slate-100 text-xs">
-                    {!isAutoPay ? (
+                    {isPayday ? (
+                      <div className="text-[11px] font-mono flex items-center gap-1 w-full justify-between">
+                        <span className="flex items-center gap-1.5 text-emerald-700 font-bold">
+                          <Sparkles className="w-3 h-3 text-emerald-600" />
+                          Salary Credited
+                        </span>
+                        <span className="text-emerald-800 font-bold text-[10px] bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                          Active Inflow
+                        </span>
+                      </div>
+                    ) : !isAutoPay ? (
                       <>
                         <button
                           type="button"

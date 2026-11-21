@@ -83,7 +83,7 @@ export interface FinancialMemoryProfile {
   calendarEvents?: CalendarEvent[];
 }
 
-export type CalendarEventCategory = "birthday" | "wedding" | "party" | "autopay";
+export type CalendarEventCategory = "birthday" | "wedding" | "party" | "autopay" | "payday";
 
 export interface CalendarEvent {
   id: string;
