@@ -174,7 +174,7 @@ function DashboardContent() {
         {/* SPACE 3: GOAL JARS (UPI AUTOPAY & WEALTH) */}
         {activeSpace === "goal-jars" && (
           <div className="space-y-6 animate-fade-in">
-            <GoalJarsSection />
+            <GoalJarsSection onOpenRiskDetails={() => setIsRiskModalOpen(true)} />
           </div>
         )}
 

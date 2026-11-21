@@ -33,10 +33,16 @@ import {
   Clock,
   ShieldAlert,
   X,
+  ArrowRight,
 } from "lucide-react";
 import confetti from "canvas-confetti";
+import { RiskDetailsModal } from "./RiskDetailsModal";
 
-export const GoalJarsSection: React.FC = () => {
+interface GoalJarsSectionProps {
+  onOpenRiskDetails?: () => void;
+}
+
+export const GoalJarsSection: React.FC<GoalJarsSectionProps> = ({ onOpenRiskDetails }) => {
   const {
     profile,
     addGoalJar,
@@ -51,6 +57,17 @@ export const GoalJarsSection: React.FC = () => {
   const [depositAmount, setDepositAmount] = useState<string>("1000");
   const [topUpError, setTopUpError] = useState<string | null>(null);
   const [expandedGoalIds, setExpandedGoalIds] = useState<Record<string, boolean>>({});
+  const [showSplitRules, setShowSplitRules] = useState(false);
+  const [showWealthGuide, setShowWealthGuide] = useState(false);
+  const [showLocalRiskModal, setShowLocalRiskModal] = useState(false);
+
+  const handleOpenRisk = () => {
+    if (onOpenRiskDetails) {
+      onOpenRiskDetails();
+    } else {
+      setShowLocalRiskModal(true);
+    }
+  };
 
   // Net Safe Pool calculation
   const totalLinkedBankCash = profile.totalLinkedBankCash ?? 48500;
@@ -600,219 +617,189 @@ export const GoalJarsSection: React.FC = () => {
       )}
 
       {/* ─────────────────────────────────────────────────────────────────────────────
-          3. ANTI-TEMPTATION & OUT-OF-SIGHT SAFE GROWTH VAULTS BANNER
+          3. UPI AUTOPAY AUTO-SAVE CARD (DECLUTTERED & STREAMLINED)
       ───────────────────────────────────────────────────────────────────────────── */}
-      <div className="fintech-card rounded-2xl p-5 bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-xl bg-white/10 text-emerald-400 border border-white/20 flex items-center justify-center shrink-0">
-            <Lock className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-sm font-bold tracking-tight text-white flex items-center gap-2">
-                <span>&quot;Out-of-Sight&quot; Safe Growth Vaults</span>
-              </h3>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">
-                Anti-Temptation + Money Multiplier
+      <div className="fintech-card rounded-2xl p-5 sm:p-6 bg-white border border-slate-200 shadow-sm space-y-4">
+        {/* Header: Only ONE status pill + Toggle switch */}
+        <div className="flex items-center justify-between gap-3 pb-3 border-b border-slate-100">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center shrink-0 shadow-xs">
+              <Zap className="w-4 h-4 fill-current" />
+            </div>
+            <h3
+              className={`text-xs sm:text-sm font-bold tracking-tight px-2.5 py-1 rounded-lg border inline-flex items-center gap-1.5 truncate ${
+                isAutoPayPaused
+                  ? "bg-amber-100 text-amber-900 border-amber-300"
+                  : isMandateActive
+                  ? "bg-emerald-50 text-emerald-900 border-emerald-300"
+                  : "bg-slate-100 text-slate-700 border-slate-300"
+              }`}
+            >
+              <span
+                className={`w-2 h-2 rounded-full shrink-0 ${
+                  isAutoPayPaused
+                    ? "bg-amber-500 animate-pulse"
+                    : isMandateActive
+                    ? "bg-emerald-500 animate-pulse"
+                    : "bg-slate-400"
+                }`}
+              />
+              <span className="truncate">
+                AutoPay Auto-Save: {isAutoPayPaused ? "PAUSED" : isMandateActive ? "ACTIVE" : "PAUSED"}
               </span>
-            </div>
-            <p className="text-xs text-slate-300 mt-1 leading-relaxed max-w-3xl">
-              <strong>Why Regular Bank Accounts Fail:</strong> Money visible in your daily UPI checking account gets spent on impulse. PocketSense AutoPay automatically sweeps goal funds out-of-sight into locked, high-yield vaults that multiply your savings while you wait for the best time to buy.
-            </p>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition-all shrink-0 self-start md:self-auto active:scale-95"
-        >
-          <Plus className="w-3.5 h-3.5" />
-          <span>+ Add Custom Goal</span>
-        </button>
-      </div>
-
-      {/* ─────────────────────────────────────────────────────────────────────────────
-          4. UPI AUTOPAY AUTO-SAVE CARD (ZERO-CLICK MONTHLY INVESTING)
-      ───────────────────────────────────────────────────────────────────────────── */}
-      <div className="fintech-card rounded-2xl p-6 bg-white border border-slate-200 shadow-sm space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-          <div className="flex items-start sm:items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center shrink-0 shadow-xs">
-              <Zap className="w-6 h-6 fill-current" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h3
-                  className={`text-sm sm:text-base font-bold tracking-tight px-2.5 py-1 rounded-lg border inline-flex items-center gap-2 transition-colors ${
-                    isAutoPayPaused
-                      ? "bg-amber-100 text-amber-900 border-amber-300"
-                      : isMandateActive
-                      ? "bg-emerald-50 text-emerald-900 border-emerald-300"
-                      : "bg-slate-100 text-slate-700 border-slate-300"
-                  }`}
-                >
-                  <span
-                    className={`w-2 h-2 rounded-full ${
-                      isAutoPayPaused
-                        ? "bg-amber-500 animate-pulse"
-                        : isMandateActive
-                        ? "bg-emerald-500 animate-pulse"
-                        : "bg-slate-400"
-                    }`}
-                  />
-                  <span>
-                    AutoPay Auto-Save: {isAutoPayPaused ? "PAUSED" : isMandateActive ? "ACTIVE" : "PAUSED"}
-                  </span>
-                </h3>
-                {isAutoPayPaused ? (
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-300 font-semibold flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                    Silent Risk Guard Active
-                  </span>
-                ) : (
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    NPCI Certified
-                  </span>
-                )}
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-medium">
-                  Max {formatINR(mandateCap)}/mo
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Zero-click monthly investing. Automatically sweeps weekly unspent buffers + UPI spare change into your Out-of-Sight Safe Growth Vaults every Friday.
-              </p>
-            </div>
+            </h3>
           </div>
 
           {/* Interactive Mandate Toggle */}
-          <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
-            <span className="text-xs font-semibold text-slate-600">
-              {isAutoPayPaused ? "Paused by Risk Guard" : isMandateActive ? "Autopilot ON" : "Autopilot OFF"}
-            </span>
-            <button
-              type="button"
-              disabled={isAutoPayPaused}
-              onClick={() => setIsMandateActive(!isMandateActive)}
-              className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                isAutoPayPaused
-                  ? "bg-amber-300 cursor-not-allowed opacity-80"
-                  : isMandateActive
-                  ? "bg-emerald-600 cursor-pointer"
-                  : "bg-slate-300 cursor-pointer"
+          <button
+            type="button"
+            disabled={isAutoPayPaused}
+            onClick={() => setIsMandateActive(!isMandateActive)}
+            className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+              isAutoPayPaused
+                ? "bg-amber-300 cursor-not-allowed opacity-80"
+                : isMandateActive
+                ? "bg-emerald-600 cursor-pointer"
+                : "bg-slate-300 cursor-pointer"
+            }`}
+            role="switch"
+            aria-checked={isMandateActive && !isAutoPayPaused}
+            aria-label="Toggle AutoPay Auto-Save"
+          >
+            <span
+              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                isAutoPayPaused || isMandateActive ? "translate-x-5" : "translate-x-0"
               }`}
-              role="switch"
-              aria-checked={isMandateActive && !isAutoPayPaused}
-            >
-              <span
-                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                  isAutoPayPaused || isMandateActive ? "translate-x-5" : "translate-x-0"
-                }`}
-              />
-            </button>
-          </div>
+            />
+          </button>
         </div>
 
-        {/* 70% / 30% Split Visualizer & Schedule */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-          <div className="md:col-span-8 space-y-3">
-            <div className="flex items-center justify-between text-xs font-mono">
-              <span className="text-slate-600 font-semibold flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-emerald-600" />
-                Schedule: <strong>Every Friday @ 6:00 PM</strong>
-              </span>
-              <span className="text-slate-500">
-                Rule: <strong>70% Wealth / Gold Vault + 30% Instant Safe Vault</strong>
-              </span>
-            </div>
-
-            {/* Split Progress Meter */}
-            <div className="space-y-1.5">
-              <div className="w-full h-3 rounded-full bg-slate-100 overflow-hidden flex">
-                <div
-                  className="h-full bg-amber-500 transition-all"
-                  style={{ width: "70%" }}
-                  title="70% Digital Gold & Index Fund Vault (~11.5% / yr)"
-                />
-                <div
-                  className="h-full bg-emerald-500 transition-all"
-                  style={{ width: "30%" }}
-                  title="30% Instant Safe Vault (~6.8% / yr)"
-                />
-              </div>
-              <div className="flex items-center justify-between text-[11px] font-mono">
-                <span className="text-amber-800 font-bold flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-amber-500" />
-                  70% Gold &amp; Index Vault (~11.5% / yr)
-                </span>
-                <span className="text-emerald-700 font-bold flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  30% Instant Safe (~6.8% / yr)
-                </span>
-              </div>
-            </div>
-
-            {/* Mandate Preset Caps */}
-            <div className="flex items-center gap-2 pt-1">
-              <span className="text-xs text-slate-500">Monthly Auto-Save Cap:</span>
-              {[3000, 5000, 10000].map((cap) => (
-                <button
-                  key={cap}
-                  type="button"
-                  onClick={() => setMandateCap(cap)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-mono font-semibold transition-all ${
-                    mandateCap === cap
-                      ? "bg-slate-900 text-white shadow-xs"
-                      : "bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100"
-                  }`}
-                >
-                  ₹{cap.toLocaleString("en-IN")}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Trigger Button & Status */}
-          <div className="md:col-span-4 flex flex-col justify-center gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200">
+        {/* Directly below the header: Single clean line */}
+        {isAutoPayPaused ? (
+          <div className="flex items-center gap-1.5 text-xs text-amber-900 font-medium">
+            <span>Paused: Card dues exceed 20% of salary.</span>
             <button
               type="button"
-              onClick={handleTriggerFridayAutoSweep}
-              disabled={!isMandateActive || isSweeping || isAutoPayPaused}
-              className={`w-full py-3 px-4 rounded-xl text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-2 active:scale-98 min-h-[44px] ${
-                isAutoPayPaused
-                  ? "bg-amber-100 text-amber-900 border border-amber-300 cursor-not-allowed"
-                  : "bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-40"
+              onClick={handleOpenRisk}
+              className="inline-flex items-center gap-0.5 text-xs font-bold text-amber-950 underline hover:text-amber-800 cursor-pointer transition-colors"
+            >
+              <span>Settle Bills</span>
+              <ArrowRight className="w-3 h-3 text-amber-700" />
+            </button>
+          </div>
+        ) : (
+          <p className="text-xs text-slate-500">
+            Zero-click monthly investing. Weekly unspent buffers &amp; spare change auto-sweep into your vaults.
+          </p>
+        )}
+
+        {/* Monthly Auto-Save Cap Pills (Kept Visible on Main Card) */}
+        <div className="flex items-center gap-2 pt-1 flex-wrap">
+          <span className="text-xs font-semibold text-slate-700">Monthly Auto-Save Cap:</span>
+          {[3000, 5000, 10000].map((cap) => (
+            <button
+              key={cap}
+              type="button"
+              onClick={() => setMandateCap(cap)}
+              className={`px-2.5 py-1 rounded-lg text-xs font-mono font-semibold transition-all ${
+                mandateCap === cap
+                  ? "bg-slate-900 text-white shadow-xs"
+                  : "bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100"
               }`}
             >
-              <Zap className={`w-4 h-4 ${isAutoPayPaused ? "text-amber-700" : "fill-white"}`} />
-              <span>
-                {isAutoPayPaused
-                  ? "AutoPay Sweep Paused by Silent Risk Guard"
-                  : "Trigger Friday Auto-Sweep Now"}
-              </span>
+              ₹{cap.toLocaleString("en-IN")}
             </button>
-            <span className="text-[10px] text-center text-slate-500 font-mono">
-              {isAutoPayPaused
-                ? "Paused: Card dues exceed 20% of salary. Settle bills in Risk Details to resume."
-                : "Sweeps ₹3,000 into Out-of-Sight Vaults"}
-            </span>
-          </div>
+          ))}
+        </div>
+
+        {/* Collapsible "Schedule & Split Rules ▾" Accordion (Default Collapsed) */}
+        <div className="pt-2 border-t border-slate-100">
+          <button
+            type="button"
+            onClick={() => setShowSplitRules(!showSplitRules)}
+            className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 transition-colors inline-flex items-center gap-1 cursor-pointer select-none focus:outline-none"
+            aria-expanded={showSplitRules}
+          >
+            <span>Schedule &amp; Split Rules</span>
+            {showSplitRules ? (
+              <ChevronUp className="w-3.5 h-3.5" />
+            ) : (
+              <ChevronDown className="w-3.5 h-3.5" />
+            )}
+          </button>
+
+          {showSplitRules && (
+            <div className="pt-3 space-y-3.5 animate-fade-in text-xs">
+              <p className="text-xs text-slate-500 leading-relaxed font-sans">
+                Zero-click monthly investing. Automatically sweeps weekly unspent buffers + UPI spare change into your Out-of-Sight Safe Growth Vaults every Friday.
+              </p>
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs font-mono gap-1 text-slate-600">
+                <span className="flex items-center gap-1.5 font-semibold">
+                  <Calendar className="w-3.5 h-3.5 text-emerald-600" />
+                  Schedule: <strong>Every Friday @ 6:00 PM</strong>
+                </span>
+                <span className="text-slate-500">
+                  Rule: <strong>70% Gold &amp; Index / 30% Instant Safe</strong>
+                </span>
+              </div>
+
+              {/* Split Progress Meter */}
+              <div className="space-y-1.5">
+                <div className="w-full h-2.5 rounded-full bg-slate-100 overflow-hidden flex">
+                  <div
+                    className="h-full bg-amber-500 transition-all"
+                    style={{ width: "70%" }}
+                    title="70% Digital Gold & Index Fund Vault (~11.5% / yr)"
+                  />
+                  <div
+                    className="h-full bg-emerald-500 transition-all"
+                    style={{ width: "30%" }}
+                    title="30% Instant Safe Vault (~6.8% / yr)"
+                  />
+                </div>
+                <div className="flex items-center justify-between text-[11px] font-mono">
+                  <span className="text-amber-800 font-bold flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-amber-500" />
+                    70% Gold &amp; Index Vault (~11.5% / yr)
+                  </span>
+                  <span className="text-emerald-700 font-bold flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    30% Instant Safe (~6.8% / yr)
+                  </span>
+                </div>
+              </div>
+
+              {!isAutoPayPaused && (
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={handleTriggerFridayAutoSweep}
+                    disabled={!isMandateActive || isSweeping}
+                    className="w-full py-2.5 px-4 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-all flex items-center justify-center gap-2 active:scale-98 disabled:opacity-40 min-h-[40px]"
+                  >
+                    <Zap className="w-3.5 h-3.5 fill-white" />
+                    <span>Trigger Friday Auto-Sweep Now</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Live Sweep Confirmation Toast/Card */}
         {sweepFeedback && (
-          <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 animate-fade-in shadow-xs">
+          <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 animate-fade-in shadow-xs">
             <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-2.5">
-                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                 <div>
                   <h4 className="text-xs font-bold text-slate-900">
-                    Friday AutoPay Sweep Executed Successfully!
+                    Friday AutoPay Sweep Executed!
                   </h4>
-                  <p className="text-xs text-slate-600 mt-0.5">
-                    Swept <strong>{formatINR(sweepFeedback.total)}</strong> out-of-sight without asking for a UPI PIN:{" "}
-                    <strong className="text-amber-700">{formatINR(sweepFeedback.sipAmount)}</strong> into Digital Gold &amp; Wealth Vault +{" "}
+                  <p className="text-[11px] text-slate-600 mt-0.5">
+                    Swept <strong>{formatINR(sweepFeedback.total)}</strong> out-of-sight:{" "}
+                    <strong className="text-amber-700">{formatINR(sweepFeedback.sipAmount)}</strong> into Digital Gold &amp; Wealth +{" "}
                     <strong className="text-emerald-700">{formatINR(sweepFeedback.goldAmount)}</strong> into Safe FD Vault.
                   </p>
                 </div>
@@ -826,71 +813,94 @@ export const GoalJarsSection: React.FC = () => {
       </div>
 
       {/* ─────────────────────────────────────────────────────────────────────────────
-          5. 3 ULTRA-SHORT PLAIN-ENGLISH INVESTING CARDS
+          4. SLEEK COLLAPSIBLE PLAIN-ENGLISH WEALTH GUIDE
       ───────────────────────────────────────────────────────────────────────────── */}
-      <div className="space-y-3 pt-2">
-        <div className="flex items-center justify-between text-xs">
-          <span className="font-bold text-slate-900 uppercase tracking-wide">
-            Plain-English Wealth Essentials (No Jargon)
-          </span>
-          <span className="text-slate-400 font-mono text-[11px]">10-Second Explainer</span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-          {/* Card 1: Emergency FD */}
-          <div className="fintech-card rounded-2xl p-4.5 bg-white border border-slate-200 shadow-sm space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">
-                  <ShieldCheck className="w-4 h-4" />
-                </div>
-                <h4 className="text-xs font-bold text-slate-900">Fixed Deposit (FD)</h4>
-              </div>
-              <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
-                100% Guaranteed
-              </span>
-            </div>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              A safe bank lockbox. Zero chance of losing money. Yields ~6.5–7% / yr without Price Swings.
-            </p>
+      <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-xs transition-all">
+        <button
+          type="button"
+          onClick={() => setShowWealthGuide(!showWealthGuide)}
+          className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-50/80 transition-colors cursor-pointer select-none"
+          aria-expanded={showWealthGuide}
+        >
+          <div className="flex items-center gap-2.5">
+            <span className="text-sm">📖</span>
+            <span className="text-xs font-bold text-slate-900 tracking-tight">
+              Plain-English Wealth Guide (FD • Index Fund • SIP)
+            </span>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium hidden sm:inline">
+              10-Second Explainer
+            </span>
           </div>
 
-          {/* Card 2: Nifty 50 Index Fund */}
-          <div className="fintech-card rounded-2xl p-4.5 bg-white border border-slate-200 shadow-sm space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center font-bold">
-                  <TrendingUp className="w-4 h-4" />
-                </div>
-                <h4 className="text-xs font-bold text-slate-900">Nifty 50 Index Fund</h4>
-              </div>
-              <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-blue-50 text-blue-800 border border-blue-200">
-                ~12% Historical
-              </span>
-            </div>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              A single basket holding India&apos;s 50 biggest companies (TCS, Reliance, HDFC). Beats Price Rise over time.
-            </p>
+          <div className="flex items-center gap-1 text-xs font-medium text-slate-500">
+            <span>{showWealthGuide ? "Hide Guide" : "View Guide"}</span>
+            {showWealthGuide ? (
+              <ChevronUp className="w-3.5 h-3.5 text-slate-400" />
+            ) : (
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+            )}
           </div>
+        </button>
 
-          {/* Card 3: SIP Autopilot */}
-          <div className="fintech-card rounded-2xl p-4.5 bg-white border border-slate-200 shadow-sm space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center font-bold">
-                  <Coins className="w-4 h-4" />
+        {showWealthGuide && (
+          <div className="p-4 pt-2 border-t border-slate-100 bg-slate-50/50 space-y-3 animate-fade-in">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {/* Card 1: Emergency FD */}
+              <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                    </div>
+                    <h4 className="text-xs font-bold text-slate-900">Fixed Deposit (FD)</h4>
+                  </div>
+                  <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
+                    100% Guaranteed
+                  </span>
                 </div>
-                <h4 className="text-xs font-bold text-slate-900">SIP Autopilot</h4>
+                <p className="text-[11px] text-slate-600 leading-relaxed font-sans">
+                  A safe bank lockbox. Zero chance of losing money. Yields ~6.5–7% / yr without Price Swings.
+                </p>
               </div>
-              <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200">
-                Zero Discipline
-              </span>
+
+              {/* Card 2: Nifty 50 Index Fund */}
+              <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center font-bold">
+                      <TrendingUp className="w-3.5 h-3.5" />
+                    </div>
+                    <h4 className="text-xs font-bold text-slate-900">Nifty 50 Index Fund</h4>
+                  </div>
+                  <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-blue-50 text-blue-800 border border-blue-200">
+                    ~12% Historical
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-600 leading-relaxed font-sans">
+                  A single basket holding India&apos;s 50 biggest companies (TCS, Reliance, HDFC). Beats Price Rise over time.
+                </p>
+              </div>
+
+              {/* Card 3: SIP Autopilot */}
+              <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center font-bold">
+                      <Coins className="w-3.5 h-3.5" />
+                    </div>
+                    <h4 className="text-xs font-bold text-slate-900">SIP Autopilot</h4>
+                  </div>
+                  <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200">
+                    Zero Discipline
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-600 leading-relaxed font-sans">
+                  Zero-discipline Growth. Automatically sweeps idle Friday cash and UPI spare change into safe vaults without asking for a UPI PIN every month.
+                </p>
+              </div>
             </div>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Zero-discipline Growth. Automatically sweeps idle Friday cash and UPI spare change into safe vaults without asking for a UPI PIN every month.
-            </p>
           </div>
-        </div>
+        )}
       </div>
 
       {/* ─────────────────────────────────────────────────────────────────────────────
@@ -1147,6 +1157,11 @@ export const GoalJarsSection: React.FC = () => {
           </div>
         </div>
       )}
+      {/* Local fallback Risk Details modal */}
+      <RiskDetailsModal
+        isOpen={showLocalRiskModal}
+        onClose={() => setShowLocalRiskModal(false)}
+      />
     </div>
   );
 };
