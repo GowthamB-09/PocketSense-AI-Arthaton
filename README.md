@@ -87,6 +87,10 @@ PocketSense Architecture (Supermemory & Linear-Grade Fintech)
     $$\text{Net Safe Cash Pool} = \text{Total Linked Bank Cash} - \text{Upcoming Card Dues} - \text{Ring-Fenced Calendar Events}$$
   - Protects gift money from being accidentally spent on impulse food deliveries days before the event.
   - Includes a bottom summary strip (`₹2,500 Ring-Fenced for 1 Upcoming Event`) and a **"Mark Paid / Done"** settlement button.
+  - **Post-Payment `Settled` State:** Once an event is marked Paid/Done, the interactive shield toggle seamlessly transitions to a static **`Settled`** badge with a checkmark, visually confirming to users and judges that the pre-locked funds have been released and deducted upon settlement.
+- **Dynamic Payday (⭐) & Celebratory Inflow Drawer:**
+  - The calendar renders only a single gold star next to the date number on Payday (with zero red AutoPay dots).
+  - Clicking Payday opens a celebratory emerald **`Income Credit`** card displaying `+₹75,000 Monthly Salary` and `Salary Credited` badge.
 - **Standout Feature B — "Bill-Week Collision Alert":**
   - If a user schedules an event within **2 days** of an AutoPay bill due date, a smart warning surfaces in the form and detail drawer:
     > *“⚠️ Heads up: HDFC Card AutoPay Due is due 1 day after this event—keep ₹17,908 reserved.”*
@@ -131,14 +135,19 @@ PocketSense Architecture (Supermemory & Linear-Grade Fintech)
 
 ---
 
-### 4. Real-Time Google Places API (New) Smart Swaps
+### 4. Real-Time Google Places API (New) Smart Swaps & Concrete Indian Alternatives
 - When asking AI Pay Guard about dining, cafes, or parties (e.g., *"I want to eat out for ₹800"*):
   - Fetches real budget restaurants within 3km using user coordinates (or Bengaluru default).
   - Filters for inexpensive/moderate options with ratings ≥ 4.2★.
   - Surfaces real place details, ratings, user reviews, and Google Maps links.
+- **Concrete Indian Footwear & Fashion Swaps:**
+  - Replaces generic advice with specific Indian market alternatives:
+    - *Footwear Splurge (`₹4,500`):* Recommends clean **Red Tape or Campus retro court sneakers (~₹1,350 on Myntra/Ajio)** instead of ₹4,500 branded pairs—saving **+₹3,150** swept straight into the active Goal Jar.
+    - *Apparel & Tech:* Recommends relatable picks (Zudio, Souled Store, CMF by Nothing, Realme).
+    - *Gemini System Prompt Rule 4:* Instructs Gemini 2.5 Flash to always name 1–2 concrete Indian brands with realistic INR pricing.
 - **Clear Money-Split Breakdown (Where the Money Goes):**
-  - **Spent Now (₹320):** Deducted from Safe Pool for the immediate craving.
-  - **Swept to Goal Jar (+₹480):** Locked into your Milestone Goal Jar.
+  - **Spent Now (₹320 / ₹1,350):** Deducted from Safe Pool for the immediate craving or swap item.
+  - **Swept to Goal Jar (+₹480 / +₹3,150):** Locked directly into your Milestone Goal Jar.
 - **Places Status Badge:** Developer badge in AI Pay Guard and Settings indicating whether Live Google Places API is active or running in Curated Offline Mode.
 
 ---
@@ -151,9 +160,35 @@ PocketSense Architecture (Supermemory & Linear-Grade Fintech)
 ---
 
 ### 6. Auto-Tracked Spending Dashboard
-- **Auto-Sync:** Clean, zero-touch status bar showing Bank & Card Email Forwarding and UPI Bank SMS sync active without developer jargon.
+- **Simulated Demo Indicator:** Displays a soft amber/slate `Simulated Demo` pill next to the heading so judges immediately recognize all displayed transactions are synthetic demo data.
+- **Auto-Sync Cards with Privacy-First Info Tooltips (`ⓘ`):**
+  - *Bank & Card Email Sync:* Interactive popover explaining privacy-first forwarding (users auto-forward only bank alert emails to a parser alias—no bank logins required).
+  - *UPI & Bank SMS Sync:* Interactive popover detailing zero-permission OS automation (iOS Shortcuts / Android webhooks) that captures single debit alerts locally without invasive SMS-read permissions.
 - **Where It Went (Category Breakdown):** Interactive SVG donut chart showing real distribution across Food & Dining, Shopping & Gear, Transport & Subscriptions, and Entertainment—mathematically locked 1:1 to Spent This Month.
 - **Spend History:** Comprehensive searchable ledger of every tracked UPI, bank, and credit card debit with clean timestamp, category, and account tags.
+
+---
+
+### 7. Goal Jars & AI Price-Trend Forecaster
+- **Progressive Disclosure Card Design (Clean & Scannable):**
+  - **Top Row:** Clean SVG Lucide icons (`Smartphone` for Tech/iPhone, `Coins` for Gold, `Headphones` for Audio, `Shield` for Emergency)—eliminating blank boxes (`▯`) on mobile. Displays title, target price (`New iPhone — ₹80,000`), category tag, and delete button.
+  - **Progress Section:** Saved balance (`₹42,000`), Target (`₹80,000`), emerald progress bar, `% funded`, and `₹ to go`.
+  - **Compact 1-Line Alert Strip:** Shows only the concise headline alert (e.g., *“Price Dropping Soon — Wait until Oct to save ~₹11,000”*) paired with a clickable **`Know More ▾`** / **`Show Less ▴`** toggle.
+- **Expandable Details:**
+  - Clicking `Know More ▾` smoothly unfolds the AI price timing insight, `Best Time to Buy` row, Out-of-Sight Safe Growth Vault badge (with duplicate yield text removed), and `+₹ Extra Earned While Waiting` breakdown.
+- **Self-Contained Root-Level Top-Up Modal:**
+  - Centered modal (`fixed inset-0 z-50 bg-slate-900/60`) accessible on desktop and mobile above all bottom navigation bars.
+  - Displays Current Saved, Target Price, and Available **Net Safe Pool** balance.
+  - Quick-add chips (`+₹500`, `+₹1,000`, `+₹2,500`, `+₹5,000`) and numeric input with 9-digit guardrails.
+  - Enforces that transfers cannot exceed Net Safe Pool, deducts from safe cash, credits the goal, triggers confetti, and displays confirmation toast.
+- **Streamlined AutoPay Auto-Save Card:**
+  - Single status pill in the header: `AutoPay Auto-Save: PAUSED/ACTIVE` alongside the switch toggle.
+  - Direct single-line notice: `"Paused: Card dues exceed 20% of salary."` with inline **`Settle Bills →`** link opening Risk Details.
+  - Monthly cap pills (`₹3,000`, `₹5,000`, `₹10,000`) remain visible on the card.
+  - Collapsible **`Schedule & Split Rules ▾`** accordion holding schedule details, 70% Gold / 30% Instant Safe meter, and manual sweep trigger.
+- **Collapsible Plain-English Wealth Guide (`📖 Plain-English Wealth Guide ▾`):**
+  - Single sleek collapsible accordion bar replacing 600px of vertical clutter.
+  - Unfolds 3 concise 10-second definitions: *Fixed Deposit (FD)* (100% guaranteed safe lockbox), *Nifty 50 Index Fund* (~12% historical), and *SIP Autopilot* (zero-discipline growth without UPI PINs).
 
 ---
 
