@@ -1,22 +1,17 @@
 "use client";
 
 import React, { useState } from "react";
-import { useFinancialMemory } from "@/lib/memory/memoryContext";
-import { formatINR } from "@/lib/utils";
 import { TransactionHistory } from "@/components/TransactionHistory";
 import {
   Smartphone,
   Mail,
   Check,
   Copy,
-  CreditCard,
   ShoppingBag,
   UtensilsCrossed,
   Car,
   Film,
   PieChart,
-  Clock,
-  Layers,
   Sparkles,
 } from "lucide-react";
 
@@ -30,23 +25,7 @@ export type SpendCategory =
   | "Transport & Subscriptions"
   | "Entertainment & Outings";
 
-export interface ActivityEvent {
-  id: string;
-  source: "Phone SMS Webhook" | "Gmail Auto-Forward" | "Bank / UPI SMS" | "Credit Card SMS";
-  title: string;
-  merchant: string;
-  amount: number;
-  time: string;
-  type: "debit" | "credit" | "bill";
-  category: SpendCategory | string;
-  bankTag: string;
-  roundUp?: number;
-  rawText?: string;
-}
-
 export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
-  const { isAutoPayPaused } = useFinancialMemory();
-
   const [activeTab, setActiveTab] = useState<"autopilot-sync" | "insights" | "ledger">("autopilot-sync");
   const [copiedEmail, setCopiedEmail] = useState(false);
 
@@ -58,116 +37,6 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
     "Transport & Subscriptions": 3438,
     "Entertainment & Outings": 2500,
   });
-
-  // Clean Consumer Recent Activity Stream
-  const [activityStream] = useState<ActivityEvent[]>([
-    {
-      id: "ev_1",
-      source: "Bank / UPI SMS",
-      title: "UPI Debit",
-      merchant: "Swiggy Gourmet Bowl",
-      amount: 480,
-      time: "12 mins ago",
-      type: "debit",
-      category: "Food & Dining",
-      bankTag: "HDFC Bank",
-      roundUp: 20,
-    },
-    {
-      id: "ev_2",
-      source: "Credit Card SMS",
-      title: "Credit Card Bill",
-      merchant: "ICICI Bank Coral Card",
-      amount: 9800, // Matches app's live card dues (₹9,800 ICICI / ₹8,108 HDFC)
-      time: "1 hour ago",
-      type: "bill",
-      category: "Credit Card Bill",
-      bankTag: "ICICI Bank",
-    },
-    {
-      id: "ev_3",
-      source: "Bank / UPI SMS",
-      title: "UPI Debit",
-      merchant: "Blue Tokai Coffee Roasters",
-      amount: 350,
-      time: "3 hours ago",
-      type: "debit",
-      category: "Food & Dining",
-      bankTag: "SBI UPI",
-      roundUp: 50,
-    },
-    {
-      id: "ev_4",
-      source: "Gmail Auto-Forward",
-      title: "Mutual Fund SIP",
-      merchant: "Nifty 50 Index Mutual Fund",
-      amount: 5000,
-      time: "Yesterday @ 6:00 PM",
-      type: "debit",
-      category: "Investments & SIPs",
-      bankTag: "HDFC Bank",
-    },
-    {
-      id: "ev_5",
-      source: "Bank / UPI SMS",
-      title: "Quick Commerce Debit",
-      merchant: "Zepto 10-Min Groceries",
-      amount: 540,
-      time: "Yesterday @ 2:15 PM",
-      type: "debit",
-      category: "Food & Dining",
-      bankTag: "HDFC Bank",
-      roundUp: 60,
-    },
-    {
-      id: "ev_6",
-      source: "Bank / UPI SMS",
-      title: "Commute Debit",
-      merchant: "Uber Ride Home",
-      amount: 350,
-      time: "2 days ago",
-      type: "debit",
-      category: "Transport & Subscriptions",
-      bankTag: "HDFC Bank",
-      roundUp: 50,
-    },
-  ]);
-
-  // Consumer Tag Helper for Clean Badges (UPI, Card, SIP)
-  const getConsumerTag = (ev: ActivityEvent) => {
-    if (
-      ev.category === "Investments & SIPs" ||
-      /sip|invest/i.test(ev.title) ||
-      /sip|fund/i.test(ev.merchant)
-    ) {
-      return {
-        label: "SIP",
-        badgeClass: "bg-purple-50 text-purple-700 border-purple-200",
-        iconBg: "bg-purple-100 text-purple-700",
-        icon: <Layers className="w-4 h-4" />,
-      };
-    }
-    if (
-      ev.type === "bill" ||
-      ev.source === "Credit Card SMS" ||
-      ev.category === "Credit Card Bill" ||
-      /card/i.test(ev.merchant) ||
-      /card/i.test(ev.bankTag)
-    ) {
-      return {
-        label: "Card",
-        badgeClass: "bg-blue-50 text-blue-700 border-blue-200",
-        iconBg: "bg-blue-100 text-blue-700",
-        icon: <CreditCard className="w-4 h-4" />,
-      };
-    }
-    return {
-      label: "UPI",
-      badgeClass: "bg-emerald-50 text-emerald-700 border-emerald-200",
-      iconBg: "bg-emerald-100 text-emerald-700",
-      icon: <Smartphone className="w-4 h-4" />,
-    };
-  };
 
   const handleCopyForwardingEmail = () => {
     navigator.clipboard.writeText("alex@pocketsense.ai");
@@ -337,84 +206,6 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 Active
               </span>
-            </div>
-          </div>
-
-          {/* RECENT ACTIVITY FEED */}
-          <div className="fintech-card rounded-2xl p-5 bg-white border border-slate-200 shadow-sm space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-slate-500" />
-                <h4 className="text-xs font-bold text-slate-900 tracking-tight">
-                  Recent Activity ({activityStream.length} Events)
-                </h4>
-              </div>
-              <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-semibold flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Auto-Synced
-              </span>
-            </div>
-
-            <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
-              {activityStream.map((ev) => {
-                const roundUpAmt =
-                  ev.roundUp ?? (ev.amount % 100 === 0 ? 0 : 100 - (ev.amount % 100));
-                const consumerTag = getConsumerTag(ev);
-
-                return (
-                  <div
-                    key={ev.id}
-                    className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3 text-xs font-mono hover:bg-slate-100/70 transition-colors"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div
-                        className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                          consumerTag.iconBg
-                        }`}
-                      >
-                        {consumerTag.icon}
-                      </div>
-                      <div className="truncate">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-slate-900 truncate">{ev.merchant}</span>
-                          <span
-                            className={`text-[9px] px-1.5 py-0.2 rounded border font-semibold ${consumerTag.badgeClass}`}
-                          >
-                            {consumerTag.label}
-                          </span>
-                        </div>
-                        <span className="text-[10px] text-slate-500 block truncate">
-                          {ev.bankTag} • {ev.time}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="text-right shrink-0">
-                      <span
-                        className={`text-sm font-bold block ${
-                          ev.type === "credit"
-                            ? "text-emerald-700"
-                            : ev.type === "bill" || consumerTag.label === "Card"
-                            ? "text-blue-700"
-                            : "text-slate-900"
-                        }`}
-                      >
-                        {ev.type === "credit" ? "+" : ev.type === "debit" ? "-" : ""}
-                        {formatINR(ev.amount)}
-                      </span>
-
-                      {/* Spare-change round-up badge: HIDDEN whenever Silent Risk Guard (isAutoPayPaused) is active */}
-                      {!isAutoPayPaused && ev.type === "debit" && ev.amount > 0 && roundUpAmt > 0 && (
-                        <div className="mt-0.5">
-                          <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">
-                            +₹{roundUpAmt} Round-Up
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
             </div>
           </div>
         </div>
