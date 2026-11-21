@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useFinancialMemory } from "@/lib/memory/memoryContext";
 import { CalendarEvent, CalendarEventCategory } from "@/types";
 import { formatINR } from "@/lib/utils";
@@ -90,13 +90,26 @@ export const SmartCashFlowCalendar: React.FC<SmartCashFlowCalendarProps> = ({
     markEventPaid,
   } = useFinancialMemory();
 
-  // Primary demo cycle is set to November 2026 (Month index 10)
-  // Current today simulation date: Nov 20, 2026
-  const [viewYear, setViewYear] = useState<number>(2026);
-  const [viewMonth, setViewMonth] = useState<number>(10); // 0-indexed: 10 = November
-  const [selectedDateStr, setSelectedDateStr] = useState<string>("2026-11-20");
+  // Real Date Synchronization (in lockstep with live system date)
+  const [todayDate, setTodayDate] = useState<Date>(() => new Date());
+  const [viewYear, setViewYear] = useState<number>(() => new Date().getFullYear());
+  const [viewMonth, setViewMonth] = useState<number>(() => new Date().getMonth());
+  const [selectedDateStr, setSelectedDateStr] = useState<string>(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  });
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Sync with client live date on mount
+  useEffect(() => {
+    const now = new Date();
+    setTodayDate(now);
+    setViewYear(now.getFullYear());
+    setViewMonth(now.getMonth());
+    const realDateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    setSelectedDateStr(realDateStr);
+  }, []);
 
   // New Event Form State
   const [formCategory, setFormCategory] = useState<CalendarEventCategory>("birthday");
@@ -164,10 +177,17 @@ export const SmartCashFlowCalendar: React.FC<SmartCashFlowCalendarProps> = ({
   };
 
   const handleJumpToToday = () => {
-    setViewYear(2026);
-    setViewMonth(10);
-    setSelectedDateStr("2026-11-20");
+    const now = new Date();
+    setTodayDate(now);
+    setViewYear(now.getFullYear());
+    setViewMonth(now.getMonth());
+    const realDateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    setSelectedDateStr(realDateStr);
   };
+
+  const todayFormatted = useMemo(() => {
+    return todayDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  }, [todayDate]);
 
   const openAddModalForDate = (dateStr: string) => {
     setFormDate(dateStr);
@@ -327,11 +347,11 @@ export const SmartCashFlowCalendar: React.FC<SmartCashFlowCalendarProps> = ({
             type="button"
             onClick={handleJumpToToday}
             className="px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-[11px] font-mono font-semibold text-slate-700 transition-colors shadow-2xs"
-            title="Jump to Today (Nov 20, 2026)"
+            title={`Jump to Today (${todayFormatted}, ${todayDate.getFullYear()})`}
           >
             Today
           </button>
-
+ 
           <button
             type="button"
             onClick={() => openAddModalForDate(selectedDateStr)}
@@ -372,7 +392,7 @@ export const SmartCashFlowCalendar: React.FC<SmartCashFlowCalendarProps> = ({
         <div className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-full ring-2 ring-emerald-500 bg-emerald-100 shrink-0" />
           <span className="font-semibold text-emerald-900">Today</span>
-          <span className="text-[10px] font-mono text-emerald-700 font-bold">(Nov 20)</span>
+          <span className="text-[10px] font-mono text-emerald-700 font-bold">({todayFormatted})</span>
         </div>
       </div>
 
@@ -403,7 +423,10 @@ export const SmartCashFlowCalendar: React.FC<SmartCashFlowCalendarProps> = ({
           {Array.from({ length: daysInMonth }).map((_, idx) => {
             const dayNum = idx + 1;
             const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(dayNum).padStart(2, "0")}`;
-            const isToday = viewYear === 2026 && viewMonth === 10 && dayNum === 20;
+            const isToday =
+              viewYear === todayDate.getFullYear() &&
+              viewMonth === todayDate.getMonth() &&
+              dayNum === todayDate.getDate();
             const isSelected = selectedDateStr === dateStr;
             const isPayday = dayNum === paydayNum;
 
