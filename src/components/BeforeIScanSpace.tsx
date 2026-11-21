@@ -63,6 +63,7 @@ interface SmartSwapData {
   simplerText?: string;
   isFoodOrHangout?: boolean;
   isEntertainment?: boolean;
+  isSneakers?: boolean;
   primaryPlace?: PlaceSwapItem;
   runnerUpPlaces?: PlaceSwapItem[];
   isLivePlaces?: boolean;
@@ -179,15 +180,19 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
       simplerText = `Spend ${formatINR(swapCost)} for a 1-month Netflix plan instead of one ${formatINR(origCost)} movie ticket, and save ${formatINR(savedDiff)} for your ${activeGoal.title}.`;
     } else if (isSneakers) {
       if (origCost === 4500) {
-        swapCost = 650;
+        swapCost = 1350;
+        swapTitle = "Red Tape / Campus Retro Court Sneakers";
+        const savedDiff = Math.max(0, origCost - swapCost);
+        swapDescription = `Grab a clean pair of Red Tape or Campus retro court sneakers (~₹1,350 on Myntra/Ajio) instead of ₹4,500 branded pairs—same crisp street look, ${formatINR(savedDiff)} saved.`;
+        simplerText = `Grab a clean pair of Red Tape or Campus retro court sneakers (~₹1,350 on Myntra/Ajio) instead of ₹4,500 branded pairs—same crisp street look, ${formatINR(savedDiff)} saved.`;
       } else {
-        const raw = Math.round((origCost * 0.35) / 50) * 50;
+        const raw = Math.round((origCost * 0.30) / 50) * 50;
         swapCost = Math.min(Math.max(50, raw), Math.max(50, origCost - 50));
+        swapTitle = "Red Tape / Campus Retro Court Sneakers";
+        const savedDiff = Math.max(0, origCost - swapCost);
+        swapDescription = `Grab a clean pair of Red Tape or Campus retro court sneakers (~${formatINR(swapCost)} on Myntra/Ajio) instead of ${formatINR(origCost)} branded pairs—same crisp street look, ${formatINR(savedDiff)} saved.`;
+        simplerText = `Spend ${formatINR(swapCost)} on Red Tape/Campus sneakers instead of ${formatINR(origCost)}—same crisp look and save ${formatINR(savedDiff)} for your ${activeGoal.title}.`;
       }
-      swapTitle = "Premium Restoration & Deep-Clean Kit";
-      const savedDiff = Math.max(0, origCost - swapCost);
-      swapDescription = `Swap to a ${formatINR(swapCost)} restoration kit or curated alternative—same fresh look, ${formatINR(savedDiff)} cheaper.`;
-      simplerText = `Spend ${formatINR(swapCost)} instead of ${formatINR(origCost)}—same fresh style and save ${formatINR(savedDiff)} for your ${activeGoal.title}.`;
     } else {
       const raw = Math.round((origCost * 0.40) / 50) * 50;
       swapCost = Math.min(Math.max(50, raw), Math.max(50, origCost - 50));
@@ -217,6 +222,7 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
       simplerText,
       isFoodOrHangout: isFood,
       isEntertainment,
+      isSneakers,
       primaryPlace,
       runnerUpPlaces,
       isLivePlaces: false,
@@ -834,6 +840,33 @@ export const BeforeIScanSpace: React.FC<BeforeIScanSpaceProps> = ({
                       </div>
                       <p className="text-xs text-slate-600 leading-relaxed font-sans">
                         Skip the single {formatINR(smartSwapResult.originalCost)} ticket—grab a 1-month Netflix plan for ₹199, watch 4 new releases this week + unlimited shows all month, and sweep +{formatINR(smartSwapResult.savedDifference)} straight to your {activeGoal.title} jar.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Dedicated Sneaker / Footwear Smart Swap Card */}
+                  {smartSwapResult.isSneakers && (
+                    <div className="p-3.5 rounded-xl bg-gradient-to-r from-amber-50/70 via-orange-50/40 to-slate-50 border border-amber-200/80 space-y-2 shadow-2xs">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-lg bg-amber-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                            <ShoppingBag className="w-4 h-4 fill-white/20" />
+                          </div>
+                          <div>
+                            <span className="font-bold text-slate-900 text-xs sm:text-sm block">
+                              Red Tape / Campus Retro Court Sneakers
+                            </span>
+                            <span className="text-[10px] text-amber-800 font-medium">
+                              Clean Street Minimalist Aesthetic • Myntra / Ajio
+                            </span>
+                          </div>
+                        </div>
+                        <span className="text-xs font-mono font-bold text-amber-900 bg-white px-2.5 py-1 rounded-lg border border-amber-200 shadow-2xs">
+                          ~₹1,350 on Myntra
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-600 leading-relaxed font-sans">
+                        Grab a clean pair of Red Tape or Campus retro court sneakers (~₹1,350 on Myntra/Ajio) instead of ₹4,500 branded pairs—same crisp street look, ₹3,150 saved straight into your {activeGoal.title} jar.
                       </p>
                     </div>
                   )}

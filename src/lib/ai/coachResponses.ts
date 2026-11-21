@@ -13,7 +13,7 @@
 export interface CoachAnswer {
   id: string;
   question: string;
-  category: "dinner" | "investing" | "banking" | "cards" | "goals" | "general";
+  category: "dinner" | "investing" | "banking" | "cards" | "goals" | "shopping" | "general";
   directAnswer: string;
   bulletPoints: string[];
   actionPill: string;
@@ -222,6 +222,33 @@ export function generateBeginnerCoachAdvice(
       actionPill: `Cap at ₹${cap.toLocaleString("en-IN")} & save ₹${saved.toLocaleString("en-IN")}`,
       actionTone: "amber",
       simplerOneLiner: `You have the cash, but ₹${amount.toLocaleString("en-IN")} delays your ${goalTitle} by ${Math.ceil(amount / 500)} days—spend ₹${cap.toLocaleString("en-IN")} instead.`
+    };
+  }
+
+  // 1b. Sneakers / Footwear / Fashion / Apparel (Indian Market Alternatives)
+  if (/sneaker|shoes|footwear|kicks|apparel|zara|h&m|shirt/i.test(q)) {
+    let amount = 4500;
+    const numMatch = q.match(/(?:(?:rs\.?|inr|₹)\s*([\d,]+))|(?:\b(\d{3,6})\b)/i);
+    if (numMatch) {
+      amount = parseFloat((numMatch[1] || numMatch[2]).replace(/,/g, ""));
+    }
+    const swapCost = amount === 4500 ? 1350 : Math.round(amount * 0.30);
+    const saved = Math.max(0, amount - swapCost);
+
+    return {
+      id: "custom_sneakers_swap",
+      question: userQuery,
+      category: "shopping",
+      directAnswer: `Wait—do this instead: grab Red Tape or Campus retro sneakers for ₹${swapCost.toLocaleString("en-IN")}.`,
+      bulletPoints: [
+        `You have ₹${pool.toLocaleString("en-IN")} safe cash left before next payday.`,
+        `Spending ₹${amount.toLocaleString("en-IN")} on branded sneakers delays your ${goalTitle} by ${Math.ceil(amount / 140)} days.`,
+        `Campus or Red Tape retro court pairs (~₹${swapCost.toLocaleString("en-IN")} on Myntra/Ajio) give the exact same street look.`
+      ],
+      concreteAction: `Grab the ₹${swapCost.toLocaleString("en-IN")} retro sneakers and sweep ₹${saved.toLocaleString("en-IN")} straight into your ${goalTitle} jar!`,
+      actionPill: `Swap to ₹${swapCost.toLocaleString("en-IN")} Sneakers • Sweep +₹${saved.toLocaleString("en-IN")}`,
+      actionTone: "amber",
+      simplerOneLiner: `Grab a clean pair of Red Tape or Campus retro court sneakers (~₹1,350 on Myntra/Ajio) instead of ₹4,500 branded pairs—same crisp street look, ₹3,150 saved.`
     };
   }
 

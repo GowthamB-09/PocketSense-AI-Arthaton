@@ -76,7 +76,13 @@ STRICT "FRIEND-TEXTING-YOU" RULES:
    - Never say "p.a." or "yield" -> say "/ yr"
    - Never say "principal" -> say "Base Cash"
    - Never say "corpus" -> say "Total Saved"
-4. Add a final line: "💡 Explain Even Simpler: <1 simple sentence>"`;
+4. CONCRETE INDIAN MARKET ALTERNATIVES (NO ABSTRACT ADVICE):
+   - Whenever evaluating clothing, sneakers, fashion, gadgets, or dining spends, ALWAYS name 1–2 concrete, realistic Indian market alternatives with realistic INR pricing:
+     • Sneakers/Footwear: Recommend clean pairs of Red Tape or Campus retro court sneakers (~₹1,350 on Myntra/Ajio) instead of ₹4,000+ branded sneakers.
+     • Apparel/Fashion: Recommend Zudio, Souled Store, or Westside (~₹499–₹999) instead of ₹3,000+ fast-fashion splurges.
+     • Tech/Gadgets: Recommend budget-friendly picks like CMF by Nothing, Realme, or Boat with realistic pricing.
+     • Food/Dining: Recommend high-rated local specialty spots or pocket-friendly joints under ₹400 for one instead of ₹1,500+ bistros.
+5. Add a final line: "💡 Explain Even Simpler: <1 simple sentence>"`;
 
         const result = streamText({
           model: geminiModel,

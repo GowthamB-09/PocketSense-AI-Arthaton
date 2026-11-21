@@ -46,22 +46,22 @@ export const PRECOMPUTED_PROMPT_CATALOG: PrecomputedResponse[] = [
     simplerOneLiner: "Spend ₹550 instead of ₹1,500 tonight—you have equal fun and save ₹950 for your iPhone.",
   },
   {
-    queryKeywords: ["headphones", "14990", "15000", "gadget", "sony", "bose", "apple", "tech", "sneakers", "4500"],
+    queryKeywords: ["headphones", "14990", "15000", "gadget", "sony", "bose", "apple", "tech"],
     verdict: "CAUTION",
-    extractedAmount: 4500,
-    merchant: "Branded Sneakers & Gear",
-    budgetImpactDays: 4.8,
-    dailySafeReduction: 264,
+    extractedAmount: 14990,
+    merchant: "Premium Tech & Headphones",
+    budgetImpactDays: 14.2,
+    dailySafeReduction: 780,
     headline: "Wait—do this instead: wait 48 hours and check festival discounts.",
     coachResponse: `**Wait—do this instead: hold off for 48 hours.**
 
 • You have **₹30,592** safe cash remaining before next payday.
-• A ₹4,500 impulse spend wipes out 2.5 days of safe headroom.
+• A ₹14,990 impulse tech spend wipes out nearly half your safe pool.
 • Your New iPhone jar is 53% funded—keep the momentum going.
 
 👉 **Next Step:** Put ₹2,000 into **Instant Safe (~6.8% / yr)** today to keep your money safe from impulse buys!`,
     smartHacks: [
-      "Bookmark the shoes and revisit on payday.",
+      "Bookmark the gadget and revisit on payday.",
       "Check upcoming festive sale coupons before paying full retail."
     ],
     recalledMemories: [
@@ -70,7 +70,34 @@ export const PRECOMPUTED_PROMPT_CATALOG: PrecomputedResponse[] = [
       "Safe Growth Vault: Instant Safe (~6.8% / yr)"
     ],
     opportunityCostGoalTitle: "New iPhone",
-    simplerOneLiner: "Hold off on the ₹4,500 shoes for 48 hours so you don't slow down your ₹80,000 iPhone goal.",
+    simplerOneLiner: "Hold off on the ₹14,990 gadget for 48 hours so you don't slow down your ₹80,000 iPhone goal.",
+  },
+  {
+    queryKeywords: ["sneakers", "shoes", "kicks", "4500", "sneaker", "footwear", "campus", "red tape", "retro court"],
+    verdict: "CAUTION",
+    extractedAmount: 4500,
+    merchant: "New Sneakers — ₹4,500",
+    budgetImpactDays: 3.2,
+    dailySafeReduction: 185,
+    headline: "Wait—do this instead: grab Red Tape / Campus retro sneakers for ₹1,350 & pocket ₹3,150.",
+    coachResponse: `**Wait—do this instead: grab Red Tape or Campus retro sneakers for ₹1,350.**
+
+• You have **₹30,592** safe cash remaining before next payday.
+• Spending ₹4,500 on branded pairs delays your New iPhone jar by 32 days.
+• A ₹1,350 Red Tape or Campus retro court sneaker on Myntra/Ajio gives you the exact same crisp street look.
+
+👉 **Next Step:** Grab the **₹1,350** retro sneakers and sweep the **₹3,150** difference directly into your **New iPhone** jar!`,
+    smartHacks: [
+      "Grab clean Red Tape or Campus retro court sneakers (~₹1,350 on Myntra/Ajio) for the same crisp street look.",
+      "Sweep the ₹3,150 difference directly into your New iPhone Goal Jar."
+    ],
+    recalledMemories: [
+      "Remaining Safe Pool: ₹30,592 (17 days to payday)",
+      "Active Goal: New iPhone (₹42,000 / ₹80,000)",
+      "Daily Safe Cushion: Protected"
+    ],
+    opportunityCostGoalTitle: "New iPhone",
+    simplerOneLiner: "Grab a clean pair of Red Tape or Campus retro court sneakers (~₹1,350 on Myntra/Ajio) instead of ₹4,500 branded pairs—same crisp street look, ₹3,150 saved.",
   },
   {
     queryKeywords: ["coffee", "420", "blue tokai", "third wave", "starbucks", "cafe", "350"],
