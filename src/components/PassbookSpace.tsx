@@ -2,13 +2,11 @@
 
 import React, { useState } from "react";
 import { useFinancialMemory } from "@/lib/memory/memoryContext";
-import { Transaction } from "@/types";
 import { formatINR } from "@/lib/utils";
 import { TransactionHistory } from "@/components/TransactionHistory";
 import {
   Smartphone,
   Mail,
-  Zap,
   Check,
   Copy,
   CreditCard,
@@ -17,12 +15,10 @@ import {
   Car,
   Film,
   PieChart,
-  Bell,
   Clock,
   Layers,
   Sparkles,
 } from "lucide-react";
-import confetti from "canvas-confetti";
 
 interface PassbookSpaceProps {
   onOpenSmsDrawer?: () => void;
@@ -49,34 +45,22 @@ export interface ActivityEvent {
 }
 
 export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
-  const {
-    profile,
-    addBatchTransactions,
-    updateCreditCardDues,
-    isAutoPayPaused,
-    claimSavings,
-  } = useFinancialMemory();
+  const { isAutoPayPaused } = useFinancialMemory();
 
   const [activeTab, setActiveTab] = useState<"autopilot-sync" | "insights" | "ledger">("autopilot-sync");
   const [copiedEmail, setCopiedEmail] = useState(false);
-  const [liveToast, setLiveToast] = useState<string | null>(null);
 
   // Top Spend Categories initialized to sum exactly to spentThisMonth (₹17,708)
   // 6850 + 4920 + 3438 + 2500 = 17,708
-  const [categoryBreakdown, setCategoryBreakdown] = useState<Record<SpendCategory, number>>({
+  const [categoryBreakdown] = useState<Record<SpendCategory, number>>({
     "Food & Dining": 6850,
     "Shopping & Gear": 4920,
     "Transport & Subscriptions": 3438,
     "Entertainment & Outings": 2500,
   });
 
-  // Default Sample SMS with Avl Bal matching totalLinkedBankCash (INR 48,500.00)
-  const currentBankCash = profile.totalLinkedBankCash ?? 48500;
-  const DEFAULT_SAMPLE_SMS = `Debited INR 540.00 from HDFC Bank A/C **4412 via UPI to ZOMATO ONLINE. Avl Bal: INR ${currentBankCash.toLocaleString("en-IN")}.00.`;
-  const [smsInput, setSmsInput] = useState<string>(DEFAULT_SAMPLE_SMS);
-
   // Clean Consumer Recent Activity Stream
-  const [activityStream, setActivityStream] = useState<ActivityEvent[]>([
+  const [activityStream] = useState<ActivityEvent[]>([
     {
       id: "ev_1",
       source: "Bank / UPI SMS",
@@ -185,245 +169,11 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
     };
   };
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // REAL REGEX SMS PARSING ENGINE
-  // ─────────────────────────────────────────────────────────────────────────────
-  const parseSmsDetails = (text: string) => {
-    const clean = text.trim();
-
-    // Parse rupee amount using /INR\s*([\d,]+(?:\.\d+)?)|Rs\.?\s*([\d,]+(?:\.\d+)?)/i
-    // Matches INR 540.00 accurately to 540 (not 5,400)
-    const amountRegex = /INR\s*([\d,]+(?:\.\d+)?)|Rs\.?\s*([\d,]+(?:\.\d+)?)/i;
-    const match = clean.match(amountRegex);
-    let amount = 0;
-    if (match) {
-      const rawVal = match[1] || match[2];
-      if (rawVal) {
-        amount = parseFloat(rawVal.replace(/,/g, ""));
-      }
-    }
-    if (amount === 0) {
-      const symbolMatch = clean.match(/₹\s*([\d,]+(?:\.\d+)?)/i);
-      if (symbolMatch && symbolMatch[1]) {
-        amount = parseFloat(symbolMatch[1].replace(/,/g, ""));
-      }
-    }
-
-    // Extract merchant name
-    let rawMerchant = "";
-    const toMatch = clean.match(
-      /(?:to|at|paid to|spent at)\s+([A-Za-z0-9&'\-\.\s]+?)(?:\s*(?:via|\.|\bon\b|\bAvl\b|\bRef\b|\bA\/C\b|\bBal\b|\bLimit\b|$))/i
-    );
-    if (toMatch && toMatch[1]?.trim()) {
-      rawMerchant = toMatch[1].trim();
-    }
-
-    let merchant = "Zomato";
-    if (/zomato/i.test(clean) || /zomato/i.test(rawMerchant)) {
-      merchant = "Zomato";
-    } else if (/swiggy/i.test(clean) || /swiggy/i.test(rawMerchant)) {
-      merchant = "Swiggy";
-    } else if (/zepto/i.test(clean) || /zepto/i.test(rawMerchant)) {
-      merchant = "Zepto";
-    } else if (/blinkit/i.test(clean) || /blinkit/i.test(rawMerchant)) {
-      merchant = "Blinkit";
-    } else if (/blue\s*tokai/i.test(clean) || /blue\s*tokai/i.test(rawMerchant)) {
-      merchant = "Blue Tokai Coffee";
-    } else if (/starbucks/i.test(clean) || /starbucks/i.test(rawMerchant)) {
-      merchant = "Starbucks";
-    } else if (/uber/i.test(clean) || /uber/i.test(rawMerchant)) {
-      merchant = "Uber";
-    } else if (/ola/i.test(clean) || /ola/i.test(rawMerchant)) {
-      merchant = "Ola";
-    } else if (/rapido/i.test(clean) || /rapido/i.test(rawMerchant)) {
-      merchant = "Rapido";
-    } else if (/zara/i.test(clean) || /zara/i.test(rawMerchant)) {
-      merchant = "Zara";
-    } else if (/amazon/i.test(clean) || /amazon/i.test(rawMerchant)) {
-      merchant = "Amazon";
-    } else if (/myntra/i.test(clean) || /myntra/i.test(rawMerchant)) {
-      merchant = "Myntra";
-    } else if (/flipkart/i.test(clean) || /flipkart/i.test(rawMerchant)) {
-      merchant = "Flipkart";
-    } else if (/bookmyshow/i.test(clean) || /bookmyshow/i.test(rawMerchant)) {
-      merchant = "BookMyShow";
-    } else if (/pvr/i.test(clean) || /pvr/i.test(rawMerchant)) {
-      merchant = "PVR Cinemas";
-    } else if (rawMerchant) {
-      merchant = rawMerchant
-        .replace(/\s+(online|ltd|limited|pvt|private|india|commerce|pay|blr|delhi|mumbai)\b/gi, "")
-        .trim();
-      if (merchant.length > 0) {
-        merchant = merchant
-          .toLowerCase()
-          .split(" ")
-          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-          .join(" ");
-      }
-    }
-
-    // Auto-classify category
-    let category: SpendCategory = "Food & Dining";
-    const searchStr = (merchant + " " + clean).toLowerCase();
-    if (
-      /zomato|swiggy|blue tokai|starbucks|food|dining|restaurant|cafe|eat|burger|pizza|kitchen|bakery|chai|coffee|mcdonalds|kfc|zepto|blinkit|instamart|grocery|groceries/i.test(
-        searchStr
-      )
-    ) {
-      category = "Food & Dining";
-    } else if (
-      /zara|amazon|myntra|flipkart|shopping|gear|apparel|clothing|fashion|retail|store|h&m|uniqlo|electronics|croma|apple/i.test(
-        searchStr
-      )
-    ) {
-      category = "Shopping & Gear";
-    } else if (
-      /uber|ola|rapido|metro|commute|transport|ride|cab|auto|flight|indigo|irctc|netflix|spotify|prime|youtube|cloud|subscription|airtel|jio/i.test(
-        searchStr
-      )
-    ) {
-      category = "Transport & Subscriptions";
-    } else if (
-      /bookmyshow|pvr|inox|movie|cinema|theatre|concert|event|party|pub|bar|brewery|club|entertainment|outing/i.test(
-        searchStr
-      )
-    ) {
-      category = "Entertainment & Outings";
-    }
-
-    // Calculate spare-change round-up dynamically to next ₹100
-    const roundUp = amount > 0 ? (amount % 100 === 0 ? 0 : 100 - (amount % 100)) : 0;
-
-    // Credit Card vs Bank/UPI detection
-    const isCreditCard = /card|credit|limit/i.test(clean) && !/debit card|debit/i.test(clean);
-
-    let bankTag = isCreditCard ? "Credit Card" : "HDFC Bank (UPI)";
-    if (/ICICI/i.test(clean)) bankTag = isCreditCard ? "ICICI Card" : "ICICI Bank UPI";
-    else if (/SBI/i.test(clean)) bankTag = isCreditCard ? "SBI Card" : "SBI UPI";
-    else if (/HDFC/i.test(clean)) bankTag = isCreditCard ? "HDFC Card" : "HDFC Bank UPI";
-    else if (/Axis/i.test(clean)) bankTag = isCreditCard ? "Axis Card" : "Axis Bank UPI";
-
-    return {
-      amount,
-      merchant,
-      category,
-      roundUp,
-      isCreditCard,
-      bankTag,
-    };
-  };
-
-  const currentParsed = parseSmsDetails(smsInput);
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // PARSE & LOG SMS ACTION
-  // ─────────────────────────────────────────────────────────────────────────────
-  const handleParseAndLogSms = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (currentParsed.amount <= 0) return;
-
-    const { amount, merchant, category, roundUp, isCreditCard, bankTag } = currentParsed;
-    const bankCash = profile.totalLinkedBankCash ?? 48500;
-    const cardDues = profile.creditCardDues ?? 17908;
-
-    // 1. Prepend newly parsed transaction to Recent Activity
-    const newFeedEvent: ActivityEvent = {
-      id: "ev_sms_" + Date.now(),
-      source: isCreditCard ? "Credit Card SMS" : "Bank / UPI SMS",
-      title: isCreditCard ? "Card Spend" : "UPI Debit",
-      merchant,
-      amount,
-      time: "Just now",
-      type: "debit",
-      category,
-      bankTag,
-      roundUp,
-      rawText: smsInput,
-    };
-    setActivityStream((prev) => [newFeedEvent, ...prev]);
-
-    // 2. Deduct debited amount from totalLinkedBankCash (if bank/UPI) or add to upcomingCardDues (if card)
-    if (isCreditCard) {
-      const updatedCardDues = cardDues + amount;
-      updateCreditCardDues(updatedCardDues, bankCash);
-    } else {
-      const updatedBankCash = Math.max(0, bankCash - amount);
-      updateCreditCardDues(cardDues, updatedBankCash);
-    }
-
-    // 3. Increment matching category in Top Spend Categories so totals stay synced with Spent This Month
-    setCategoryBreakdown((prev) => ({
-      ...prev,
-      [category]: prev[category] + amount,
-    }));
-
-    // Respect Silent Risk Guard in SMS Round-Ups
-    if (!isAutoPayPaused && roundUp > 0) {
-      const targetGoal = profile.goals?.[0]?.id || "goal_iphone";
-      claimSavings(
-        targetGoal,
-        roundUp,
-        `Spare-Change Round-Up (+₹${roundUp}) from ${merchant} spend`
-      );
-    }
-
-    // Append transaction to Ledger
-    const newTx: Transaction = {
-      id: "tx_sms_" + Date.now(),
-      merchant,
-      amount,
-      date: new Date().toISOString().split("T")[0],
-      category: category === "Food & Dining" ? "Dining & Social" : (category as any),
-      spendingType: "Impulse Want",
-      upiRef: "UPI" + Math.floor(1000000000 + Math.random() * 9000000000),
-      bank: bankTag,
-      triggerTag: "sms-autopilot",
-      rawSms: smsInput,
-    };
-    addBatchTransactions([newTx]);
-
-    const roundUpMessage = isAutoPayPaused
-      ? "AutoPay paused by Risk Guard"
-      : `+₹${roundUp} swept to Goal Jars`;
-    setLiveToast(
-      `✓ Logged: ₹${amount.toLocaleString("en-IN")} at ${merchant} (${category}). ${roundUpMessage}.`
-    );
-
-    confetti({
-      particleCount: 35,
-      spread: 50,
-      origin: { y: 0.35 },
-      colors: ["#10B981", "#3B82F6", "#F59E0B"],
-    });
-
-    setTimeout(() => setLiveToast(null), 5000);
-  };
-
   const handleCopyForwardingEmail = () => {
     navigator.clipboard.writeText("alex@pocketsense.ai");
     setCopiedEmail(true);
     setTimeout(() => setCopiedEmail(false), 2500);
   };
-
-  // Sample SMS presets for 1-click testing
-  const SAMPLE_PRESETS = [
-    {
-      label: "🍕 Zomato UPI (₹540)",
-      text: `Debited INR 540.00 from HDFC Bank A/C **4412 via UPI to ZOMATO ONLINE. Avl Bal: INR ${currentBankCash.toLocaleString("en-IN")}.00.`,
-    },
-    {
-      label: "🥗 Swiggy UPI (₹480)",
-      text: "SBI UPI: Rs.480.00 debited from A/C **9011 to Swiggy. Avl Bal: INR 48,020.00.",
-    },
-    {
-      label: "👗 Zara Card (₹1,120)",
-      text: "ICICI Card ending 8021 spent Rs.1120.00 at ZARA. Avl Limit Rs.1,45,000.",
-    },
-    {
-      label: "🚗 Uber Ride (₹350)",
-      text: "Debited Rs.350.00 from HDFC Bank via UPI to Uber India. Avl Bal: INR 47,670.00.",
-    },
-  ];
 
   const totalSpentThisMonth = Object.values(categoryBreakdown).reduce((a, b) => a + b, 0);
 
@@ -530,20 +280,6 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
         </div>
       </div>
 
-      {/* Live Toast */}
-      {liveToast && (
-        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-medium text-emerald-950 flex items-center justify-between gap-3 animate-fade-in shadow-xs">
-          <div className="flex items-center gap-2.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping shrink-0" />
-            <Bell className="w-4 h-4 text-emerald-700 shrink-0" />
-            <span>{liveToast}</span>
-          </div>
-          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200 shrink-0 font-bold">
-            Live Synced
-          </span>
-        </div>
-      )}
-
       {/* ─────────────────────────────────────────────────────────────────────────────
           TAB 1: ZERO-TOUCH AUTOPILOT
       ───────────────────────────────────────────────────────────────────────────── */}
@@ -604,120 +340,82 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
             </div>
           </div>
 
-          {/* PARSE & LOG SMS CARD */}
-          <div className="fintech-card rounded-2xl p-5 sm:p-6 bg-white border border-slate-200 shadow-sm space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
+          {/* RECENT ACTIVITY FEED */}
+          <div className="fintech-card rounded-2xl p-5 bg-white border border-slate-200 shadow-sm space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-100">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center">
-                  <Zap className="w-4 h-4 fill-emerald-600 text-emerald-600" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                    <span>Parse &amp; Log SMS</span>
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    Parse any pasted bank or credit card SMS. Auto-extracts amount, merchant, category, and sweeps spare change.
-                  </p>
-                </div>
+                <Clock className="w-4 h-4 text-slate-500" />
+                <h4 className="text-xs font-bold text-slate-900 tracking-tight">
+                  Recent Activity ({activityStream.length} Events)
+                </h4>
               </div>
-
-              <span className="text-[10px] font-mono text-slate-400 self-start sm:self-auto">
-                Live App Sync • Zero Manual Typing
+              <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-semibold flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Auto-Synced
               </span>
             </div>
 
-            {/* Quick Sample Presets Chips */}
-            <div className="space-y-1.5">
-              <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider block font-semibold">
-                Quick-Test Sample SMS Templates:
-              </span>
-              <div className="flex flex-wrap gap-2">
-                {SAMPLE_PRESETS.map((preset, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => setSmsInput(preset.text)}
-                    className="px-2.5 py-1 rounded-lg text-xs font-mono font-medium bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 transition-colors shadow-2xs"
+            <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
+              {activityStream.map((ev) => {
+                const roundUpAmt =
+                  ev.roundUp ?? (ev.amount % 100 === 0 ? 0 : 100 - (ev.amount % 100));
+                const consumerTag = getConsumerTag(ev);
+
+                return (
+                  <div
+                    key={ev.id}
+                    className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3 text-xs font-mono hover:bg-slate-100/70 transition-colors"
                   >
-                    {preset.label}
-                  </button>
-                ))}
-              </div>
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                          consumerTag.iconBg
+                        }`}
+                      >
+                        {consumerTag.icon}
+                      </div>
+                      <div className="truncate">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-slate-900 truncate">{ev.merchant}</span>
+                          <span
+                            className={`text-[9px] px-1.5 py-0.2 rounded border font-semibold ${consumerTag.badgeClass}`}
+                          >
+                            {consumerTag.label}
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-slate-500 block truncate">
+                          {ev.bankTag} • {ev.time}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                      <span
+                        className={`text-sm font-bold block ${
+                          ev.type === "credit"
+                            ? "text-emerald-700"
+                            : ev.type === "bill" || consumerTag.label === "Card"
+                            ? "text-blue-700"
+                            : "text-slate-900"
+                        }`}
+                      >
+                        {ev.type === "credit" ? "+" : ev.type === "debit" ? "-" : ""}
+                        {formatINR(ev.amount)}
+                      </span>
+
+                      {/* Spare-change round-up badge: HIDDEN whenever Silent Risk Guard (isAutoPayPaused) is active */}
+                      {!isAutoPayPaused && ev.type === "debit" && ev.amount > 0 && roundUpAmt > 0 && (
+                        <div className="mt-0.5">
+                          <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">
+                            +₹{roundUpAmt} Round-Up
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-
-            {/* SMS Input Text Area */}
-            <form onSubmit={handleParseAndLogSms} className="space-y-3 pt-1">
-              <div className="relative">
-                <textarea
-                  rows={2}
-                  value={smsInput}
-                  onChange={(e) => setSmsInput(e.target.value)}
-                  placeholder="Paste any Indian Bank/UPI or Credit Card SMS..."
-                  className="w-full p-3 text-xs font-mono bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors"
-                />
-              </div>
-
-              {/* Real-Time Extraction Preview Strip */}
-              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 grid grid-cols-2 sm:grid-cols-5 gap-3 font-mono text-xs">
-                <div>
-                  <span className="text-[10px] text-slate-400 block uppercase font-medium">Parsed Amount</span>
-                  <span className="text-sm font-bold text-slate-900 block">
-                    {currentParsed.amount > 0 ? `₹${currentParsed.amount.toLocaleString("en-IN")}` : "₹0"}
-                  </span>
-                  <span className="text-[10px] text-slate-500 font-sans">
-                    {currentParsed.isCreditCard ? "Credit Card" : "Bank / UPI"}
-                  </span>
-                </div>
-
-                <div>
-                  <span className="text-[10px] text-slate-400 block uppercase font-medium">Merchant</span>
-                  <strong className="text-slate-900 text-sm block truncate">{currentParsed.merchant}</strong>
-                  <span className="text-[10px] text-slate-500 font-sans">{currentParsed.bankTag}</span>
-                </div>
-
-                <div>
-                  <span className="text-[10px] text-slate-400 block uppercase font-medium">Category</span>
-                  <span className="text-xs font-bold text-slate-800 block truncate">{currentParsed.category}</span>
-                  <span className="text-[10px] text-emerald-600 font-sans font-medium">Auto-Classified</span>
-                </div>
-
-                <div>
-                  <span className="text-[10px] text-slate-400 block uppercase font-medium">Account Target</span>
-                  <span className="text-xs font-bold text-slate-800 block truncate">
-                    {currentParsed.isCreditCard ? "Adds to Card Dues" : "Deducts Bank Cash"}
-                  </span>
-                  <span className="text-[10px] text-blue-600 font-sans font-medium">Updates Net Safe Pool</span>
-                </div>
-
-                <div className="col-span-2 sm:col-span-1">
-                  <span className="text-[10px] text-slate-400 block uppercase font-medium">Spare Change</span>
-                  {isAutoPayPaused ? (
-                    <span className="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full inline-block">
-                      +₹0 (AutoPay Paused)
-                    </span>
-                  ) : (
-                    <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full inline-block">
-                      +₹{currentParsed.roundUp} Round-Up
-                    </span>
-                  )}
-                  <span className="text-[10px] text-slate-400 block font-sans">
-                    {isAutoPayPaused ? "Buffer Protected" : "Swept to Vaults"}
-                  </span>
-                </div>
-              </div>
-
-              {/* Action Button: Parse & Log SMS */}
-              <div className="flex justify-end pt-1">
-                <button
-                  type="submit"
-                  disabled={currentParsed.amount <= 0}
-                  className="px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white shadow-sm flex items-center justify-center gap-2 transition-all active:scale-98 min-h-[42px]"
-                >
-                  <Zap className="w-4 h-4 fill-white" />
-                  <span>Parse &amp; Log SMS</span>
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       )}
