@@ -263,7 +263,7 @@ export function parseSmsHeuristically(smsText: string): SmsParseResult {
 }
 
 /**
- * Personal Finance Behavioral Coach Advice for Young Working Professionals (24–30)
+ * Personal Finance Behavioral Coach Advice for Young Working Professionals (24–40)
  */
 export function generateHeuristicCoachAdvice(
   req: ImpulseCheckRequest,

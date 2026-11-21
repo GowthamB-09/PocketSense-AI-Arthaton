@@ -7,6 +7,17 @@
 
 ---
 
+## 📸 Screenshots & Demo
+
+| Safe Pool & Calendar | AI Pay Guard (Cmd+K) |
+| :---: | :---: |
+| ![Safe Pool & Calendar](./public/screenshots/dashboard.png) | ![AI Pay Guard](./public/screenshots/pay-guard.png) |
+
+> 🎬 **Demo Video Walkthrough (Under 5 Minutes):**  
+> **[Watch the PocketSense PRO Demo Video](https://www.youtube.com/watch?v=YOUR_VIDEO_LINK_HERE)** *(Submission Walkthrough)*
+
+---
+
 ## 💡 1. Product Vision & Problem Statement
 
 ### The Problem: The "Day 20 Squeeze" & Frictionless Lifestyle Creep
@@ -104,7 +115,7 @@ PocketSense Architecture (Supermemory & Linear-Grade Fintech)
   - Evaluates `totalSafePool <= upcomingCardDues`.
   - When true, the top header button changes label to **"Bill Buffer Limit"** with an amber `ShieldAlert` icon and protective styling.
   - Clicking or hovering displays the toast:
-    > *“Simulation paused: Your Safe Pool has reached your ₹{upcomingCardDues} credit card bill threshold.”*
+    > *“Simulation paused: Your Safe Pool has reached your ₹17,908 credit card bill threshold.”*
   - Automatically prevents further simulations from depleting cash reserved for card bills.
 - **9-Digit Input Guardrails:**
   - In the Budget & Salary Settings modal, Take-Home Salary and Fixed Bills inputs are restricted to 9 digits (`maxLength={9}`, capped at 999,999,999 / ₹99.99 Crores).
@@ -123,7 +134,7 @@ PocketSense Architecture (Supermemory & Linear-Grade Fintech)
 ### 4. Real-Time Google Places API (New) Smart Swaps
 - When asking AI Pay Guard about dining, cafes, or parties (e.g., *"I want to eat out for ₹800"*):
   - Fetches real budget restaurants within 3km using user coordinates (or Bengaluru default).
-  - Filters for inexpensive/moderate options with ratings $\ge$ 4.2★.
+  - Filters for inexpensive/moderate options with ratings ≥ 4.2★.
   - Surfaces real place details, ratings, user reviews, and Google Maps links.
 - **Clear Money-Split Breakdown (Where the Money Goes):**
   - **Spent Now (₹320):** Deducted from Safe Pool for the immediate craving.
@@ -171,7 +182,7 @@ Add your API keys:
 GOOGLE_GENERATIVE_AI_API_KEY=your_gemini_api_key_here
 
 # Google Places API (New) Key (Optional, for Live Nearby Restaurant Swaps)
-VITE_GOOGLE_MAPS_API_KEY=your_google_places_api_key_here
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_places_api_key_here
 ```
 > **Note:** If no API keys are configured, PocketSense PRO automatically falls back to its built-in **High-Accuracy Local Heuristics & Curated Offline Swaps**, ensuring 100% of UI features, SMS classification, calendar protections, and coaching work seamlessly.
 

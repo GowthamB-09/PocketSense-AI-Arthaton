@@ -53,7 +53,7 @@ export async function POST(req: Request) {
     // If Gemini is configured, streaming is requested, and Demo Mode is disabled
     if (stream && !demoMode && isGeminiConfigured) {
       try {
-        const systemPrompt = `You are an elite, super-friendly AI Money Coach for PocketSense AI, texting a young working professional (age 24–30).
+        const systemPrompt = `You are an elite, super-friendly AI Money Coach for PocketSense AI, texting a young working professional (age 24–40).
 STRICT "FRIEND-TEXTING-YOU" RULES:
 1. NO WALLS OF TEXT. Never output long paragraphs or textbook definitions.
 2. EXACT 3-PART SCANNABLE FORMAT:

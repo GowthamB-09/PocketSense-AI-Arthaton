@@ -78,7 +78,7 @@ export const GooglePlacesStatusBadge: React.FC<GooglePlacesStatusBadgeProps> = (
             <span>Developer Setup Hint:</span>
           </div>
           <p className="text-[10px] text-amber-800 leading-relaxed pl-5">
-            Set <code className="px-1 py-0.5 bg-amber-100/80 rounded font-mono font-bold">VITE_GOOGLE_MAPS_API_KEY</code> in your <code className="px-1 py-0.5 bg-amber-100/80 rounded font-mono">.env</code> and enable <strong>Places API (New)</strong> in Google Cloud Console.
+            Set <code className="px-1 py-0.5 bg-amber-100/80 rounded font-mono font-bold">NEXT_PUBLIC_GOOGLE_MAPS_API_KEY</code> in your <code className="px-1 py-0.5 bg-amber-100/80 rounded font-mono">.env</code> and enable <strong>Places API (New)</strong> in Google Cloud Console.
           </p>
           <div className="pl-5 pt-1">
             <a
@@ -167,7 +167,7 @@ export const GooglePlacesStatusBadge: React.FC<GooglePlacesStatusBadgeProps> = (
             <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-[10px] text-amber-900 space-y-1">
               <strong className="block font-semibold">💡 Setup Hint:</strong>
               <p className="leading-relaxed">
-                Add <code className="px-1 py-0.5 bg-amber-100 rounded font-mono font-semibold">VITE_GOOGLE_MAPS_API_KEY=&quot;your_key&quot;</code> in your project <code className="px-1 py-0.5 bg-amber-100 rounded font-mono">.env</code> and enable <strong>Places API (New)</strong> in Google Cloud Console.
+                Add <code className="px-1 py-0.5 bg-amber-100 rounded font-mono font-semibold">NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=&quot;your_key&quot;</code> in your project <code className="px-1 py-0.5 bg-amber-100 rounded font-mono">.env</code> and enable <strong>Places API (New)</strong> in Google Cloud Console.
               </p>
               <div className="pt-1">
                 <a

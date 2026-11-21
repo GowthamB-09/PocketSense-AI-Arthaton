@@ -54,7 +54,7 @@ export async function POST(req: Request) {
 
     if (!demoMode && isGeminiConfigured) {
       try {
-        const prompt = `You are the PocketSense AI Financial Parser for young working professionals (24-30 age group).
+        const prompt = `You are the PocketSense AI Financial Parser for young working professionals (24–40 age group).
 Parse the following Indian bank SMS notifications into structured transaction records.
 Rules:
 1. Context: Rent, Mutual Fund SIPs, Cook/Maid, Gym, Groceries are 'Survival Need'. Speciality coffee, weekend brewery/dining splits, apparel sales, gourmet quick commerce are 'Impulse Want'. Recurring streaming/SaaS auto-debits (Apple, Netflix, Spotify) are 'Silent Subscription Leak'.
