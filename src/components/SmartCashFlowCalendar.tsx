@@ -389,11 +389,7 @@ export const SmartCashFlowCalendar: React.FC<SmartCashFlowCalendarProps> = ({
           </span>
         </div>
 
-        <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full ring-2 ring-emerald-500 bg-emerald-100 shrink-0" />
-          <span className="font-semibold text-emerald-900">Today</span>
-          <span className="text-[10px] font-mono text-emerald-700 font-bold">({todayFormatted})</span>
-        </div>
+
       </div>
 
       {/* 3. 7-Column Calendar Grid (M T W T F S S) */}
