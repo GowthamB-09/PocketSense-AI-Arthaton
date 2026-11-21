@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useFinancialMemory } from "@/lib/memory/memoryContext";
 import { TransactionHistory } from "@/components/TransactionHistory";
 import {
@@ -14,6 +14,7 @@ import {
   Film,
   PieChart,
   Sparkles,
+  Info,
 } from "lucide-react";
 
 interface PassbookSpaceProps {
@@ -30,6 +31,20 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
   const { profile } = useFinancialMemory();
   const [activeTab, setActiveTab] = useState<"autopilot-sync" | "insights" | "ledger">("autopilot-sync");
   const [copiedEmail, setCopiedEmail] = useState(false);
+  const [activeTooltip, setActiveTooltip] = useState<"email" | "sms" | null>(null);
+
+  useEffect(() => {
+    const handleGlobalClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest("[data-info-tooltip]")) {
+        setActiveTooltip(null);
+      }
+    };
+    if (activeTooltip) {
+      document.addEventListener("click", handleGlobalClick);
+      return () => document.removeEventListener("click", handleGlobalClick);
+    }
+  }, [activeTooltip]);
 
   // Sync Spent This Month 1:1 with Top Salary Bar
   const takeHomeSalary = Math.max(1, profile.monthlySalary || 75000);
@@ -182,6 +197,28 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <span className="text-xs font-bold text-slate-900">Bank &amp; Card Email Sync:</span>
+                    <div className="relative inline-flex items-center" data-info-tooltip="email">
+                      <button
+                        type="button"
+                        onClick={() => setActiveTooltip(activeTooltip === "email" ? null : "email")}
+                        onMouseEnter={() => setActiveTooltip("email")}
+                        onMouseLeave={() => setActiveTooltip(null)}
+                        className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer p-0.5 focus:outline-none"
+                        aria-label="Bank & Card Email Sync info"
+                      >
+                        <Info className="w-3.5 h-3.5" />
+                      </button>
+                      {activeTooltip === "email" && (
+                        <div
+                          role="tooltip"
+                          className="absolute top-full left-0 mt-1.5 z-50 bg-slate-900 text-white text-xs rounded-lg p-2.5 shadow-lg max-w-[260px] w-64 animate-fade-in pointer-events-none"
+                        >
+                          <p className="text-[11px] leading-snug font-normal text-slate-200">
+                            Privacy-first forwarding: Users auto-forward only bank alert emails to a parser alias—no bank logins required. (Currently running on synthetic demo data.)
+                          </p>
+                        </div>
+                      )}
+                    </div>
                     <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
                       ON
                     </span>
@@ -210,6 +247,28 @@ export const PassbookSpace: React.FC<PassbookSpaceProps> = () => {
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <span className="text-xs font-bold text-slate-900">UPI &amp; Bank SMS Sync:</span>
+                    <div className="relative inline-flex items-center" data-info-tooltip="sms">
+                      <button
+                        type="button"
+                        onClick={() => setActiveTooltip(activeTooltip === "sms" ? null : "sms")}
+                        onMouseEnter={() => setActiveTooltip("sms")}
+                        onMouseLeave={() => setActiveTooltip(null)}
+                        className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer p-0.5 focus:outline-none"
+                        aria-label="UPI & Bank SMS Sync info"
+                      >
+                        <Info className="w-3.5 h-3.5" />
+                      </button>
+                      {activeTooltip === "sms" && (
+                        <div
+                          role="tooltip"
+                          className="absolute top-full left-0 mt-1.5 z-50 bg-slate-900 text-white text-xs rounded-lg p-2.5 shadow-lg max-w-[260px] w-64 animate-fade-in pointer-events-none"
+                        >
+                          <p className="text-[11px] leading-snug font-normal text-slate-200">
+                            Zero SMS-read permissions: Powered by opt-in OS automation (iOS Shortcuts / Android webhooks) that sends single debit alerts locally. (Currently running on synthetic demo data.)
+                          </p>
+                        </div>
+                      )}
+                    </div>
                     <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
                       ON
                     </span>
