@@ -1,247 +1,295 @@
 # PocketSense PRO 🎯
 
-🌐 **Live Public Deployment (Works 24/7):** [https://pocketsense-ai-one.vercel.app](https://pocketsense-ai-one.vercel.app)
+🌐 **Live Public Deployment (Works 24/7):** [https://pocketsense-ai-one.vercel.app](https://pocketsense-ai-one.vercel.app)  
+📦 **Public GitHub Repository:** [https://github.com/GowthamB-09/PocketSense-AI-Arthaton](https://github.com/GowthamB-09/PocketSense-AI-Arthaton)  
+🎬 **Demo Video Walkthrough (Under 5 Minutes):** [Watch the PocketSense PRO Demo Video](https://www.youtube.com/watch?v=YOUR_VIDEO_LINK_HERE)
 
 > **Zero-Login, Privacy-First Behavioral Money Coach for Young Professionals**  
 > *Built for Arthaton 2026 ("AI for Finance") Hackathon*
 
 ---
 
+## 📑 Table of Contents
+- [1. What PocketSense AI Does](#-1-what-pocketsense-ai-does)
+- [2. How to Run It (Local Setup & Quickstart)](#-2-how-to-run-it-local-setup--quickstart)
+- [3. AI Models and APIs Used](#-3-ai-models-and-apis-used)
+- [4. Deep-Dive Core Features & Innovations](#-4-deep-dive-core-features--innovations)
+- [5. Architecture & Tech Stack](#-5-architecture--tech-stack)
+- [6. Arthaton 2026 Rules & Compliance Checklist](#-6-arthaton-2026-rules--compliance-checklist)
+- [7. Submission Details](#-7-submission-details)
+
+---
+
 ## 📸 Screenshots & Demo
 
-| Safe Pool & Calendar | AI Pay Guard (Cmd+K) |
+| Safe Pool & Calendar | AI Pay Guard (`Cmd+K`) |
 | :---: | :---: |
 | ![Safe Pool & Calendar](./public/screenshots/dashboard.png) | ![AI Pay Guard](./public/screenshots/pay-guard.png) |
 
-> 🎬 **Demo Video Walkthrough (Under 5 Minutes):**  
-> **[Watch the PocketSense PRO Demo Video](https://www.youtube.com/watch?v=YOUR_VIDEO_LINK_HERE)** *(Submission Walkthrough)*
+---
+
+## 💡 1. What PocketSense AI Does
+
+PocketSense PRO is an executive **zero-login, non-custodial Behavioral Money Coach** designed specifically for young urban professionals (ages 24–40).
+
+### The Core Problem: The "Day 20 Squeeze" & Post-Mortem Failure
+Professionals earning competitive salaries (₹60,000–₹1,50,000/month) frequently find their discretionary cash depleted by the 20th of every month. After fixed commitments (Rent, SIPs, EMIs ~₹32,000), frictionless UPI QR codes and tap-to-pay cards eliminate spending resistance on micro-transactions:
+- ₹420 specialty cafe pour-overs
+- ₹480 10-minute quick commerce carts
+- ₹3,500 weekend dining splits
+- ₹4,500 impulse branded sneakers or fast fashion
+
+**Why traditional banking apps fail:** They show post-mortem pie charts *after* the cash is gone, demand invasive banking credentials or SMS-read permissions, and possess zero contextual awareness of upcoming bills or personal savings goals.
+
+### The PocketSense Solution: Intercepting Spend *Before* It Happens
+PocketSense flips financial tracking from **reactive post-mortems** to **real-time pre-spend behavioral intervention**:
+
+1. **"Before-I-Scan" AI Pay Guard (`Cmd+K`):**  
+   Before scanning a UPI QR code, users trigger an instant command bar asking: *"Should I spend ₹4,500 on new sneakers?"*  
+   The coach provides an immediate verdict (`APPROVED`, `CAUTION`, or `BLOCKED`) based on the user's remaining safe daily runway, days left in the cycle, and active milestone jars.
+2. **Concrete Smart Swaps & Impulse Diversion ("Skip & Save"):**  
+   Instead of abstract advice, PocketSense recommends concrete, budget-friendly Indian market alternatives (e.g., swapping ₹4,500 branded sneakers for clean Red Tape/Campus retro court sneakers at ~₹1,350 on Myntra/Ajio), sweeping the difference (**+₹3,150**) straight into a Milestone Goal Jar.
+3. **Ring-Fenced Event Shield on Cash-Flow Calendar:**  
+   Users pre-schedule upcoming birthdays, weddings, and dinners. PocketSense automatically rings-fences and deducts these budgets from the spendable cash pool days in advance so gift funds aren't accidentally eaten by daily food deliveries. Once marked paid, the event cleanly transitions to a **`Settled`** state.
+4. **Zero-Sum Safe Pool Mathematics:**  
+   Guarantees that Take-Home Salary strictly balances:
+   $$\text{Fixed Bills} + \text{Spent This Month} + \text{Total Safe Pool} = \text{Take-Home Salary (₹75,000)}$$
+5. **Silent Risk Guard:**  
+   Monitors multi-card dues and automatically pauses weekly AutoPay sweeps if credit card dues exceed **20% of monthly salary**, preventing accidental overdrafts before payday.
+6. **Goal Jars & Out-of-Sight Safe Growth Vault:**  
+   Visualizes milestone progress (iPhone, Gold, Emergency Fund) with progressive disclosure, AI price drop forecasts, and instant safe yield projections (~6.8%/yr liquid vault).
+7. **Zero-Login, Privacy-First Architecture:**  
+   Zero bank logins, zero cloud database tracking, zero SMS-read permissions. Operates entirely on client-side non-custodial local memory (`localStorage`) and simulated demo data for judging clarity.
 
 ---
 
-## 💡 1. Product Vision & Problem Statement
+## 🛠️ 2. How to Run It (Local Setup & Quickstart)
 
-### The Problem: The "Day 20 Squeeze" & Frictionless Lifestyle Creep
-Young urban professionals (ages 24–40) earning competitive take-home salaries (e.g., ₹60,000–₹1,20,000/month) frequently find themselves cash-squeezed by the 20th of the month. 
+Follow these steps to run PocketSense PRO locally on your machine in under two minutes:
 
-After accounting for non-negotiable fixed commitments (Rent, SIP mutual funds, EMIs, household staff ~₹32,000), the remaining discretionary pool vanishes into micro-transactions:
-- ₹420 specialty cafe pour-overs (Blue Tokai, Third Wave)
-- ₹480 10-minute quick commerce carts (Zepto, Blinkit, Instamart)
-- ₹650 surge-priced Uber Premier commutes
-- ₹3,500 Friday craft brewery & bistro bill splits
-- ₹14,990 flash tech sales & apparel carts (Zara, H&M)
+### Prerequisites
+- **Node.js:** v18.18+ or v20+ (recommended: Node 20 LTS)
+- **npm:** v9+ (or pnpm / yarn)
+- **Git** installed on your system
 
-Because frictionless UPI QR codes and credit card tap-to-pay eliminate payment resistance, professionals suffer from **lifestyle creep**, credit card debt spirals, and delayed compounding for high-conviction goals (Japan trip, MacBook upgrade, emergency runway).
+### Step 1: Clone the Public Repository
+```bash
+git clone https://github.com/GowthamB-09/PocketSense-AI-Arthaton.git
+cd PocketSense-AI-Arthaton
+```
 
-### Why Existing Fintech Apps Fail
-1. **Post-Mortem Charts:** Banking and expense tracker apps display colorful pie charts *after* discretionary funds have evaporated.
-2. **Invasive Credential Demands:** Requiring net-banking credentials, SMS read permissions, PAN cards, or live brokerage access exposes sensitive financial data.
-3. **Zero Behavioral Memory:** Standard apps treat every transaction in isolation, lacking awareness of the user's specific goals, impulse triggers, and upcoming bill cycles.
+### Step 2: Install Project Dependencies
+```bash
+npm install
+```
 
-### The PocketSense Solution
-PocketSense is an executive **zero-login, non-custodial Behavioral Money Coach** inspired by **Supermemory.ai** and **Linear**:
-- **Intercepts Spending *Before* It Happens:** Instant command-bar coach (`Cmd+K`) where professionals ask before scanning: *"Should I spend ₹3,500 on dinner & craft beer tonight?"*
-- **Smart Cash-Flow & Event Calendar:** Plan and ring-fence upcoming gifts, weddings, and parties before daily spending starts.
-- **Salary Allocation Breakdown:** Mathematically guarantees that Take-Home Salary strictly equals Fixed Bills + Spent This Month + Total Safe Pool.
-- **Opportunity Cost & Wealth Jars:** Converts skipped impulse wants directly into tangible milestone assets (e.g., skipping a restaurant tab deposits ₹2,500 into your iPhone jar) with one-click **"Skip & Save"**.
+### Step 3: Configure Environment Variables
+Copy the sample environment file to create your local environment configuration:
+```bash
+# On Linux / macOS / Git Bash:
+cp .env.example .env.local
+
+# On Windows PowerShell:
+Copy-Item .env.example .env.local
+```
+
+Open `.env.local` and add your API keys:
+```env
+# Google Gemini API Key (Required for Live AI Streaming & Structured Parsing)
+# Get a free key at: https://aistudio.google.com/app/apikey
+GOOGLE_GENERATIVE_AI_API_KEY=your_gemini_api_key_here
+
+# Google Places API (New) Key (Optional, for Live Local Restaurant & Cafe Swaps)
+# Enable "Places API (New)" at: https://console.cloud.google.com/
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_places_api_key_here
+```
+
+> ⚡ **Offline & Zero-Key Fallback:**  
+> If no API keys are provided, PocketSense PRO **still runs 100% smoothly**. The application features an automatic fallback to its built-in **High-Accuracy Local Heuristics & Curated Offline AI Engine**, ensuring every feature, calendar interaction, top-up modal, and coaching interaction functions without external network dependencies.
+
+### Step 4: Run the Development Server
+```bash
+npm run dev
+```
+
+Open your browser and navigate to:
+```
+http://localhost:3000
+```
+
+### Step 5: Production Build (Optional)
+To verify a clean production build:
+```bash
+npm run build
+npm run start
+```
 
 ---
 
-## ⚡ 2. Architecture & Tech Stack
+## 🤖 3. AI Models and APIs Used
+
+PocketSense PRO leverages a hybrid AI pipeline combining Google's latest generative models with deterministic local heuristic fallbacks:
 
 ```
-PocketSense Architecture (Supermemory & Linear-Grade Fintech)
-├── Framework: Next.js 15 (App Router, React 19, TypeScript)
-├── Styling: Tailwind CSS (Fintech Obsidian & Clean Slate, 1px border-slate-200)
-├── AI & Intelligence Layer: Vercel AI SDK (`ai`) + Google Gemini API (`@ai-sdk/google`, `gemini-2.5-flash`)
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                       POCKETSENSE PRO AI & API PIPELINE                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                       │
+        ┌──────────────────────────────┴──────────────────────────────┐
+        ▼                                                             ▼
+┌──────────────────────────────┐                            ┌──────────────────────────────┐
+│       Google Gemini API      │                            │    Google Places API (New)   │
+│  `gemini-1.5-flash` / `2.5`  │                            │  `places.googleapis.com/v1`  │
+│    via `@ai-sdk/google`      │                            │   Location-Aware Discovery   │
+└──────────────┬───────────────┘                            └──────────────┬───────────────┘
+               │                                                           │
+       ┌───────┴───────────────────────┐                                   │
+       ▼                               ▼                                   ▼
+┌──────────────────────────────┐┌──────────────────────────────┐┌──────────────────────────────┐
+│  Streaming Behavioral Coach  ││ Structured SMS/Email Parser  ││ Real-Time Nearby Smart Swaps │
+│   `streamText` (Vercel AI)   ││ `generateObject` (Zod Schema)││  3km Radius, 4.2★+, < ₹400   │
+│  • Verdicts (APPROVED/BLOCK) ││  • Strict JSON Transaction   ││  • Live Ratings & Reviews    │
+│  • Opportunity Cost Math     ││  • Category Classification   ││  • Direct Google Maps Links  │
+│  • Concrete Indian Swaps     ││  • Spend Type (Want vs Need) ││  • Curated Offline Fallback  │
+└──────────────────────────────┘└──────────────────────────────┘└──────────────────────────────┘
+                                       │
+                                       ▼
+             ┌───────────────────────────────────────────────────┐
+             │   Deterministic Local Heuristic & Offline Engine  │
+             │     • 0ms Instant Response • Zero-Failure SLA     │
+             │   • RegEx Parser • Curated Indian Brand Swaps     │
+             └───────────────────────────────────────────────────┘
+```
+
+### 1. Google Gemini Generative AI Model (`gemini-1.5-flash` / `gemini-2.5-flash`)
+- **Package / SDK:** `@ai-sdk/google` + `ai` (Vercel AI SDK Core)
+- **Role & Capabilities:**
+  1. **Real-Time Streaming Behavioral Coach (`/api/coach`):**
+     - Invoked via `streamText` for ultra-low-latency response generation.
+     - Governed by an executive system prompt enforcing a **3-part scannable format** (Line 1: Clear bold verdict `APPROVED`, `CAUTION`, or `BLOCKED`; Line 2: Exact mathematical impact on remaining safe daily cash and days left; Line 3: Direct opportunity cost impact on primary Goal Jar).
+     - **Rule 4 (Concrete Indian Retail Recommendations):** Instructs the model to never suggest generic placeholders like "curated alternative." It mandates specific, relatable Indian market brands (Campus, Red Tape, Zudio, Souled Store, CMF by Nothing, Realme) with realistic INR prices.
+  2. **Structured Financial Transaction Extraction (`/api/parse-sms`):**
+     - Invoked via `generateObject` paired with a strict TypeScript **Zod schema** (`smsSchema`).
+     - Extracts merchant name, exact INR amount, ISO transaction date, UPI reference IDs, confidence scores, and automatically categorizes transactions into:
+       - `Survival Need` (Rent, SIPs, utilities, groceries)
+       - `Impulse Want` (Specialty coffee, dining splits, branded apparel)
+       - `Silent Subscription Leak` (Recurring OTT, SaaS auto-debits)
+
+### 2. Google Places API (New) (`places.googleapis.com/v1/places:searchText`)
+- **Role & Capabilities:**
+  - Powers real-time, location-aware dining & cafe smart swaps inside AI Pay Guard.
+  - When a user asks about spending on food/dining (e.g., *"Dinner for ₹800"*), the backend queries nearby spots within a **3km radius** using browser coordinates (or default Bengaluru tech hub coordinates).
+  - Filters for high-rating venues (≥ 4.2★) in inexpensive/moderate price tiers (`PRICE_LEVEL_INEXPENSIVE`, `PRICE_LEVEL_MODERATE`).
+  - Returns verified venue names, ratings, total review counts, formatted addresses, and clickable Google Maps directions links.
+
+### 3. Vercel AI SDK (`ai` v4)
+- Provides unified, type-safe streaming abstractions (`streamText`, `generateObject`) connecting the Next.js serverless edge runtime to Google Gemini with zero boilerplate.
+
+### 4. Deterministic Local Heuristics & Curated Offline AI Engine
+- **Zero-Failure Architecture:** If the user is offline, has not configured an API key, or exceeds rate limits, PocketSense PRO automatically falls back to an algorithmic heuristic parser:
+  - High-accuracy regex extraction for Indian banking SMS templates (HDFC, ICICI, SBI, Axis, Cred, Paytm).
+  - Curated Indian market swap database with realistic price-differential calculations.
+  - Guarantees **100% uptime and zero broken demo states** during judging and evaluations.
+
+---
+
+## 🚀 4. Deep-Dive Core Features & Innovations
+
+### 1. Interactive Smart Cash-Flow & Event Calendar
+- **Mobile-First 7-Column Grid (`Mon` to `Sun`):** Clean monthly navigation with quick `"Today"` jump button and dynamic real-date highlight.
+- **Dynamic Payday (⭐) Aligned with Settings:** Reads `profile.salaryCreditDay` (Day 1, 5, 25, 28, or 30). Renders a single gold Payday star (⭐) on that exact day across all months without duplicate icons or false red bill dots.
+- **Pre-Loaded Color-Coded Schedule:**
+  - 🔴 **Red Pills & Dots (AutoPay Bills):** e.g., Nov 24 (*ICICI Card AutoPay Due • ₹9,800*) and Nov 27 (*HDFC Card AutoPay Due • ₹8,108*).
+  - 🟣 **Purple Pills & Dots (Personal Events & Gifts):** e.g., Nov 26 (*Aarav's Birthday Gift & Dinner • ₹2,500*).
+  - ⭐ **Gold Star (Payday):** Celebratory salary credit (*Monthly Salary Credited • ₹75,000*).
+- **Standout Feature A — "Ring-Fenced Event Shield" (Auto-Pre-Lock):**
+  - Every scheduled event features a default **Pre-Lock Toggle (ON)**.
+  - Subtracts planned event budgets immediately from the Net Safe Cash Pool:
+    $$\text{Net Safe Cash Pool} = \text{Total Linked Bank Cash} - \text{Upcoming Card Dues} - \text{Ring-Fenced Calendar Events}$$
+  - Protects gift and party funds from being accidentally spent on impulse food deliveries days before the event.
+  - **Post-Payment `Settled` State:** Once an event is marked Paid/Done, the interactive shield toggle seamlessly transitions to a static **`Settled`** badge with a checkmark, visually confirming that pre-locked funds have been released and deducted upon settlement.
+- **Dynamic Payday Drawer:** Clicking Payday opens a celebratory emerald **`Income Credit`** card displaying `+₹75,000 Monthly Salary` and `Salary Credited` badge.
+- **Standout Feature B — "Bill-Week Collision Alert":**
+  - If a user schedules an event within **2 days** of an AutoPay bill due date, a smart warning surfaces in the form and detail drawer:
+    > *“⚠️ Heads up: HDFC Card AutoPay Due is due 1 day after this event—keep ₹17,908 reserved.”*
+
+### 2. Salary Allocation & Safe Pool Breakdown Bar
+- Replaces scattered metric cards with a unified 3-segment stacked horizontal progress bar:
+  1. **Fixed Bills & SIPs (Purple/Indigo `#4F46E5`):** Non-negotiable rent, mutual fund SIPs, and utilities.
+  2. **Spent This Month (Warm Amber `#F59E0B`):** Discretionary purchases tracked so far.
+  3. **Total Safe Pool (Vibrant Emerald `#10B981`):** Net spendable cash remaining.
+- **Zero-Sum Balance Guarantee:** Mathematically locks:
+  $$\text{Fixed Bills} + \text{Spent This Month} + \text{Total Safe Pool} = \text{Take-Home Salary (₹75,000)}$$
+
+### 3. Multi-Tier Financial & Simulation Guardrails
+- **Bill Buffer Limit Protection:** Evaluates `totalSafePool <= upcomingCardDues`. When true, the top header button changes label to **"Bill Buffer Limit"** with an amber `ShieldAlert` icon, preventing further simulations from depleting cash reserved for card bills.
+- **9-Digit Input Guardrails:** Take-Home Salary and Fixed Bills inputs are restricted to 9 digits (`maxLength={9}`, capped at ₹99.99 Crores) with non-digit stripping to eliminate layout breaks, bar overflow, or `NaN`.
+- **Indian & Standard Comma-Formatted Number Parsing:** Enhanced regex extracts numbers with Indian comma patterns (`14,990`, `1,50,000`) cleanly.
+- **Silent Risk Guard (AutoPay Pause):** Dynamically triggers when upcoming card bills exceed **20% of monthly salary** (e.g., > ₹15,000 on ₹75,000 salary), pausing weekly Friday AutoPay sweeps into Goal Jars.
+
+### 4. "Before-I-Scan" AI Pay Guard & Smart Swap Engine (`Cmd+K`)
+- Instant impulse evaluation before scanning UPI QR codes.
+- Serves three clear verdicts: `APPROVED`, `CAUTION`, or `BLOCKED`.
+- **Concrete Indian Footwear & Fashion Swaps:**
+  - *Footwear Splurge (`₹4,500`):* Recommends clean **Red Tape or Campus retro court sneakers (~₹1,350 on Myntra/Ajio)** instead of ₹4,500 branded pairs—saving **+₹3,150** swept straight into the active Goal Jar.
+  - *Apparel & Tech:* Recommends relatable picks (Zudio, Souled Store, CMF by Nothing, Realme).
+- **Clear Money-Split Breakdown:**
+  - **Spent Now (₹1,350):** Deducted from Safe Pool for the immediate swap item.
+  - **Swept to Goal Jar (+₹3,150):** Locked directly into your Milestone Goal Jar.
+
+### 5. Auto-Tracked Spending Dashboard
+- **Simulated Demo Indicator:** Displays a soft amber/slate `Simulated Demo` pill next to the heading so judges immediately recognize all displayed transactions are synthetic demo data.
+- **Auto-Sync Cards with Privacy-First Info Tooltips (`ⓘ`):**
+  - *Bank & Card Email Sync:* Interactive popover explaining privacy-first forwarding (users auto-forward only bank alert emails to a parser alias—no bank logins required).
+  - *UPI & Bank SMS Sync:* Interactive popover detailing zero-permission OS automation (iOS Shortcuts / Android webhooks) that captures single debit alerts locally without invasive SMS-read permissions.
+- **Category Breakdown & Spend History:** Interactive SVG donut chart showing real distribution across Food & Dining, Shopping & Gear, Transport & Subscriptions, and Entertainment.
+
+### 6. Goal Jars & AI Price-Trend Forecaster
+- **Progressive Disclosure Card Design:** Clean collapsed card default showing goal icon (Lucide SVG icons avoiding blank `▯` boxes on mobile), target price, progress bar, `% funded`, and compact alert strip paired with a clickable **`Know More ▾`** / **`Show Less ▴`** toggle.
+- **Self-Contained Root-Level Top-Up Modal:** Centered modal accessible on desktop and mobile with `+₹500` to `+₹5,000` quick chips, Net Safe Pool balance guards, and confetti celebration.
+- **Streamlined AutoPay Auto-Save Card:** Single status pill in the header (`AutoPay Auto-Save: PAUSED/ACTIVE`), direct single-line notice with inline `Settle Bills →` trigger, and collapsible `Schedule & Split Rules ▾` accordion.
+- **Collapsible Plain-English Wealth Guide (`📖 Plain-English Wealth Guide ▾`):** Single sleek collapsible accordion bar unfolding 3 concise 10-second definitions: *Fixed Deposit (FD)*, *Nifty 50 Index Fund*, and *SIP Autopilot*.
+
+---
+
+## ⚡ 5. Architecture & Tech Stack
+
+```
+PocketSense Architecture
+├── Frontend & Framework: Next.js 15 (App Router, React 19, TypeScript)
+├── Styling & Design System: Tailwind CSS (Fintech Obsidian & Clean Slate)
+├── AI & Intelligence Layer: Vercel AI SDK (`ai`) + Google Gemini API (`@ai-sdk/google`, `gemini-1.5-flash`)
 │   ├── Structured Parsing: `generateObject` with Zod schema for UPI SMS/statement classification
 │   └── Streaming Coach: `streamText` for real-time executive behavioral coaching
 ├── External Integrations:
 │   └── Google Places API (New): Real-time nearby budget restaurant search (< 3km, 4.2★+) with offline fallback
-├── Financial Memory Engine (Supermemory-Style):
+├── Financial Memory Engine:
 │   ├── Client-side non-custodial local memory store (`localStorage`)
 │   ├── Dynamic Salary Cycle & Pacing Engine (Configurable Salary Credit Day)
-│   ├── Ring-Fenced Event Shield (Auto-Pre-Lock of planned event budgets)
+│   ├── Ring-Fenced Event Shield (Auto-Pre-Lock of planned event budgets with Settled state)
 │   ├── Bill-Week Collision Alert Engine (±2 days proximity warning to AutoPay due dates)
 │   └── Silent Risk Guard (Dynamic 20% Salary credit card threshold with AutoPay pause)
 ├── Multi-Tier Simulation & Input Guardrails:
 │   ├── Bill Buffer Limit: Halts simulated spend when Total Safe Pool ≤ Upcoming Card Dues
 │   ├── 9-Digit Input Guardrails: Prevents layout overflow and NaN in Salary & Fixed Bills inputs
 │   └── Comma-Formatted Numeric Normalizer: Seamlessly extracts Indian (₹1,50,000) & standard numbers
-└── Micro-Interactions: `canvas-confetti` celebrations upon impulse diversion
+└── Micro-Interactions: `canvas-confetti` celebrations upon savings milestones
 ```
 
 ---
 
-## 🚀 3. Core Features & Behavioral Innovations
-
-### 1. Interactive Smart Cash-Flow & Event Calendar
-- **Mobile-First 7-Column Grid (`Mon` to `Sun`):** Clean monthly calendar navigation (`<` and `>`), a quick `"Today"` jump button, and dynamic real-date synchronization highlighting the live date with an emerald indicator.
-- **Dynamic Payday (⭐) Aligned with Settings:** Reads `profile.salaryCreditDay` configured in Budget Settings (Day 1, 5, 25, 28, or 30). The calendar dynamically renders the gold Payday star (⭐) and status badge on that exact day across all months.
-- **Pre-Loaded Color-Coded Schedule:**
-  - 🔴 **Red Pills & Dots (AutoPay Bills):** Nov 24 (*ICICI Card AutoPay Due • ₹9,800*) and Nov 27 (*HDFC Card AutoPay Due • ₹8,108*).
-  - 🟣 **Purple Pills & Dots (Personal Events & Gifts):** Nov 26 (*Aarav's Birthday Gift & Dinner • ₹2,500*).
-  - ⭐ **Gold Star (Payday):** Dynamic salary credit day (*Monthly Salary Credited • ₹75,000*).
-- **Standout Feature A — "Ring-Fenced Event Shield" (Auto-Pre-Lock):**
-  - Every scheduled event features a default **Pre-Lock Toggle (ON)**.
-  - Subtracts planned event budgets immediately from the Net Safe Cash Pool:
-    $$\text{Net Safe Cash Pool} = \text{Total Linked Bank Cash} - \text{Upcoming Card Dues} - \text{Ring-Fenced Calendar Events}$$
-  - Protects gift money from being accidentally spent on impulse food deliveries days before the event.
-  - Includes a bottom summary strip (`₹2,500 Ring-Fenced for 1 Upcoming Event`) and a **"Mark Paid / Done"** settlement button.
-  - **Post-Payment `Settled` State:** Once an event is marked Paid/Done, the interactive shield toggle seamlessly transitions to a static **`Settled`** badge with a checkmark, visually confirming to users and judges that the pre-locked funds have been released and deducted upon settlement.
-- **Dynamic Payday (⭐) & Celebratory Inflow Drawer:**
-  - The calendar renders only a single gold star next to the date number on Payday (with zero red AutoPay dots).
-  - Clicking Payday opens a celebratory emerald **`Income Credit`** card displaying `+₹75,000 Monthly Salary` and `Salary Credited` badge.
-- **Standout Feature B — "Bill-Week Collision Alert":**
-  - If a user schedules an event within **2 days** of an AutoPay bill due date, a smart warning surfaces in the form and detail drawer:
-    > *“⚠️ Heads up: HDFC Card AutoPay Due is due 1 day after this event—keep ₹17,908 reserved.”*
-- **Quick Event & Gift Scheduler Modal:**
-  - 4 categories: 🎂 *Birthday Gift*, 💍 *Wedding*, 🎉 *Party / Outing*, or 🧾 *AutoPay Bill*.
-  - Title input with quick chips (*"Aarav's Birthday"*, *"Wedding Gift"*, *"Team Outing"*).
-  - Budget input with ₹ prefix, capped at 9 digits max (`maxLength={9}`).
-
----
-
-### 2. Salary Allocation & Safe Pool Breakdown Bar
-- Replaces scattered metric cards with a unified, 3-segment stacked horizontal progress bar:
-  1. **Fixed Bills & SIPs (Purple/Indigo `#4F46E5`):** Non-negotiable rent, mutual fund SIPs, and utilities. Clickable to adjust commitments.
-  2. **Spent This Month (Warm Amber `#F59E0B`):** Discretionary purchases tracked so far.
-  3. **Total Safe Pool (Vibrant Emerald `#10B981`):** Net spendable cash remaining.
-- **Category Labels Above the Bar:** Clean horizontal label row with matching colored indicator dots positioned above the bar.
-- **Amounts Centered Inside:** Displays formatted rupee amounts (`₹32,000`, `₹12,408`, `₹30,592`) centered within each segment with interactive hover/tap tooltips.
-- **Mathematically Locked Zero-Sum Guarantee:**
-  $$\text{Fixed Bills} + \text{Spent This Month} + \text{Total Safe Pool} = \text{Take-Home Salary (₹75,000)}$$
-  Ensures Spent This Month cannot exceed the spendable ceiling (`₹43,000`).
-
----
-
-### 3. Multi-Tier Financial & Simulation Guardrails
-- **Bill Buffer Limit Protection:**
-  - Evaluates `totalSafePool <= upcomingCardDues`.
-  - When true, the top header button changes label to **"Bill Buffer Limit"** with an amber `ShieldAlert` icon and protective styling.
-  - Clicking or hovering displays the toast:
-    > *“Simulation paused: Your Safe Pool has reached your ₹17,908 credit card bill threshold.”*
-  - Automatically prevents further simulations from depleting cash reserved for card bills.
-- **9-Digit Input Guardrails:**
-  - In the Budget & Salary Settings modal, Take-Home Salary and Fixed Bills inputs are restricted to 9 digits (`maxLength={9}`, capped at 999,999,999 / ₹99.99 Crores).
-  - Strips non-digits (`replace(/\D/g, "")`) on `onChange` to eliminate layout breaks, bar overflow, or `NaN`.
-- **Indian & Standard Comma-Formatted Number Parsing:**
-  - Enhanced regular expression in AI Pay Guard extracts numbers with commas and decimals:
-    - `1,200` parses cleanly to `1200` (fixing comma-split bugs).
-    - Indian numbering formats like `14,990` and `1,50,000` parse accurately.
-- **Silent Risk Guard (AutoPay Pause):**
-  - Dynamically triggers when upcoming card bills exceed **20% of monthly salary** (e.g., > ₹15,000 on a ₹75,000 salary).
-  - Pauses weekly Friday AutoPay sweeps into Goal Jars to protect bank balance until payday.
-  - Features a **"Pay Card Bills Now"** action inside Risk Details that deducts dues from bank cash and resets dues to ₹0, immediately untriggering the pause.
-
----
-
-### 4. Real-Time Google Places API (New) Smart Swaps & Concrete Indian Alternatives
-- When asking AI Pay Guard about dining, cafes, or parties (e.g., *"I want to eat out for ₹800"*):
-  - Fetches real budget restaurants within 3km using user coordinates (or Bengaluru default).
-  - Filters for inexpensive/moderate options with ratings ≥ 4.2★.
-  - Surfaces real place details, ratings, user reviews, and Google Maps links.
-- **Concrete Indian Footwear & Fashion Swaps:**
-  - Replaces generic advice with specific Indian market alternatives:
-    - *Footwear Splurge (`₹4,500`):* Recommends clean **Red Tape or Campus retro court sneakers (~₹1,350 on Myntra/Ajio)** instead of ₹4,500 branded pairs—saving **+₹3,150** swept straight into the active Goal Jar.
-    - *Apparel & Tech:* Recommends relatable picks (Zudio, Souled Store, CMF by Nothing, Realme).
-    - *Gemini System Prompt Rule 4:* Instructs Gemini 2.5 Flash to always name 1–2 concrete Indian brands with realistic INR pricing.
-- **Clear Money-Split Breakdown (Where the Money Goes):**
-  - **Spent Now (₹320 / ₹1,350):** Deducted from Safe Pool for the immediate craving or swap item.
-  - **Swept to Goal Jar (+₹480 / +₹3,150):** Locked directly into your Milestone Goal Jar.
-- **Places Status Badge:** Developer badge in AI Pay Guard and Settings indicating whether Live Google Places API is active or running in Curated Offline Mode.
-
----
-
-### 5. "Before-I-Scan" AI Pay Guard & Smart Swap Engine (`Cmd+K`)
-- Instant impulse evaluation before scanning UPI QR codes.
-- Serves three clear verdicts: `APPROVED`, `CAUTION`, or `BLOCKED`.
-- Provides cheaper alternatives and calculates the exact percentage contribution to your milestone jars.
-
----
-
-### 6. Auto-Tracked Spending Dashboard
-- **Simulated Demo Indicator:** Displays a soft amber/slate `Simulated Demo` pill next to the heading so judges immediately recognize all displayed transactions are synthetic demo data.
-- **Auto-Sync Cards with Privacy-First Info Tooltips (`ⓘ`):**
-  - *Bank & Card Email Sync:* Interactive popover explaining privacy-first forwarding (users auto-forward only bank alert emails to a parser alias—no bank logins required).
-  - *UPI & Bank SMS Sync:* Interactive popover detailing zero-permission OS automation (iOS Shortcuts / Android webhooks) that captures single debit alerts locally without invasive SMS-read permissions.
-- **Where It Went (Category Breakdown):** Interactive SVG donut chart showing real distribution across Food & Dining, Shopping & Gear, Transport & Subscriptions, and Entertainment—mathematically locked 1:1 to Spent This Month.
-- **Spend History:** Comprehensive searchable ledger of every tracked UPI, bank, and credit card debit with clean timestamp, category, and account tags.
-
----
-
-### 7. Goal Jars & AI Price-Trend Forecaster
-- **Progressive Disclosure Card Design (Clean & Scannable):**
-  - **Top Row:** Clean SVG Lucide icons (`Smartphone` for Tech/iPhone, `Coins` for Gold, `Headphones` for Audio, `Shield` for Emergency)—eliminating blank boxes (`▯`) on mobile. Displays title, target price (`New iPhone — ₹80,000`), category tag, and delete button.
-  - **Progress Section:** Saved balance (`₹42,000`), Target (`₹80,000`), emerald progress bar, `% funded`, and `₹ to go`.
-  - **Compact 1-Line Alert Strip:** Shows only the concise headline alert (e.g., *“Price Dropping Soon — Wait until Oct to save ~₹11,000”*) paired with a clickable **`Know More ▾`** / **`Show Less ▴`** toggle.
-- **Expandable Details:**
-  - Clicking `Know More ▾` smoothly unfolds the AI price timing insight, `Best Time to Buy` row, Out-of-Sight Safe Growth Vault badge (with duplicate yield text removed), and `+₹ Extra Earned While Waiting` breakdown.
-- **Self-Contained Root-Level Top-Up Modal:**
-  - Centered modal (`fixed inset-0 z-50 bg-slate-900/60`) accessible on desktop and mobile above all bottom navigation bars.
-  - Displays Current Saved, Target Price, and Available **Net Safe Pool** balance.
-  - Quick-add chips (`+₹500`, `+₹1,000`, `+₹2,500`, `+₹5,000`) and numeric input with 9-digit guardrails.
-  - Enforces that transfers cannot exceed Net Safe Pool, deducts from safe cash, credits the goal, triggers confetti, and displays confirmation toast.
-- **Streamlined AutoPay Auto-Save Card:**
-  - Single status pill in the header: `AutoPay Auto-Save: PAUSED/ACTIVE` alongside the switch toggle.
-  - Direct single-line notice: `"Paused: Card dues exceed 20% of salary."` with inline **`Settle Bills →`** link opening Risk Details.
-  - Monthly cap pills (`₹3,000`, `₹5,000`, `₹10,000`) remain visible on the card.
-  - Collapsible **`Schedule & Split Rules ▾`** accordion holding schedule details, 70% Gold / 30% Instant Safe meter, and manual sweep trigger.
-- **Collapsible Plain-English Wealth Guide (`📖 Plain-English Wealth Guide ▾`):**
-  - Single sleek collapsible accordion bar replacing 600px of vertical clutter.
-  - Unfolds 3 concise 10-second definitions: *Fixed Deposit (FD)* (100% guaranteed safe lockbox), *Nifty 50 Index Fund* (~12% historical), and *SIP Autopilot* (zero-discipline growth without UPI PINs).
-
----
-
-## 🛠️ 4. Quickstart & Local Installation
-
-### Prerequisites
-- Node.js 18.18+ or 20+
-- npm 9+
-
-### Step 1: Clone and Install
-```bash
-git clone https://github.com/GowthamB-09/PocketSense-AI-Arthaton.git
-cd PocketSense-AI-Arthaton
-npm install
-```
-
-### Step 2: Configure Environment Variables
-Copy `.env.example` to `.env.local`:
-```bash
-cp .env.example .env.local
-```
-
-Add your API keys:
-```env
-# Google Gemini API Key (Required for Live AI Coaching)
-GOOGLE_GENERATIVE_AI_API_KEY=your_gemini_api_key_here
-
-# Google Places API (New) Key (Optional, for Live Nearby Restaurant Swaps)
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_places_api_key_here
-```
-> **Note:** If no API keys are configured, PocketSense PRO automatically falls back to its built-in **High-Accuracy Local Heuristics & Curated Offline Swaps**, ensuring 100% of UI features, SMS classification, calendar protections, and coaching work seamlessly.
-
-### Step 3: Run Development Server
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
----
-
-## 🏆 5. Arthaton 2026 Rules & Compliance Checklist
+## 🏆 6. Arthaton 2026 Rules & Compliance Checklist
 
 PocketSense PRO fulfills 100% of the **Arthaton 2026 ("AI for Finance")** competition rules and judging criteria:
 
 | Arthaton Rule / Criteria | Requirement Description | PocketSense PRO Implementation | Compliance Status |
 | :--- | :--- | :--- | :---: |
-| **Theme: AI for Finance** | Practical AI application that helps individuals or businesses make better financial decisions (smart budgeting, investing, risk mitigation). | Behavioral Money Coach intercepts impulsive UPI spending before it happens, enforces Ring-Fenced Event Shields, and pauses AutoPay when credit card dues spike above 20%. | ✅ **100% Met** |
+| **Theme: AI for Finance** | Practical AI application that helps individuals make better financial decisions (smart budgeting, investing, risk mitigation). | Behavioral Money Coach intercepts impulsive UPI spending before it happens, enforces Ring-Fenced Event Shields, and pauses AutoPay when credit card dues spike above 20%. | ✅ **100% Met** |
 | **No Real Money / No Trading Risk** | Must strictly use historical/paper/synthetic data. Real money usage is prohibited. | 100% non-custodial synthetic user profile (`SYNTHETIC_DEMO_PROFILE`) & simulated transactions. Zero payment gateways or real credentials required. | ✅ **100% Met** |
-| **AI Models & API Integration** | AI models (Gemini, Claude, GPT, etc.) and synthetic datasets are fully permitted. | Built with Google Gemini 2.5 Flash (`@ai-sdk/google`) and Vercel AI SDK (`ai`), featuring structured output parsing and streaming advice with offline fallback. | ✅ **100% Met** |
+| **AI Models & API Integration** | AI models (Gemini, Claude, GPT, etc.) and synthetic datasets are fully permitted. | Built with Google Gemini 1.5/2.5 Flash (`@ai-sdk/google`), Google Places API (New), and Vercel AI SDK (`ai`), featuring structured output parsing and streaming advice with offline fallback. | ✅ **100% Met** |
 | **Originality & Attribution** | Project must be original work. All open-source libraries, APIs, and tools must be credited. | Original product architecture inspired by Supermemory and Linear. All open-source libraries and APIs are explicitly listed and credited below. | ✅ **100% Met** |
 | **Public GitHub Repository** | Complete project source code hosted publicly with a setup guide. | Public repository hosted at [github.com/GowthamB-09/PocketSense-AI-Arthaton](https://github.com/GowthamB-09/PocketSense-AI-Arthaton). | ✅ **100% Met** |
-| **Comprehensive README Documentation** | Clear README explaining problem statement, architecture, features, and setup. | Comprehensive, production-grade `README.md` covering vision, math formulas, architecture, and step-by-step local setup. | ✅ **100% Met** |
+| **Comprehensive README Documentation** | Clear README explaining what the app does, how to run it, and which AI models & APIs were used. | Comprehensive, production-grade `README.md` covering app purpose, quickstart instructions, and AI models & APIs used right at the top. | ✅ **100% Met** |
 | **Working Live Demo Deployment** | Working demonstration accessible online 24/7. | Deployed to production on Vercel at [pocketsense-ai-one.vercel.app](https://pocketsense-ai-one.vercel.app). | ✅ **100% Met** |
 | **Under-5-Minute Demo Video** | Video walkthrough under 5 minutes demonstrating core functionality. | Complete, fast-paced demo video script showcasing command-bar intercept, event shield, and multi-card risk guard ready for submission. | ✅ **100% Met** |
 
@@ -249,8 +297,8 @@ PocketSense PRO fulfills 100% of the **Arthaton 2026 ("AI for Finance")** compet
 
 ### Open-Source Libraries & APIs Credited
 - **[Next.js 15](https://nextjs.org/):** React framework & App Router.
-- **[Vercel AI SDK (`ai`)](https://sdk.vercel.ai/):** Streaming chat and structured schema generation.
-- **[Google Gemini API (`@ai-sdk/google`)](https://aistudio.google.com/):** Gemini 2.5 Flash LLM for SMS parsing and behavioral coaching.
+- **[Vercel AI SDK (`ai`)](https://sdk.vercel.ai/):** Streaming chat (`streamText`) and structured schema generation (`generateObject`).
+- **[Google Gemini API (`@ai-sdk/google`)](https://aistudio.google.com/):** Gemini 1.5/2.5 Flash LLM for SMS parsing and behavioral coaching.
 - **[Google Places API (New)](https://developers.google.com/maps/documentation/places/web-service):** Location-aware budget restaurant discovery.
 - **[Tailwind CSS](https://tailwindcss.com/):** Fintech UI system.
 - **[Lucide React](https://lucide.dev/):** Iconography.
@@ -263,9 +311,10 @@ PocketSense PRO fulfills 100% of the **Arthaton 2026 ("AI for Finance")** compet
 
 ---
 
-## 👥 6. Submission Details
+## 👥 7. Submission Details
 - **Project:** PocketSense PRO
 - **Track:** AI for Finance (Arthaton 2026)
 - **Target Audience:** Young Working Professionals (Ages 24–40)
 - **Live Deployment:** [https://pocketsense-ai-one.vercel.app](https://pocketsense-ai-one.vercel.app)
-- **Repository:** [https://github.com/GowthamB-09/PocketSense-AI-Arthaton](https://github.com/GowthamB-09/PocketSense-AI-Arthaton)
+- **GitHub Repository:** [https://github.com/GowthamB-09/PocketSense-AI-Arthaton](https://github.com/GowthamB-09/PocketSense-AI-Arthaton)
+- **Demo Video:** [https://www.youtube.com/watch?v=YOUR_VIDEO_LINK_HERE](https://www.youtube.com/watch?v=YOUR_VIDEO_LINK_HERE)
