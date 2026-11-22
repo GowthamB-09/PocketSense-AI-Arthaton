@@ -2,7 +2,7 @@
 
 🌐 **Live Public Deployment (Works 24/7):** [https://pocketsense-ai-one.vercel.app](https://pocketsense-ai-one.vercel.app)  
 📦 **Public GitHub Repository:** [https://github.com/GowthamB-09/PocketSense-AI-Arthaton](https://github.com/GowthamB-09/PocketSense-AI-Arthaton)  
-🎬 **Demo Video Walkthrough (Under 5 Minutes):** [Watch the PocketSense PRO Demo Video](https://www.youtube.com/watch?v=YOUR_VIDEO_LINK_HERE)
+🎬 **Demo Video Walkthrough (Under 5 Minutes):** [Watch the PocketSense PRO Demo Video](https://youtu.be/bUnqRm4iMbU)
 
 > **Zero-Login, Privacy-First Behavioral Money Coach for Young Professionals**  
 > *Built for Arthaton 2026 ("AI for Finance") Hackathon*
@@ -323,4 +323,4 @@ PocketSense PRO fulfills 100% of the **Arthaton 2026 ("AI for Finance")** compet
 - **Target Audience:** Young Working Professionals (Ages 24–40)
 - **Live Deployment:** [https://pocketsense-ai-one.vercel.app](https://pocketsense-ai-one.vercel.app)
 - **GitHub Repository:** [https://github.com/GowthamB-09/PocketSense-AI-Arthaton](https://github.com/GowthamB-09/PocketSense-AI-Arthaton)
-- **Demo Video:** [https://www.youtube.com/watch?v=YOUR_VIDEO_LINK_HERE](https://www.youtube.com/watch?v=YOUR_VIDEO_LINK_HERE)
+- **Demo Video:** [https://youtu.be/bUnqRm4iMbU](https://youtu.be/bUnqRm4iMbU)
