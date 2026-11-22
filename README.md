@@ -286,6 +286,7 @@ PocketSense PRO fulfills 100% of the **Arthaton 2026 ("AI for Finance")** compet
 | :--- | :--- | :--- | :---: |
 | **Theme: AI for Finance** | Practical AI application that helps individuals make better financial decisions (smart budgeting, investing, risk mitigation). | Behavioral Money Coach intercepts impulsive UPI spending before it happens, enforces Ring-Fenced Event Shields, and pauses AutoPay when credit card dues spike above 20%. | ✅ **100% Met** |
 | **No Real Money / No Trading Risk** | Must strictly use historical/paper/synthetic data. Real money usage is prohibited. | 100% non-custodial synthetic user profile (`SYNTHETIC_DEMO_PROFILE`) & simulated transactions. Zero payment gateways or real credentials required. | ✅ **100% Met** |
+| **Zero Sensitive Data & API Keys in Repo** | Never put real bank details, passwords, PAN numbers, UPI IDs, or live API keys in the repository. | Strict compliance: 100% synthetic masked data (`**4412`), zero passwords, zero PAN cards, zero real UPI IDs. All `.env*` files are `.gitignore`d; only harmless placeholder examples are committed. | ✅ **100% Met** |
 | **AI Models & API Integration** | AI models (Gemini, Claude, GPT, etc.) and synthetic datasets are fully permitted. | Built with Google Gemini 1.5/2.5 Flash (`@ai-sdk/google`), Google Places API (New), and Vercel AI SDK (`ai`), featuring structured output parsing and streaming advice with offline fallback. | ✅ **100% Met** |
 | **Originality & Attribution** | Project must be original work. All open-source libraries, APIs, and tools must be credited. | Original product architecture inspired by Supermemory and Linear. All open-source libraries and APIs are explicitly listed and credited below. | ✅ **100% Met** |
 | **Public GitHub Repository** | Complete project source code hosted publicly with a setup guide. | Public repository hosted at [github.com/GowthamB-09/PocketSense-AI-Arthaton](https://github.com/GowthamB-09/PocketSense-AI-Arthaton). | ✅ **100% Met** |
@@ -304,10 +305,15 @@ PocketSense PRO fulfills 100% of the **Arthaton 2026 ("AI for Finance")** compet
 - **[Lucide React](https://lucide.dev/):** Iconography.
 - **[Canvas Confetti](https://www.npmjs.com/package/canvas-confetti):** Celebratory micro-interactions for savings milestones.
 
-### Privacy & Synthetic Data Compliance
-- **100% Synthetic Data:** All transaction records, bank SMS alerts, and financial figures are synthetic mock data designed for young professional budgeting scenarios.
-- **Zero Real Financial Credentials:** PocketSense PRO accesses no real bank accounts, IFSC codes, PAN details, Aadhaar numbers, live trading APIs, or payment gateways.
-- **Client-Side Non-Custodial Memory:** Financial memory is stored strictly within browser `localStorage` and session memory.
+### 🔒 Security, Privacy & Zero-Credential Compliance
+> [!IMPORTANT]
+> **Strict Zero-Leakage & Safety Guarantee:**
+> 1. **Zero Real Bank Details:** No bank account numbers, IFSC codes, debit/credit card CVVs, or net banking credentials. All accounts in code and UI are synthetic demo representations with masked indicators (`**4412`, `**9012`).
+> 2. **Zero Passwords or Credentials:** No user passwords, authentication secrets, or session tokens are stored or tracked.
+> 3. **Zero PAN or Identity Data:** Zero Permanent Account Numbers (PAN), Aadhaar numbers, or KYC documents exist in this codebase, database, or git history.
+> 4. **Zero Personal or Live UPI IDs:** No real individual UPI VPA handles (`@okhdfcbank`, `@paytm`, etc.) are tracked. All simulations generate synthetic reference strings.
+> 5. **Zero API Keys Committed:** All `.env` and `.env*.local` files are strictly excluded via `.gitignore`. `.env.example` contains only harmless placeholder strings (`your_gemini_api_key_here`). The application features an automatic offline heuristic engine that allows 100% full-functionality testing even without providing any API keys.
+> 6. **Client-Side Non-Custodial Memory:** Financial memory is stored strictly within browser `localStorage` and session memory. PocketSense never transmits financial data to third-party databases.
 
 ---
 
