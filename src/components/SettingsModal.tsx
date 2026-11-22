@@ -25,9 +25,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 }) => {
   const { profile, analysis, updateSalary, loadSyntheticDemo } = useFinancialMemory();
 
-  const now = new Date();
-  const realDay = now.getDate();
-
   const [salary, setSalary] = useState(String(profile.monthlySalary || 75000).slice(0, 9));
   const [fixed, setFixed] = useState(String(profile.fixedEssentials || 32000).slice(0, 9));
   
@@ -195,24 +192,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   {day}
                 </button>
               ))}
-            </div>
-          </div>
-
-          {/* Real-time Math Blueprint */}
-          <div className="p-3.5 sm:p-4 rounded-xl bg-slate-50 border border-slate-200 font-mono text-xs space-y-1.5">
-            <div className="flex justify-between items-center text-slate-600">
-              <span className="truncate mr-2">Safe Spending Pool:</span>
-              <strong className="text-slate-900 shrink-0">{formatINR(discretionaryPool)}</strong>
-            </div>
-            <div className="flex justify-between items-center text-slate-600">
-              <span>Current Real Day:</span>
-              <strong className="text-slate-900">Day {realDay} of month</strong>
-            </div>
-            <div className="flex justify-between items-center text-slate-600">
-              <span>Calculated Safe Spend:</span>
-              <strong className="text-emerald-700">
-                {formatINR(Math.round(discretionaryPool / 30))}/day
-              </strong>
             </div>
           </div>
 
