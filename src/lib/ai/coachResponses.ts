@@ -303,7 +303,7 @@ export function generateBeginnerCoachAdvice(
         "It historically grows at ~12% a year, beating everyday price rises.",
         "Automating it on payday means you build wealth with zero effort."
       ],
-      concreteAction: `Keep your ₹5,000 monthly Friday AutoPay Auto-Save active to build wealth automatically!`,
+      concreteAction: `Keep your ₹5,000 monthly Friday Autosave active to build wealth automatically!`,
       actionPill: `Auto-Invest in Top 50 Index Fund`,
       actionTone: "green",
       simplerOneLiner: `Index Funds put your money into India's 50 biggest companies so it grows faster than prices rise.`

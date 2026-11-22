@@ -247,7 +247,7 @@ PocketSense PRO leverages a hybrid AI pipeline combining Google's latest generat
 ### 6. Goal Jars & AI Price-Trend Forecaster
 - **Progressive Disclosure Card Design:** Clean collapsed card default showing goal icon (Lucide SVG icons avoiding blank `▯` boxes on mobile), target price, progress bar, `% funded`, and compact alert strip paired with a clickable **`Know More ▾`** / **`Show Less ▴`** toggle.
 - **Self-Contained Root-Level Top-Up Modal:** Centered modal accessible on desktop and mobile with `+₹500` to `+₹5,000` quick chips, Net Safe Pool balance guards, and confetti celebration.
-- **Streamlined AutoPay Auto-Save Card:** Single status pill in the header (`AutoPay Auto-Save: PAUSED/ACTIVE`), direct single-line notice with inline `Settle Bills →` trigger, and collapsible `Schedule & Split Rules ▾` accordion.
+- **Streamlined Autosave Card:** Single status pill in the header (`Autosave: PAUSED/ACTIVE`), direct single-line notice with inline `Settle Bills →` trigger, and collapsible `Schedule & Split Rules ▾` accordion.
 - **Collapsible Plain-English Wealth Guide (`📖 Plain-English Wealth Guide ▾`):** Single sleek collapsible accordion bar unfolding 3 concise 10-second definitions: *Fixed Deposit (FD)*, *Nifty 50 Index Fund*, and *SIP Autopilot*.
 
 ---

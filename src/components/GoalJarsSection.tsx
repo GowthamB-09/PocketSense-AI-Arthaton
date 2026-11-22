@@ -645,7 +645,7 @@ export const GoalJarsSection: React.FC<GoalJarsSectionProps> = ({ onOpenRiskDeta
                 }`}
               />
               <span className="truncate">
-                AutoPay Auto-Save: {isAutoPayPaused ? "PAUSED" : isMandateActive ? "ACTIVE" : "PAUSED"}
+                Autosave: {isAutoPayPaused ? "PAUSED" : isMandateActive ? "ACTIVE" : "PAUSED"}
               </span>
             </h3>
           </div>
@@ -664,7 +664,7 @@ export const GoalJarsSection: React.FC<GoalJarsSectionProps> = ({ onOpenRiskDeta
             }`}
             role="switch"
             aria-checked={isMandateActive && !isAutoPayPaused}
-            aria-label="Toggle AutoPay Auto-Save"
+            aria-label="Toggle Autosave"
           >
             <span
               className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
@@ -693,9 +693,9 @@ export const GoalJarsSection: React.FC<GoalJarsSectionProps> = ({ onOpenRiskDeta
           </p>
         )}
 
-        {/* Monthly Auto-Save Cap Pills (Kept Visible on Main Card) */}
+        {/* Monthly Autosave Cap Pills (Kept Visible on Main Card) */}
         <div className="flex items-center gap-2 pt-1 flex-wrap">
-          <span className="text-xs font-semibold text-slate-700">Monthly Auto-Save Cap:</span>
+          <span className="text-xs font-semibold text-slate-700">Monthly Autosave Cap:</span>
           {[3000, 5000, 10000].map((cap) => (
             <button
               key={cap}
